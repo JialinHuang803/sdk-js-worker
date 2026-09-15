@@ -17,6 +17,7 @@ export function PrTable({
             <th>Plane</th>
             <th>Packages / API versions</th>
             <th>Failed checks</th>
+            <th>Conflicts</th>
             <th>Next step</th>
             <th>Created</th>
             <th>Release plan</th>
@@ -86,6 +87,15 @@ export function PrTable({
               </td>
               <td>
                 <CheckSummary pr={pr} />
+              </td>
+              <td>
+                {pr.conflicts === null ? (
+                  <span className="unknown">Checking</span>
+                ) : pr.conflicts ? (
+                  <span className="status status--danger">Conflicts</span>
+                ) : (
+                  <span className="status status--good">None reported</span>
+                )}
               </td>
               <td>
                 <NextStepSummary pr={pr} />

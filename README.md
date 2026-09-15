@@ -44,10 +44,10 @@ reflects whether branch protection's qualifying approval requirement is
 actually satisfied without publishing reviewer identities.
 
 Plane, next-step, search, and sorting filters are stored in the hash URL, so a
-filtered view can be bookmarked. Conflicts are integrated into **Needs
-resolution** and its reason rather than occupying a separate table column. Hash
-routing also lets deep links work under the project Pages path
-`/sdk-js-worker/` without server rewrites.
+filtered view can be bookmarked. Conflicts remain visible in their own column
+and are also integrated into **Needs resolution** and its reason. Hash routing
+also lets deep links work under the project Pages path `/sdk-js-worker/`
+without server rewrites.
 
 ## Local development
 
