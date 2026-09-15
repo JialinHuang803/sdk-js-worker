@@ -120,6 +120,21 @@ tbody tr:hover { background: #fbfcfe; }
 .status--danger { color: #b32727; }
 .status--good { color: #287344; }
 .unknown { color: #737e90; font-style: italic; }
+.next-step { min-width: 145px; }
+.next-step small {
+  display: block; max-width: 190px; margin-top: 6px; color: #6c7789;
+  line-height: 1.35;
+}
+.next-step__badge {
+  display: inline-block; padding: 4px 8px; border-radius: 5px;
+  color: #425068; background: #e9edf4; font-size: 11px; font-weight: 750;
+  white-space: nowrap;
+}
+.next-step__badge--resolve { color: #a32626; background: #fbe2e2; }
+.next-step__badge--review { color: #075eaf; background: #deeffe; }
+.next-step__badge--waiting,
+.next-step__badge--unknown { color: #754d09; background: #fff0cb; }
+.next-step__badge--merge { color: #22643c; background: #dff3e6; }
 .dashboard-state {
   min-height: 180px; display: grid; place-content: center; justify-items: center;
   gap: 10px; padding: 30px; color: #5b667a; text-align: center;

@@ -1,4 +1,5 @@
 import type { PullRequestRecord } from "../../data/contracts";
+import { getNextStep } from "./nextStep";
 
 export function PrTable({
   rows,
@@ -17,6 +18,7 @@ export function PrTable({
             <th>Packages / API versions</th>
             <th>Failed checks</th>
             <th>Conflicts</th>
+            <th>Next step</th>
             <th>Created</th>
             <th>Release plan</th>
           </tr>
@@ -96,6 +98,9 @@ export function PrTable({
                 )}
               </td>
               <td>
+                <NextStepSummary pr={pr} />
+              </td>
+              <td>
                 <time dateTime={pr.createdAt}>
                   {formatAge(pr.createdAt, now)}
                   <small>{new Date(pr.createdAt).toLocaleDateString()}</small>
@@ -114,6 +119,18 @@ export function PrTable({
           ))}
         </tbody>
       </table>
+    </div>
+  );
+}
+
+function NextStepSummary({ pr }: { pr: PullRequestRecord }) {
+  const nextStep = getNextStep(pr);
+  return (
+    <div className="next-step">
+      <span className={`next-step__badge next-step__badge--${nextStep.kind}`}>
+        {nextStep.label}
+      </span>
+      <small>{nextStep.detail}</small>
     </div>
   );
 }

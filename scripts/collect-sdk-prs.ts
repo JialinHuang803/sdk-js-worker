@@ -5,6 +5,7 @@ import {
   type DashboardSnapshot,
   type PackageMetadata,
   type PullRequestRecord,
+  type ReviewDecision,
 } from "../src/data/contracts.ts";
 import {
   extractReleasePlanUrl,
@@ -20,6 +21,8 @@ const outputPath = resolve(
   process.env.DASHBOARD_OUTPUT ?? "public/data/sdk-prs.json",
 );
 const apiRoot = process.env.GITHUB_API_URL ?? "https://api.github.com";
+const graphqlUrl =
+  process.env.GITHUB_GRAPHQL_URL ?? "https://api.github.com/graphql";
 const token = process.env.GITHUB_TOKEN || process.env.GH_TOKEN;
 const headers: Record<string, string> = {
   Accept: "application/vnd.github+json",
@@ -62,6 +65,11 @@ interface CheckRunsResponse {
   check_runs: CheckRun[];
 }
 
+interface ReviewDecisionResult {
+  decisions: Map<number, ReviewDecision>;
+  complete: boolean;
+}
+
 async function request<T>(path: string): Promise<{
   data: T;
   headers: Headers;
@@ -74,6 +82,88 @@ async function request<T>(path: string): Promise<{
     );
   }
   return { data: (await response.json()) as T, headers: response.headers };
+}
+
+async function collectReviewDecisions(
+  pulls: PullListItem[],
+): Promise<ReviewDecisionResult> {
+  if (!token) {
+    console.warn(
+      "Review decisions require GITHUB_TOKEN or GH_TOKEN; marking them unknown.",
+    );
+    return {
+      decisions: new Map(pulls.map((pull) => [pull.number, "unknown"])),
+      complete: false,
+    };
+  }
+  const [owner, name] = repository.split("/");
+  const fields = pulls
+    .map(
+      (pull) =>
+        `pr${pull.number}: pullRequest(number: ${pull.number}) { reviewDecision }`,
+    )
+    .join("\n");
+  const response = await fetch(graphqlUrl, {
+    method: "POST",
+    headers: {
+      ...headers,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      query: `query($owner: String!, $name: String!) {
+        repository(owner: $owner, name: $name) {
+          ${fields}
+        }
+      }`,
+      variables: { owner, name },
+    }),
+  });
+  if (!response.ok) {
+    console.warn(
+      `Review decision query failed (${response.status}); marking reviews unknown.`,
+    );
+    return {
+      decisions: new Map(pulls.map((pull) => [pull.number, "unknown"])),
+      complete: false,
+    };
+  }
+  const payload = (await response.json()) as {
+    data?: {
+      repository?: Record<
+        string,
+        {
+          reviewDecision:
+            | "APPROVED"
+            | "CHANGES_REQUESTED"
+            | "REVIEW_REQUIRED"
+            | null;
+        }
+      >;
+    };
+    errors?: unknown[];
+  };
+  const decisions = new Map<number, ReviewDecision>();
+  for (const pull of pulls) {
+    const value = payload.data?.repository?.[`pr${pull.number}`]?.reviewDecision;
+    decisions.set(
+      pull.number,
+      value === "APPROVED"
+        ? "approved"
+        : value === "CHANGES_REQUESTED"
+          ? "changes-requested"
+          : value === "REVIEW_REQUIRED"
+            ? "review-required"
+            : value === null
+              ? "not-required"
+              : "unknown",
+    );
+  }
+  return {
+    decisions,
+    complete:
+      (payload.errors?.length ?? 0) === 0 &&
+      [...decisions.values()].every((value) => value !== "unknown"),
+  };
 }
 
 async function paginate<T>(path: string): Promise<T[]> {
@@ -219,7 +309,11 @@ async function collectPackage(
       };
 }
 
-async function collectPull(pullItem: PullListItem): Promise<PullRequestRecord> {
+async function collectPull(
+  pullItem: PullListItem,
+  reviewDecision: ReviewDecision,
+  reviewsComplete: boolean,
+): Promise<PullRequestRecord> {
   const pull = (
     await request<PullDetails>(`/repos/${repository}/pulls/${pullItem.number}`)
   ).data;
@@ -249,6 +343,9 @@ async function collectPull(pullItem: PullListItem): Promise<PullRequestRecord> {
     }
   }
   if (roots.length === 0) warnings.push("No SDK package roots were identified.");
+  if (!reviewsComplete || reviewDecision === "unknown") {
+    warnings.push("Required review status could not be collected.");
+  }
 
   let checks: PullRequestRecord["checks"];
   let checksComplete = true;
@@ -278,6 +375,7 @@ async function collectPull(pullItem: PullListItem): Promise<PullRequestRecord> {
     headSha: pull.head.sha,
     createdAt: pull.created_at,
     releasePlanUrl: extractReleasePlanUrl(pull.body),
+    reviewDecision,
     packages,
     checks,
     conflicts: pull.mergeable === null ? null : !pull.mergeable,
@@ -289,6 +387,8 @@ async function collectPull(pullItem: PullListItem): Promise<PullRequestRecord> {
       )
         ? "partial"
         : "complete",
+      reviews:
+        reviewsComplete && reviewDecision !== "unknown" ? "complete" : "partial",
     },
     warnings,
   };
@@ -337,7 +437,14 @@ async function main() {
     `/repos/${repository}/pulls?state=open&sort=updated&direction=desc`,
   );
   const autoPulls = pulls.filter((pull) => pull.title.startsWith("[AutoPR"));
-  const pullRequests = await mapLimit(autoPulls, 4, collectPull);
+  const reviewDecisions = await collectReviewDecisions(autoPulls);
+  const pullRequests = await mapLimit(autoPulls, 4, (pull) =>
+    collectPull(
+      pull,
+      reviewDecisions.decisions.get(pull.number) ?? "unknown",
+      reviewDecisions.complete,
+    ),
+  );
   const fetchedAt = new Date().toISOString();
   await writeSnapshot({
     schemaVersion: DASHBOARD_SCHEMA_VERSION,

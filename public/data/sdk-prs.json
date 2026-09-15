@@ -1,13 +1,136 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-09-15T02:28:15.248Z",
+  "generatedAt": "2026-09-15T03:23:57.552Z",
   "stale": false,
   "source": {
     "repository": "Azure/azure-sdk-for-js",
     "query": "state:open title-prefix:[AutoPR",
-    "fetchedAt": "2026-09-15T02:28:15.248Z"
+    "fetchedAt": "2026-09-15T03:23:57.552Z"
   },
   "pullRequests": [
+    {
+      "repository": "Azure/azure-sdk-for-js",
+      "number": 39847,
+      "url": "https://github.com/Azure/azure-sdk-for-js/pull/39847",
+      "title": "[AutoPR @azure-arm-appcontainers]-generated-from-SDK Generation - JS-6833340",
+      "draft": false,
+      "plane": "management",
+      "headSha": "4a8ce6a6b8d67331e0a1663ce3599a07c362ce7a",
+      "createdAt": "2026-09-03T01:24:59Z",
+      "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=36380",
+      "reviewDecision": "review-required",
+      "packages": [
+        {
+          "root": "sdk/appcontainers/arm-appcontainers",
+          "name": "@azure/arm-appcontainers",
+          "version": "4.0.0",
+          "apiVersions": [
+            {
+              "namespace": "Microsoft.App",
+              "versions": [
+                "2026-07-01"
+              ]
+            }
+          ],
+          "state": "available"
+        }
+      ],
+      "checks": {
+        "failedCount": 0,
+        "qualification": "pending",
+        "observedCount": 14
+      },
+      "conflicts": false,
+      "completeness": {
+        "changedFiles": "complete",
+        "checks": "complete",
+        "metadata": "complete",
+        "reviews": "complete"
+      },
+      "warnings": []
+    },
+    {
+      "repository": "Azure/azure-sdk-for-js",
+      "number": 39879,
+      "url": "https://github.com/Azure/azure-sdk-for-js/pull/39879",
+      "title": "[AutoPR @azure-arm-edgeoperator]-generated-from-SDK Generation - JS-6835979",
+      "draft": false,
+      "plane": "management",
+      "headSha": "1a051fc5fe0120b8003fd35a941f69d068c39db9",
+      "createdAt": "2026-09-04T23:04:16Z",
+      "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=36420",
+      "reviewDecision": "review-required",
+      "packages": [
+        {
+          "root": "sdk/edgeoperator/arm-edgeoperator",
+          "name": "@azure/arm-edgeoperator",
+          "version": "1.0.0-beta.1",
+          "apiVersions": [
+            {
+              "namespace": "Microsoft.EdgeOperator",
+              "versions": [
+                "2026-06-01-preview"
+              ]
+            }
+          ],
+          "state": "available"
+        }
+      ],
+      "checks": {
+        "failedCount": 0,
+        "qualification": "pending",
+        "observedCount": 15
+      },
+      "conflicts": false,
+      "completeness": {
+        "changedFiles": "complete",
+        "checks": "complete",
+        "metadata": "complete",
+        "reviews": "complete"
+      },
+      "warnings": []
+    },
+    {
+      "repository": "Azure/azure-sdk-for-js",
+      "number": 39373,
+      "url": "https://github.com/Azure/azure-sdk-for-js/pull/39373",
+      "title": "[AutoPR @azure-arm-devopsinfrastructure]-generated-from-SDK Generation - JS-6632648",
+      "draft": false,
+      "plane": "management",
+      "headSha": "1033becaa20955916bef4c7945316282ecb9d808",
+      "createdAt": "2026-07-23T01:19:10Z",
+      "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=35438",
+      "reviewDecision": "not-required",
+      "packages": [
+        {
+          "root": "sdk/devopsinfrastructure/arm-devopsinfrastructure",
+          "name": "@azure/arm-devopsinfrastructure",
+          "version": "2.0.0-beta.1",
+          "apiVersions": [
+            {
+              "namespace": "Microsoft.DevOpsInfrastructure",
+              "versions": [
+                "2026-07-03-preview"
+              ]
+            }
+          ],
+          "state": "available"
+        }
+      ],
+      "checks": {
+        "failedCount": 0,
+        "qualification": "complete",
+        "observedCount": 72
+      },
+      "conflicts": false,
+      "completeness": {
+        "changedFiles": "complete",
+        "checks": "complete",
+        "metadata": "complete",
+        "reviews": "complete"
+      },
+      "warnings": []
+    },
     {
       "repository": "Azure/azure-sdk-for-js",
       "number": 39891,
@@ -18,6 +141,7 @@
       "headSha": "a758145262a0808f03b8cf4e813cfdb2e5c93b14",
       "createdAt": "2026-09-08T11:08:15Z",
       "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=36443",
+      "reviewDecision": "review-required",
       "packages": [
         {
           "root": "sdk/storagemover/arm-storagemover",
@@ -43,46 +167,8 @@
       "completeness": {
         "changedFiles": "complete",
         "checks": "complete",
-        "metadata": "complete"
-      },
-      "warnings": []
-    },
-    {
-      "repository": "Azure/azure-sdk-for-js",
-      "number": 39847,
-      "url": "https://github.com/Azure/azure-sdk-for-js/pull/39847",
-      "title": "[AutoPR @azure-arm-appcontainers]-generated-from-SDK Generation - JS-6833340",
-      "draft": false,
-      "plane": "management",
-      "headSha": "1ff73716fe6860315b4864c6c141370360cf8590",
-      "createdAt": "2026-09-03T01:24:59Z",
-      "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=36380",
-      "packages": [
-        {
-          "root": "sdk/appcontainers/arm-appcontainers",
-          "name": "@azure/arm-appcontainers",
-          "version": "4.0.0",
-          "apiVersions": [
-            {
-              "namespace": "Microsoft.App",
-              "versions": [
-                "2026-07-01"
-              ]
-            }
-          ],
-          "state": "available"
-        }
-      ],
-      "checks": {
-        "failedCount": 0,
-        "qualification": "complete",
-        "observedCount": 61
-      },
-      "conflicts": true,
-      "completeness": {
-        "changedFiles": "complete",
-        "checks": "complete",
-        "metadata": "complete"
+        "metadata": "complete",
+        "reviews": "complete"
       },
       "warnings": []
     },
@@ -96,6 +182,7 @@
       "headSha": "caedc0ee9317a7e6316ccdb2dff2d0d25460de44",
       "createdAt": "2026-09-14T22:46:32Z",
       "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=36522",
+      "reviewDecision": "review-required",
       "packages": [
         {
           "root": "sdk/contentsafety/ai-content-safety-rest",
@@ -121,7 +208,8 @@
       "completeness": {
         "changedFiles": "complete",
         "checks": "complete",
-        "metadata": "complete"
+        "metadata": "complete",
+        "reviews": "complete"
       },
       "warnings": []
     },
@@ -135,6 +223,7 @@
       "headSha": "f7d625ae2de41da576c42026e48b1ea771d5f78c",
       "createdAt": "2026-09-14T18:00:57Z",
       "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=36517",
+      "reviewDecision": "review-required",
       "packages": [
         {
           "root": "sdk/iothub/arm-iothub",
@@ -160,7 +249,8 @@
       "completeness": {
         "changedFiles": "complete",
         "checks": "complete",
-        "metadata": "complete"
+        "metadata": "complete",
+        "reviews": "complete"
       },
       "warnings": []
     },
@@ -174,6 +264,7 @@
       "headSha": "986eb1a3f1904790f3932871e43252e9dd223283",
       "createdAt": "2026-09-14T16:21:52Z",
       "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=36304",
+      "reviewDecision": "review-required",
       "packages": [
         {
           "root": "sdk/compute/arm-compute",
@@ -217,7 +308,8 @@
       "completeness": {
         "changedFiles": "complete",
         "checks": "complete",
-        "metadata": "complete"
+        "metadata": "complete",
+        "reviews": "complete"
       },
       "warnings": []
     },
@@ -231,6 +323,7 @@
       "headSha": "3e502530e66feb0c013a8bbdf5ed4f58a31fd09e",
       "createdAt": "2026-08-25T17:11:27Z",
       "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=35307",
+      "reviewDecision": "approved",
       "packages": [
         {
           "root": "sdk/policy/arm-policy",
@@ -256,7 +349,8 @@
       "completeness": {
         "changedFiles": "complete",
         "checks": "complete",
-        "metadata": "complete"
+        "metadata": "complete",
+        "reviews": "complete"
       },
       "warnings": []
     },
@@ -270,6 +364,7 @@
       "headSha": "24a3175fc0108c2a2f99fe31b335e82f4d4548d4",
       "createdAt": "2026-09-13T16:31:31Z",
       "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=36506",
+      "reviewDecision": "approved",
       "packages": [
         {
           "root": "sdk/networkcloud/arm-networkcloud",
@@ -295,7 +390,8 @@
       "completeness": {
         "changedFiles": "complete",
         "checks": "complete",
-        "metadata": "complete"
+        "metadata": "complete",
+        "reviews": "complete"
       },
       "warnings": []
     },
@@ -309,6 +405,7 @@
       "headSha": "7a64f09f1a17423e184da50e9c72e87e6ac8ca00",
       "createdAt": "2026-09-14T06:36:57Z",
       "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=36510",
+      "reviewDecision": "review-required",
       "packages": [
         {
           "root": "sdk/frontdoor/arm-frontdoor",
@@ -334,7 +431,8 @@
       "completeness": {
         "changedFiles": "complete",
         "checks": "complete",
-        "metadata": "complete"
+        "metadata": "complete",
+        "reviews": "complete"
       },
       "warnings": []
     },
@@ -348,6 +446,7 @@
       "headSha": "ead559ab9956ae502760c034740ccaa003c99698",
       "createdAt": "2026-09-09T02:36:35Z",
       "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=36401",
+      "reviewDecision": "review-required",
       "packages": [
         {
           "root": "sdk/communication/communication-identity",
@@ -373,7 +472,8 @@
       "completeness": {
         "changedFiles": "complete",
         "checks": "complete",
-        "metadata": "complete"
+        "metadata": "complete",
+        "reviews": "complete"
       },
       "warnings": []
     },
@@ -387,6 +487,7 @@
       "headSha": "d39ab195aa0c93c48f1308acc41285916e6ff6c2",
       "createdAt": "2026-08-22T13:53:27Z",
       "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=36239",
+      "reviewDecision": "approved",
       "packages": [
         {
           "root": "sdk/resiliencemanagement/arm-resiliencemanagement",
@@ -412,7 +513,8 @@
       "completeness": {
         "changedFiles": "complete",
         "checks": "complete",
-        "metadata": "complete"
+        "metadata": "complete",
+        "reviews": "complete"
       },
       "warnings": []
     },
@@ -426,6 +528,7 @@
       "headSha": "ce8a16c8e78cf63b3815d5998d0fcdf4b4c236bf",
       "createdAt": "2026-07-09T09:43:05Z",
       "releasePlanUrl": null,
+      "reviewDecision": "review-required",
       "packages": [
         {
           "root": "sdk/devcenter/developer-devcenter-rest",
@@ -451,7 +554,8 @@
       "completeness": {
         "changedFiles": "complete",
         "checks": "complete",
-        "metadata": "complete"
+        "metadata": "complete",
+        "reviews": "complete"
       },
       "warnings": []
     },
@@ -465,6 +569,7 @@
       "headSha": "4023f7d61aad98f575ef18a97ba9751761ece20e",
       "createdAt": "2026-09-10T17:11:57Z",
       "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=36491",
+      "reviewDecision": "review-required",
       "packages": [
         {
           "root": "sdk/deviceregistry/arm-deviceregistry",
@@ -490,7 +595,8 @@
       "completeness": {
         "changedFiles": "complete",
         "checks": "complete",
-        "metadata": "complete"
+        "metadata": "complete",
+        "reviews": "complete"
       },
       "warnings": []
     },
@@ -504,6 +610,7 @@
       "headSha": "6e11d88dd14d12515fa5de02978fea2bae908075",
       "createdAt": "2026-08-27T20:02:29Z",
       "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=36309",
+      "reviewDecision": "review-required",
       "packages": [
         {
           "root": "sdk/oracledatabase/arm-oracledatabase",
@@ -529,7 +636,8 @@
       "completeness": {
         "changedFiles": "complete",
         "checks": "complete",
-        "metadata": "complete"
+        "metadata": "complete",
+        "reviews": "complete"
       },
       "warnings": []
     },
@@ -543,6 +651,7 @@
       "headSha": "bf3f60602ec20cf8f3e2f4c14982de800a092d18",
       "createdAt": "2026-09-08T08:22:21Z",
       "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=36441",
+      "reviewDecision": "approved",
       "packages": [
         {
           "root": "sdk/elastic/arm-elastic",
@@ -568,46 +677,8 @@
       "completeness": {
         "changedFiles": "complete",
         "checks": "complete",
-        "metadata": "complete"
-      },
-      "warnings": []
-    },
-    {
-      "repository": "Azure/azure-sdk-for-js",
-      "number": 39879,
-      "url": "https://github.com/Azure/azure-sdk-for-js/pull/39879",
-      "title": "[AutoPR @azure-arm-edgeoperator]-generated-from-SDK Generation - JS-6792096",
-      "draft": false,
-      "plane": "management",
-      "headSha": "87aa6b5b21f3447e3cedecf1a38f9b770e500357",
-      "createdAt": "2026-09-04T23:04:16Z",
-      "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=36420",
-      "packages": [
-        {
-          "root": "sdk/edgeoperator/arm-edgeoperator",
-          "name": "@azure/arm-edgeoperator",
-          "version": "1.0.0-beta.1",
-          "apiVersions": [
-            {
-              "namespace": "Microsoft.EdgeOperator",
-              "versions": [
-                "2026-06-01-preview"
-              ]
-            }
-          ],
-          "state": "available"
-        }
-      ],
-      "checks": {
-        "failedCount": 0,
-        "qualification": "complete",
-        "observedCount": 196
-      },
-      "conflicts": false,
-      "completeness": {
-        "changedFiles": "complete",
-        "checks": "complete",
-        "metadata": "complete"
+        "metadata": "complete",
+        "reviews": "complete"
       },
       "warnings": []
     },
@@ -621,6 +692,7 @@
       "headSha": "8983768d07a64d5ceb153056dda11e947b337cc9",
       "createdAt": "2026-09-03T17:37:52Z",
       "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=36378",
+      "reviewDecision": "approved",
       "packages": [
         {
           "root": "sdk/avs/arm-avs",
@@ -646,7 +718,8 @@
       "completeness": {
         "changedFiles": "complete",
         "checks": "complete",
-        "metadata": "complete"
+        "metadata": "complete",
+        "reviews": "complete"
       },
       "warnings": []
     },
@@ -660,6 +733,7 @@
       "headSha": "7a85b1e6432e3dc42feda65e33f88d3fd6d6319c",
       "createdAt": "2026-08-19T15:38:48Z",
       "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=36144",
+      "reviewDecision": "review-required",
       "packages": [
         {
           "root": "sdk/platformvalidation/arm-platformvalidation",
@@ -685,7 +759,8 @@
       "completeness": {
         "changedFiles": "complete",
         "checks": "complete",
-        "metadata": "complete"
+        "metadata": "complete",
+        "reviews": "complete"
       },
       "warnings": []
     },
@@ -699,6 +774,7 @@
       "headSha": "82136c7cc12aedced511563109250d617302e83c",
       "createdAt": "2026-08-12T19:37:00Z",
       "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=36017",
+      "reviewDecision": "not-required",
       "packages": [
         {
           "root": "sdk/relationships/arm-relationships",
@@ -724,7 +800,8 @@
       "completeness": {
         "changedFiles": "complete",
         "checks": "complete",
-        "metadata": "complete"
+        "metadata": "complete",
+        "reviews": "complete"
       },
       "warnings": []
     },
@@ -738,6 +815,7 @@
       "headSha": "97530b33a1fbed6da50109ec14476749fc745d4a",
       "createdAt": "2026-09-02T00:55:20Z",
       "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=36365",
+      "reviewDecision": "approved",
       "packages": [
         {
           "root": "sdk/managedops/arm-managedops",
@@ -763,7 +841,8 @@
       "completeness": {
         "changedFiles": "complete",
         "checks": "complete",
-        "metadata": "complete"
+        "metadata": "complete",
+        "reviews": "complete"
       },
       "warnings": []
     },
@@ -777,6 +856,7 @@
       "headSha": "8cf215ea0216bfbfdb0b122792576bb7fa7e9452",
       "createdAt": "2026-08-17T21:27:28Z",
       "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=36107",
+      "reviewDecision": "review-required",
       "packages": [
         {
           "root": "sdk/storagecache/arm-storagecache",
@@ -802,7 +882,8 @@
       "completeness": {
         "changedFiles": "complete",
         "checks": "complete",
-        "metadata": "complete"
+        "metadata": "complete",
+        "reviews": "complete"
       },
       "warnings": []
     },
@@ -816,6 +897,7 @@
       "headSha": "b444f11779fdb92e384e0df90af8518ae4643762",
       "createdAt": "2026-08-19T05:50:34Z",
       "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=35295",
+      "reviewDecision": "approved",
       "packages": [
         {
           "root": "sdk/securityinsight/arm-securityinsight",
@@ -841,7 +923,8 @@
       "completeness": {
         "changedFiles": "complete",
         "checks": "complete",
-        "metadata": "complete"
+        "metadata": "complete",
+        "reviews": "complete"
       },
       "warnings": []
     },
@@ -855,6 +938,7 @@
       "headSha": "7f3337748368963b6dba0a3361ed71bae38463f2",
       "createdAt": "2026-08-18T02:35:36Z",
       "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=35595",
+      "reviewDecision": "approved",
       "packages": [
         {
           "root": "sdk/servicegroups/arm-servicegroups",
@@ -880,7 +964,8 @@
       "completeness": {
         "changedFiles": "complete",
         "checks": "complete",
-        "metadata": "complete"
+        "metadata": "complete",
+        "reviews": "complete"
       },
       "warnings": []
     },
@@ -894,6 +979,7 @@
       "headSha": "759022bd358c0c4ff99c35bd1942fd7750646332",
       "createdAt": "2026-08-26T06:53:39Z",
       "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=36266",
+      "reviewDecision": "review-required",
       "packages": [
         {
           "root": "sdk/migrate/arm-migrate",
@@ -919,7 +1005,8 @@
       "completeness": {
         "changedFiles": "complete",
         "checks": "complete",
-        "metadata": "complete"
+        "metadata": "complete",
+        "reviews": "complete"
       },
       "warnings": []
     },
@@ -933,6 +1020,7 @@
       "headSha": "7d4ec312a5921e44c8719426a99a5e97c4a59f98",
       "createdAt": "2026-08-31T07:24:23Z",
       "releasePlanUrl": null,
+      "reviewDecision": "review-required",
       "packages": [
         {
           "root": "sdk/dataprotection/arm-dataprotection",
@@ -958,7 +1046,8 @@
       "completeness": {
         "changedFiles": "complete",
         "checks": "complete",
-        "metadata": "complete"
+        "metadata": "complete",
+        "reviews": "complete"
       },
       "warnings": []
     },
@@ -972,6 +1061,7 @@
       "headSha": "ad6507e3b790823886303d9c3947dd6925f88562",
       "createdAt": "2026-08-26T20:07:30Z",
       "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=36284",
+      "reviewDecision": "review-required",
       "packages": [
         {
           "root": "sdk/eventhub/arm-eventhub",
@@ -1011,7 +1101,8 @@
       "completeness": {
         "changedFiles": "complete",
         "checks": "complete",
-        "metadata": "complete"
+        "metadata": "complete",
+        "reviews": "complete"
       },
       "warnings": []
     },
@@ -1025,6 +1116,7 @@
       "headSha": "ad20c2c6ccc8fa00186e1a4112aa275229963b44",
       "createdAt": "2026-08-25T21:06:03Z",
       "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=36134",
+      "reviewDecision": "review-required",
       "packages": [
         {
           "root": "sdk/deviceregistry/iot-device-registry-software-update",
@@ -1050,7 +1142,8 @@
       "completeness": {
         "changedFiles": "complete",
         "checks": "complete",
-        "metadata": "complete"
+        "metadata": "complete",
+        "reviews": "complete"
       },
       "warnings": []
     },
@@ -1064,6 +1157,7 @@
       "headSha": "76a3658a5f969f20a652c1539c001d0b903a11f1",
       "createdAt": "2026-08-24T13:52:25Z",
       "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=36244",
+      "reviewDecision": "approved",
       "packages": [
         {
           "root": "sdk/playwright/arm-playwright",
@@ -1089,7 +1183,8 @@
       "completeness": {
         "changedFiles": "complete",
         "checks": "complete",
-        "metadata": "complete"
+        "metadata": "complete",
+        "reviews": "complete"
       },
       "warnings": []
     },
@@ -1103,6 +1198,7 @@
       "headSha": "be46e333444913754996b04b7b8c832e3505da49",
       "createdAt": "2026-08-20T15:25:54Z",
       "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=36140",
+      "reviewDecision": "not-required",
       "packages": [
         {
           "root": "sdk/quota/arm-quota",
@@ -1128,7 +1224,8 @@
       "completeness": {
         "changedFiles": "complete",
         "checks": "complete",
-        "metadata": "complete"
+        "metadata": "complete",
+        "reviews": "complete"
       },
       "warnings": []
     },
@@ -1142,6 +1239,7 @@
       "headSha": "f26652ca03532dc92f502b71977cb2b3f5e6c02f",
       "createdAt": "2026-08-21T18:48:40Z",
       "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=36231",
+      "reviewDecision": "approved",
       "packages": [
         {
           "root": "sdk/hybridconnectivity/arm-hybridconnectivity",
@@ -1167,7 +1265,8 @@
       "completeness": {
         "changedFiles": "complete",
         "checks": "complete",
-        "metadata": "complete"
+        "metadata": "complete",
+        "reviews": "complete"
       },
       "warnings": []
     },
@@ -1181,6 +1280,7 @@
       "headSha": "0271c796d4ec67e4b54ccf2f2e7d8b01391aa452",
       "createdAt": "2026-08-21T20:02:04Z",
       "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=36233",
+      "reviewDecision": "approved",
       "packages": [
         {
           "root": "sdk/iotfirmwaredefense/arm-iotfirmwaredefense",
@@ -1206,7 +1306,8 @@
       "completeness": {
         "changedFiles": "complete",
         "checks": "complete",
-        "metadata": "complete"
+        "metadata": "complete",
+        "reviews": "complete"
       },
       "warnings": []
     },
@@ -1220,6 +1321,7 @@
       "headSha": "0a8deece11576350034aed224a57141f52167cf1",
       "createdAt": "2026-08-20T19:16:00Z",
       "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=36189",
+      "reviewDecision": "approved",
       "packages": [
         {
           "root": "sdk/cosmosdb/arm-cosmosdb",
@@ -1245,7 +1347,8 @@
       "completeness": {
         "changedFiles": "complete",
         "checks": "complete",
-        "metadata": "complete"
+        "metadata": "complete",
+        "reviews": "complete"
       },
       "warnings": []
     },
@@ -1259,6 +1362,7 @@
       "headSha": "dd766d4206c3d21dc58b81fc93f15ef7548ced64",
       "createdAt": "2026-08-20T22:52:27Z",
       "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=36194",
+      "reviewDecision": "approved",
       "packages": [
         {
           "root": "sdk/cdn/arm-cdn",
@@ -1284,7 +1388,8 @@
       "completeness": {
         "changedFiles": "complete",
         "checks": "complete",
-        "metadata": "complete"
+        "metadata": "complete",
+        "reviews": "complete"
       },
       "warnings": []
     },
@@ -1298,6 +1403,7 @@
       "headSha": "cfd2253fb5d367fdf518519e07b7a2de3be8f7a2",
       "createdAt": "2026-08-19T21:28:40Z",
       "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=36147",
+      "reviewDecision": "approved",
       "packages": [
         {
           "root": "sdk/machinelearning/arm-machinelearning",
@@ -1323,7 +1429,8 @@
       "completeness": {
         "changedFiles": "complete",
         "checks": "complete",
-        "metadata": "complete"
+        "metadata": "complete",
+        "reviews": "complete"
       },
       "warnings": []
     },
@@ -1337,6 +1444,7 @@
       "headSha": "74a2bb4a9c4c48a9c06c5f51e399e310e20860f5",
       "createdAt": "2026-08-14T21:58:23Z",
       "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=36087",
+      "reviewDecision": "approved",
       "packages": [
         {
           "root": "sdk/consumption/arm-consumption",
@@ -1362,7 +1470,8 @@
       "completeness": {
         "changedFiles": "complete",
         "checks": "complete",
-        "metadata": "complete"
+        "metadata": "complete",
+        "reviews": "complete"
       },
       "warnings": []
     },
@@ -1376,6 +1485,7 @@
       "headSha": "f57f7b9cd9da7c0b88fbe513690bcab85786d97e",
       "createdAt": "2026-08-12T05:50:41Z",
       "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=36000",
+      "reviewDecision": "approved",
       "packages": [
         {
           "root": "sdk/napsteromniagentapi/arm-napsteromniagentapi",
@@ -1401,7 +1511,8 @@
       "completeness": {
         "changedFiles": "complete",
         "checks": "complete",
-        "metadata": "complete"
+        "metadata": "complete",
+        "reviews": "complete"
       },
       "warnings": []
     },
@@ -1415,6 +1526,7 @@
       "headSha": "5db26b043146e385ad466c28d02936cf42733e78",
       "createdAt": "2026-08-11T17:13:58Z",
       "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=35986",
+      "reviewDecision": "approved",
       "packages": [
         {
           "root": "sdk/cost-management/arm-costmanagement",
@@ -1440,7 +1552,8 @@
       "completeness": {
         "changedFiles": "complete",
         "checks": "complete",
-        "metadata": "complete"
+        "metadata": "complete",
+        "reviews": "complete"
       },
       "warnings": []
     },
@@ -1454,6 +1567,7 @@
       "headSha": "f4a632a21d0cb8d9b179d201e0f7f0d8d5fae88b",
       "createdAt": "2026-08-10T10:57:36Z",
       "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=35972",
+      "reviewDecision": "approved",
       "packages": [
         {
           "root": "sdk/paloaltonetworksngfw/arm-paloaltonetworksngfw",
@@ -1479,7 +1593,8 @@
       "completeness": {
         "changedFiles": "complete",
         "checks": "complete",
-        "metadata": "complete"
+        "metadata": "complete",
+        "reviews": "complete"
       },
       "warnings": []
     },
@@ -1493,6 +1608,7 @@
       "headSha": "f236e79a27e25e369cf01a7cbf3c143d6722a2de",
       "createdAt": "2026-08-09T11:21:35Z",
       "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=35969",
+      "reviewDecision": "approved",
       "packages": [
         {
           "root": "sdk/operationalinsights/arm-operationalinsights",
@@ -1518,7 +1634,8 @@
       "completeness": {
         "changedFiles": "complete",
         "checks": "complete",
-        "metadata": "complete"
+        "metadata": "complete",
+        "reviews": "complete"
       },
       "warnings": []
     },
@@ -1532,6 +1649,7 @@
       "headSha": "158c943cb8fd087a66691d4aae3b880f36f27cc8",
       "createdAt": "2026-07-22T19:04:59Z",
       "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=35433",
+      "reviewDecision": "not-required",
       "packages": [
         {
           "root": "sdk/servicebus/arm-servicebus",
@@ -1557,7 +1675,8 @@
       "completeness": {
         "changedFiles": "complete",
         "checks": "complete",
-        "metadata": "complete"
+        "metadata": "complete",
+        "reviews": "complete"
       },
       "warnings": []
     },
@@ -1571,6 +1690,7 @@
       "headSha": "1fe798e8af64432e7ddcd668096d75e4a157cd23",
       "createdAt": "2026-07-23T02:27:10Z",
       "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=35440",
+      "reviewDecision": "approved",
       "packages": [
         {
           "root": "sdk/containerinstance/arm-containerinstance",
@@ -1596,7 +1716,8 @@
       "completeness": {
         "changedFiles": "complete",
         "checks": "complete",
-        "metadata": "complete"
+        "metadata": "complete",
+        "reviews": "complete"
       },
       "warnings": []
     },
@@ -1610,6 +1731,7 @@
       "headSha": "22cf4aff14af982dbe6bfb6e22348e98f8337fdb",
       "createdAt": "2026-07-22T09:15:42Z",
       "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=35305",
+      "reviewDecision": "approved",
       "packages": [
         {
           "root": "sdk/machinelearning/arm-machinelearning",
@@ -1635,46 +1757,8 @@
       "completeness": {
         "changedFiles": "complete",
         "checks": "complete",
-        "metadata": "complete"
-      },
-      "warnings": []
-    },
-    {
-      "repository": "Azure/azure-sdk-for-js",
-      "number": 39373,
-      "url": "https://github.com/Azure/azure-sdk-for-js/pull/39373",
-      "title": "[AutoPR @azure-arm-devopsinfrastructure]-generated-from-SDK Generation - JS-6632648",
-      "draft": false,
-      "plane": "management",
-      "headSha": "1033becaa20955916bef4c7945316282ecb9d808",
-      "createdAt": "2026-07-23T01:19:10Z",
-      "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=35438",
-      "packages": [
-        {
-          "root": "sdk/devopsinfrastructure/arm-devopsinfrastructure",
-          "name": "@azure/arm-devopsinfrastructure",
-          "version": "2.0.0-beta.1",
-          "apiVersions": [
-            {
-              "namespace": "Microsoft.DevOpsInfrastructure",
-              "versions": [
-                "2026-07-03-preview"
-              ]
-            }
-          ],
-          "state": "available"
-        }
-      ],
-      "checks": {
-        "failedCount": 0,
-        "qualification": "complete",
-        "observedCount": 72
-      },
-      "conflicts": false,
-      "completeness": {
-        "changedFiles": "complete",
-        "checks": "complete",
-        "metadata": "complete"
+        "metadata": "complete",
+        "reviews": "complete"
       },
       "warnings": []
     },
@@ -1688,6 +1772,7 @@
       "headSha": "c58684950d5b95956ec763c2aa148441906bf1ed",
       "createdAt": "2026-07-28T10:57:10Z",
       "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=35659",
+      "reviewDecision": "not-required",
       "packages": [
         {
           "root": "sdk/mongocluster/arm-mongocluster",
@@ -1713,7 +1798,8 @@
       "completeness": {
         "changedFiles": "complete",
         "checks": "complete",
-        "metadata": "complete"
+        "metadata": "complete",
+        "reviews": "complete"
       },
       "warnings": []
     },
@@ -1727,6 +1813,7 @@
       "headSha": "7d42bcadd35046d2a43e75126267cfdc7d70243f",
       "createdAt": "2026-08-03T22:28:43Z",
       "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=35847",
+      "reviewDecision": "approved",
       "packages": [
         {
           "root": "sdk/cognitiveservices/arm-cognitiveservices",
@@ -1752,7 +1839,8 @@
       "completeness": {
         "changedFiles": "complete",
         "checks": "complete",
-        "metadata": "complete"
+        "metadata": "complete",
+        "reviews": "complete"
       },
       "warnings": []
     },
@@ -1766,6 +1854,7 @@
       "headSha": "a535f44156daea0ca4483ca7eb71be0a663a9c97",
       "createdAt": "2026-07-21T10:02:03Z",
       "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=34988",
+      "reviewDecision": "approved",
       "packages": [
         {
           "root": "sdk/keyvault/arm-keyvault",
@@ -1791,7 +1880,8 @@
       "completeness": {
         "changedFiles": "complete",
         "checks": "complete",
-        "metadata": "complete"
+        "metadata": "complete",
+        "reviews": "complete"
       },
       "warnings": []
     },
@@ -1805,6 +1895,7 @@
       "headSha": "be10380f416838036b3143511ff58b2bfdfe1ff3",
       "createdAt": "2026-07-30T17:24:59Z",
       "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=2242",
+      "reviewDecision": "review-required",
       "packages": [
         {
           "root": "sdk/contentsafety/ai-content-safety-rest",
@@ -1830,7 +1921,8 @@
       "completeness": {
         "changedFiles": "complete",
         "checks": "complete",
-        "metadata": "complete"
+        "metadata": "complete",
+        "reviews": "complete"
       },
       "warnings": []
     },
@@ -1844,6 +1936,7 @@
       "headSha": "32a2088c208443ed8b1beeea2885e0bff4cf7812",
       "createdAt": "2026-07-25T17:45:59Z",
       "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=35569",
+      "reviewDecision": "review-required",
       "packages": [
         {
           "root": "sdk/relay/arm-relay",
@@ -1869,7 +1962,8 @@
       "completeness": {
         "changedFiles": "complete",
         "checks": "complete",
-        "metadata": "complete"
+        "metadata": "complete",
+        "reviews": "complete"
       },
       "warnings": []
     },
@@ -1883,6 +1977,7 @@
       "headSha": "1b8bc3d75b2cc0b1b1efae0ba844b60ef55da1b0",
       "createdAt": "2026-07-23T16:43:59Z",
       "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=35443",
+      "reviewDecision": "review-required",
       "packages": [
         {
           "root": "sdk/storagemover/arm-storagemover",
@@ -1908,7 +2003,8 @@
       "completeness": {
         "changedFiles": "complete",
         "checks": "complete",
-        "metadata": "complete"
+        "metadata": "complete",
+        "reviews": "complete"
       },
       "warnings": []
     },
@@ -1922,6 +2018,7 @@
       "headSha": "a0ffc29576124b61cf567c76a5532d232dcbd3d0",
       "createdAt": "2026-08-05T14:44:47Z",
       "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=35926",
+      "reviewDecision": "approved",
       "packages": [
         {
           "root": "sdk/sql/arm-sql",
@@ -1947,7 +2044,8 @@
       "completeness": {
         "changedFiles": "complete",
         "checks": "complete",
-        "metadata": "complete"
+        "metadata": "complete",
+        "reviews": "complete"
       },
       "warnings": []
     },
@@ -1961,6 +2059,7 @@
       "headSha": "2fb1b2a4f5dd2441541b78cf026b527d3b601d83",
       "createdAt": "2026-08-04T02:01:26Z",
       "releasePlanUrl": null,
+      "reviewDecision": "review-required",
       "packages": [
         {
           "root": "sdk/compute/arm-compute",
@@ -2004,7 +2103,8 @@
       "completeness": {
         "changedFiles": "complete",
         "checks": "complete",
-        "metadata": "complete"
+        "metadata": "complete",
+        "reviews": "complete"
       },
       "warnings": []
     },
@@ -2018,6 +2118,7 @@
       "headSha": "51b81a2185824f8694d044886a7c8160c6afba51",
       "createdAt": "2026-07-22T19:05:47Z",
       "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=35435",
+      "reviewDecision": "not-required",
       "packages": [
         {
           "root": "sdk/eventhub/arm-eventhub",
@@ -2043,7 +2144,8 @@
       "completeness": {
         "changedFiles": "complete",
         "checks": "complete",
-        "metadata": "complete"
+        "metadata": "complete",
+        "reviews": "complete"
       },
       "warnings": []
     },
@@ -2057,6 +2159,7 @@
       "headSha": "cfdf4eb8363114e6c9afc4ef82298e195f0bcc4e",
       "createdAt": "2026-07-10T18:35:37Z",
       "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=35262",
+      "reviewDecision": "approved",
       "packages": [
         {
           "root": "sdk/containerinstance/arm-containerinstance",
@@ -2082,7 +2185,8 @@
       "completeness": {
         "changedFiles": "complete",
         "checks": "complete",
-        "metadata": "complete"
+        "metadata": "complete",
+        "reviews": "complete"
       },
       "warnings": []
     }

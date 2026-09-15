@@ -22,10 +22,26 @@ Each AutoPR row includes:
 - failed check count across GitHub check runs and commit status contexts,
   including statuses reported by Azure Pipelines
 - GitHub merge conflict state
+- a prioritized next step derived from draft, CI, conflicts, required review,
+  pending, and completeness signals
 
 Only the failed count is shown—not individual CI job details. Zero failures is
 qualified when checks are pending, cancelled, absent, or incomplete. Unknown
 mergeability is shown as checking rather than as conflict-free.
+
+The **Next step** column applies this order:
+
+1. drafts remain **Draft in progress**
+2. CI failures, conflicts, cancelled checks, or requested changes become
+   **Needs resolution**
+3. GitHub's `REVIEW_REQUIRED` decision becomes **Review needed**
+4. running checks become **Waiting for checks**
+5. incomplete signals become **Status unavailable**
+6. a fully clear PR becomes **Wait to merge**
+
+GitHub's `reviewDecision` is used instead of counting requested reviewers. It
+reflects whether branch protection's qualifying approval requirement is
+actually satisfied without publishing reviewer identities.
 
 Filters and sorting are stored in the hash URL, so a filtered view can be
 bookmarked. Hash routing also lets deep links work under the project Pages path
@@ -48,10 +64,11 @@ Dependencies are resolved through the Azure SDK public npm feed. The local
 material; never commit it. The committed `.npmrc.example` contains only the
 feed location and is also used by CI.
 
-The GitHub collector defaults to public unauthenticated API access. For a live
-local run, set `GITHUB_TOKEN` or `GH_TOKEN` to a read-only token if
-unauthenticated rate limits are insufficient. Do not use a token in any
-`VITE_*` variable: Vite exposes those values to the browser bundle.
+REST collection can use public unauthenticated API access, but the authoritative
+GraphQL review decision requires `GITHUB_TOKEN` or `GH_TOKEN`. Without one, the
+collector explicitly marks review state incomplete rather than inferring an
+approval. Do not use a token in any `VITE_*` variable: Vite exposes those values
+to the browser bundle.
 
 Useful checks:
 

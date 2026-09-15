@@ -9,6 +9,12 @@ export type CheckQualification =
   | "cancelled"
   | "partial"
   | "unknown";
+export type ReviewDecision =
+  | "approved"
+  | "review-required"
+  | "changes-requested"
+  | "not-required"
+  | "unknown";
 
 export interface ApiVersion {
   namespace: string;
@@ -34,6 +40,7 @@ export interface PullRequestRecord {
   headSha: string;
   createdAt: string;
   releasePlanUrl: string | null;
+  reviewDecision: ReviewDecision;
   packages: PackageMetadata[];
   checks: {
     failedCount: number | null;
@@ -45,6 +52,7 @@ export interface PullRequestRecord {
     changedFiles: Completeness;
     checks: Completeness;
     metadata: Completeness;
+    reviews: Completeness;
   };
   warnings: string[];
 }
