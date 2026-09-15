@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 import type { PullRequestRecord } from "../src/data/contracts";
 import { getNextStep } from "../src/features/sdk-prs/nextStep";
+import {
+  filterPullRequests,
+  type SdkPrFilters,
+} from "../src/features/sdk-prs/useSdkPrFilters";
 
 function pull(
   overrides: Partial<PullRequestRecord> = {},
@@ -76,6 +80,26 @@ describe("getNextStep", () => {
     expect(getNextStep(pull())).toMatchObject({
       kind: "merge",
       label: "Wait to merge",
+    });
+  });
+
+  describe("filterPullRequests", () => {
+    const filters: SdkPrFilters = {
+      search: "",
+      plane: "all",
+      nextStep: "resolve",
+      sort: "newest",
+    };
+
+    it("filters by the derived next step, including conflicts", () => {
+      const conflicted = pull({ number: 1, conflicts: true });
+      const reviewNeeded = pull({
+        number: 2,
+        reviewDecision: "review-required",
+      });
+      expect(filterPullRequests([conflicted, reviewNeeded], filters)).toEqual([
+        conflicted,
+      ]);
     });
   });
 });

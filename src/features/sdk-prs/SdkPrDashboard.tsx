@@ -81,14 +81,17 @@ export function SdkPrDashboard() {
             ]}
           />
           <FilterSelect
-            label="Status"
-            value={filters.status}
-            onChange={(value) => setFilter("status", value)}
+            label="Next step"
+            value={filters.nextStep}
+            onChange={(value) => setFilter("nextStep", value)}
             options={[
-              ["all", "All statuses"],
-              ["failing", "Has failures"],
-              ["conflicts", "Has conflicts"],
-              ["draft", "Draft"],
+              ["all", "All next steps"],
+              ["resolve", "Needs resolution"],
+              ["review", "Review needed"],
+              ["waiting", "Waiting for checks"],
+              ["merge", "Wait to merge"],
+              ["draft", "Draft in progress"],
+              ["unknown", "Status unavailable"],
             ]}
           />
           <FilterSelect

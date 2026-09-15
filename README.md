@@ -43,8 +43,10 @@ GitHub's `reviewDecision` is used instead of counting requested reviewers. It
 reflects whether branch protection's qualifying approval requirement is
 actually satisfied without publishing reviewer identities.
 
-Filters and sorting are stored in the hash URL, so a filtered view can be
-bookmarked. Hash routing also lets deep links work under the project Pages path
+Plane, next-step, search, and sorting filters are stored in the hash URL, so a
+filtered view can be bookmarked. Conflicts are integrated into **Needs
+resolution** and its reason rather than occupying a separate table column. Hash
+routing also lets deep links work under the project Pages path
 `/sdk-js-worker/` without server rewrites.
 
 ## Local development
