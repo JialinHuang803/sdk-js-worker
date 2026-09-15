@@ -1,0 +1,2090 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-09-15T02:28:15.248Z",
+  "stale": false,
+  "source": {
+    "repository": "Azure/azure-sdk-for-js",
+    "query": "state:open title-prefix:[AutoPR",
+    "fetchedAt": "2026-09-15T02:28:15.248Z"
+  },
+  "pullRequests": [
+    {
+      "repository": "Azure/azure-sdk-for-js",
+      "number": 39891,
+      "url": "https://github.com/Azure/azure-sdk-for-js/pull/39891",
+      "title": "[AutoPR @azure-arm-storagemover]-generated-from-SDK Generation - JS-6798569",
+      "draft": false,
+      "plane": "management",
+      "headSha": "a758145262a0808f03b8cf4e813cfdb2e5c93b14",
+      "createdAt": "2026-09-08T11:08:15Z",
+      "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=36443",
+      "packages": [
+        {
+          "root": "sdk/storagemover/arm-storagemover",
+          "name": "@azure/arm-storagemover",
+          "version": "3.2.0",
+          "apiVersions": [
+            {
+              "namespace": "Microsoft.StorageMover",
+              "versions": [
+                "2026-05-01"
+              ]
+            }
+          ],
+          "state": "available"
+        }
+      ],
+      "checks": {
+        "failedCount": 0,
+        "qualification": "complete",
+        "observedCount": 15
+      },
+      "conflicts": false,
+      "completeness": {
+        "changedFiles": "complete",
+        "checks": "complete",
+        "metadata": "complete"
+      },
+      "warnings": []
+    },
+    {
+      "repository": "Azure/azure-sdk-for-js",
+      "number": 39847,
+      "url": "https://github.com/Azure/azure-sdk-for-js/pull/39847",
+      "title": "[AutoPR @azure-arm-appcontainers]-generated-from-SDK Generation - JS-6833340",
+      "draft": false,
+      "plane": "management",
+      "headSha": "1ff73716fe6860315b4864c6c141370360cf8590",
+      "createdAt": "2026-09-03T01:24:59Z",
+      "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=36380",
+      "packages": [
+        {
+          "root": "sdk/appcontainers/arm-appcontainers",
+          "name": "@azure/arm-appcontainers",
+          "version": "4.0.0",
+          "apiVersions": [
+            {
+              "namespace": "Microsoft.App",
+              "versions": [
+                "2026-07-01"
+              ]
+            }
+          ],
+          "state": "available"
+        }
+      ],
+      "checks": {
+        "failedCount": 0,
+        "qualification": "complete",
+        "observedCount": 61
+      },
+      "conflicts": true,
+      "completeness": {
+        "changedFiles": "complete",
+        "checks": "complete",
+        "metadata": "complete"
+      },
+      "warnings": []
+    },
+    {
+      "repository": "Azure/azure-sdk-for-js",
+      "number": 39966,
+      "url": "https://github.com/Azure/azure-sdk-for-js/pull/39966",
+      "title": "[AutoPR @azure-rest-ai-content-safety]-generated-from-SDK Generation - JS-6834989",
+      "draft": false,
+      "plane": "data",
+      "headSha": "caedc0ee9317a7e6316ccdb2dff2d0d25460de44",
+      "createdAt": "2026-09-14T22:46:32Z",
+      "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=36522",
+      "packages": [
+        {
+          "root": "sdk/contentsafety/ai-content-safety-rest",
+          "name": "@azure-rest/ai-content-safety",
+          "version": "1.0.3",
+          "apiVersions": [
+            {
+              "namespace": "ContentSafety",
+              "versions": [
+                "2026-09-01-preview"
+              ]
+            }
+          ],
+          "state": "available"
+        }
+      ],
+      "checks": {
+        "failedCount": 6,
+        "qualification": "complete",
+        "observedCount": 76
+      },
+      "conflicts": false,
+      "completeness": {
+        "changedFiles": "complete",
+        "checks": "complete",
+        "metadata": "complete"
+      },
+      "warnings": []
+    },
+    {
+      "repository": "Azure/azure-sdk-for-js",
+      "number": 39962,
+      "url": "https://github.com/Azure/azure-sdk-for-js/pull/39962",
+      "title": "[AutoPR @azure-arm-iothub]-generated-from-SDK Generation - JS-6833415",
+      "draft": false,
+      "plane": "management",
+      "headSha": "f7d625ae2de41da576c42026e48b1ea771d5f78c",
+      "createdAt": "2026-09-14T18:00:57Z",
+      "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=36517",
+      "packages": [
+        {
+          "root": "sdk/iothub/arm-iothub",
+          "name": "@azure/arm-iothub",
+          "version": "7.0.0-beta.4",
+          "apiVersions": [
+            {
+              "namespace": "Microsoft.Devices",
+              "versions": [
+                "2026-10-01-preview"
+              ]
+            }
+          ],
+          "state": "available"
+        }
+      ],
+      "checks": {
+        "failedCount": 0,
+        "qualification": "complete",
+        "observedCount": 77
+      },
+      "conflicts": false,
+      "completeness": {
+        "changedFiles": "complete",
+        "checks": "complete",
+        "metadata": "complete"
+      },
+      "warnings": []
+    },
+    {
+      "repository": "Azure/azure-sdk-for-js",
+      "number": 39961,
+      "url": "https://github.com/Azure/azure-sdk-for-js/pull/39961",
+      "title": "[AutoPR @azure-arm-compute]-generated-from-SDK Generation - JS-6832828",
+      "draft": false,
+      "plane": "management",
+      "headSha": "986eb1a3f1904790f3932871e43252e9dd223283",
+      "createdAt": "2026-09-14T16:21:52Z",
+      "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=36304",
+      "packages": [
+        {
+          "root": "sdk/compute/arm-compute",
+          "name": "@azure/arm-compute",
+          "version": "25.1.2",
+          "apiVersions": [
+            {
+              "namespace": "Compute",
+              "versions": [
+                "2026-04-01"
+              ]
+            },
+            {
+              "namespace": "ComputeDisk",
+              "versions": [
+                "2026-03-02"
+              ]
+            },
+            {
+              "namespace": "ComputeGallery",
+              "versions": [
+                "2025-12-03"
+              ]
+            },
+            {
+              "namespace": "ComputeSku",
+              "versions": [
+                "2021-07-01"
+              ]
+            }
+          ],
+          "state": "available"
+        }
+      ],
+      "checks": {
+        "failedCount": 2,
+        "qualification": "complete",
+        "observedCount": 77
+      },
+      "conflicts": false,
+      "completeness": {
+        "changedFiles": "complete",
+        "checks": "complete",
+        "metadata": "complete"
+      },
+      "warnings": []
+    },
+    {
+      "repository": "Azure/azure-sdk-for-js",
+      "number": 39728,
+      "url": "https://github.com/Azure/azure-sdk-for-js/pull/39728",
+      "title": "[AutoPR @azure-arm-policy]-generated-from-SDK Generation - JS-6830951",
+      "draft": false,
+      "plane": "management",
+      "headSha": "3e502530e66feb0c013a8bbdf5ed4f58a31fd09e",
+      "createdAt": "2026-08-25T17:11:27Z",
+      "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=35307",
+      "packages": [
+        {
+          "root": "sdk/policy/arm-policy",
+          "name": "@azure/arm-policy",
+          "version": "8.0.0",
+          "apiVersions": [
+            {
+              "namespace": "Microsoft.Authorization",
+              "versions": [
+                "2026-07-01"
+              ]
+            }
+          ],
+          "state": "available"
+        }
+      ],
+      "checks": {
+        "failedCount": 0,
+        "qualification": "complete",
+        "observedCount": 128
+      },
+      "conflicts": false,
+      "completeness": {
+        "changedFiles": "complete",
+        "checks": "complete",
+        "metadata": "complete"
+      },
+      "warnings": []
+    },
+    {
+      "repository": "Azure/azure-sdk-for-js",
+      "number": 39949,
+      "url": "https://github.com/Azure/azure-sdk-for-js/pull/39949",
+      "title": "[AutoPR @azure-arm-networkcloud]-generated-from-SDK Generation - JS-6830678",
+      "draft": false,
+      "plane": "management",
+      "headSha": "24a3175fc0108c2a2f99fe31b335e82f4d4548d4",
+      "createdAt": "2026-09-13T16:31:31Z",
+      "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=36506",
+      "packages": [
+        {
+          "root": "sdk/networkcloud/arm-networkcloud",
+          "name": "@azure/arm-networkcloud",
+          "version": "2.1.0-beta.1",
+          "apiVersions": [
+            {
+              "namespace": "Microsoft.NetworkCloud",
+              "versions": [
+                "2026-08-01-preview"
+              ]
+            }
+          ],
+          "state": "available"
+        }
+      ],
+      "checks": {
+        "failedCount": 0,
+        "qualification": "complete",
+        "observedCount": 14
+      },
+      "conflicts": false,
+      "completeness": {
+        "changedFiles": "complete",
+        "checks": "complete",
+        "metadata": "complete"
+      },
+      "warnings": []
+    },
+    {
+      "repository": "Azure/azure-sdk-for-js",
+      "number": 39950,
+      "url": "https://github.com/Azure/azure-sdk-for-js/pull/39950",
+      "title": "[AutoPR @azure-arm-frontdoor]-generated-from-SDK Generation - JS-6831003",
+      "draft": false,
+      "plane": "management",
+      "headSha": "7a64f09f1a17423e184da50e9c72e87e6ac8ca00",
+      "createdAt": "2026-09-14T06:36:57Z",
+      "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=36510",
+      "packages": [
+        {
+          "root": "sdk/frontdoor/arm-frontdoor",
+          "name": "@azure/arm-frontdoor",
+          "version": "6.1.0",
+          "apiVersions": [
+            {
+              "namespace": "Microsoft.Network",
+              "versions": [
+                "2026-04-01"
+              ]
+            }
+          ],
+          "state": "available"
+        }
+      ],
+      "checks": {
+        "failedCount": 5,
+        "qualification": "complete",
+        "observedCount": 77
+      },
+      "conflicts": false,
+      "completeness": {
+        "changedFiles": "complete",
+        "checks": "complete",
+        "metadata": "complete"
+      },
+      "warnings": []
+    },
+    {
+      "repository": "Azure/azure-sdk-for-js",
+      "number": 39898,
+      "url": "https://github.com/Azure/azure-sdk-for-js/pull/39898",
+      "title": "[AutoPR @azure-communication-identity]-generated-from-SDK Generation - JS-6802370",
+      "draft": true,
+      "plane": "data",
+      "headSha": "ead559ab9956ae502760c034740ccaa003c99698",
+      "createdAt": "2026-09-09T02:36:35Z",
+      "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=36401",
+      "packages": [
+        {
+          "root": "sdk/communication/communication-identity",
+          "name": "@azure/communication-identity",
+          "version": "2.0.0",
+          "apiVersions": [
+            {
+              "namespace": "Azure.Communication.Identity",
+              "versions": [
+                "2026-09-23"
+              ]
+            }
+          ],
+          "state": "available"
+        }
+      ],
+      "checks": {
+        "failedCount": 5,
+        "qualification": "complete",
+        "observedCount": 13
+      },
+      "conflicts": false,
+      "completeness": {
+        "changedFiles": "complete",
+        "checks": "complete",
+        "metadata": "complete"
+      },
+      "warnings": []
+    },
+    {
+      "repository": "Azure/azure-sdk-for-js",
+      "number": 39702,
+      "url": "https://github.com/Azure/azure-sdk-for-js/pull/39702",
+      "title": "[AutoPR @azure-arm-resiliencemanagement]-generated-from-SDK Generation - JS-6809513",
+      "draft": false,
+      "plane": "management",
+      "headSha": "d39ab195aa0c93c48f1308acc41285916e6ff6c2",
+      "createdAt": "2026-08-22T13:53:27Z",
+      "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=36239",
+      "packages": [
+        {
+          "root": "sdk/resiliencemanagement/arm-resiliencemanagement",
+          "name": "@azure/arm-resiliencemanagement",
+          "version": "1.0.0-beta.2",
+          "apiVersions": [
+            {
+              "namespace": "Microsoft.AzureResilienceManagement",
+              "versions": [
+                "2026-08-31-preview"
+              ]
+            }
+          ],
+          "state": "available"
+        }
+      ],
+      "checks": {
+        "failedCount": 0,
+        "qualification": "complete",
+        "observedCount": 72
+      },
+      "conflicts": false,
+      "completeness": {
+        "changedFiles": "complete",
+        "checks": "complete",
+        "metadata": "complete"
+      },
+      "warnings": []
+    },
+    {
+      "repository": "Azure/azure-sdk-for-js",
+      "number": 39222,
+      "url": "https://github.com/Azure/azure-sdk-for-js/pull/39222",
+      "title": "[AutoPR @azure-rest-developer-devcenter]-generated-from-SDK Generation - JS-6540159",
+      "draft": true,
+      "plane": "data",
+      "headSha": "ce8a16c8e78cf63b3815d5998d0fcdf4b4c236bf",
+      "createdAt": "2026-07-09T09:43:05Z",
+      "releasePlanUrl": null,
+      "packages": [
+        {
+          "root": "sdk/devcenter/developer-devcenter-rest",
+          "name": "@azure-rest/developer-devcenter",
+          "version": "1.0.0",
+          "apiVersions": [
+            {
+              "namespace": "DevCenterService",
+              "versions": [
+                "2023-04-01"
+              ]
+            }
+          ],
+          "state": "available"
+        }
+      ],
+      "checks": {
+        "failedCount": 7,
+        "qualification": "complete",
+        "observedCount": 13
+      },
+      "conflicts": true,
+      "completeness": {
+        "changedFiles": "complete",
+        "checks": "complete",
+        "metadata": "complete"
+      },
+      "warnings": []
+    },
+    {
+      "repository": "Azure/azure-sdk-for-js",
+      "number": 39925,
+      "url": "https://github.com/Azure/azure-sdk-for-js/pull/39925",
+      "title": "[AutoPR @azure-arm-deviceregistry]-generated-from-SDK Generation - JS-6811151",
+      "draft": false,
+      "plane": "management",
+      "headSha": "4023f7d61aad98f575ef18a97ba9751761ece20e",
+      "createdAt": "2026-09-10T17:11:57Z",
+      "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=36491",
+      "packages": [
+        {
+          "root": "sdk/deviceregistry/arm-deviceregistry",
+          "name": "@azure/arm-deviceregistry",
+          "version": "2.0.0",
+          "apiVersions": [
+            {
+              "namespace": "Microsoft.DeviceRegistry",
+              "versions": [
+                "2026-11-01"
+              ]
+            }
+          ],
+          "state": "available"
+        }
+      ],
+      "checks": {
+        "failedCount": 4,
+        "qualification": "complete",
+        "observedCount": 194
+      },
+      "conflicts": false,
+      "completeness": {
+        "changedFiles": "complete",
+        "checks": "complete",
+        "metadata": "complete"
+      },
+      "warnings": []
+    },
+    {
+      "repository": "Azure/azure-sdk-for-js",
+      "number": 39768,
+      "url": "https://github.com/Azure/azure-sdk-for-js/pull/39768",
+      "title": "[AutoPR @azure-arm-oracledatabase]-generated-from-SDK Generation - JS-6755890",
+      "draft": false,
+      "plane": "management",
+      "headSha": "6e11d88dd14d12515fa5de02978fea2bae908075",
+      "createdAt": "2026-08-27T20:02:29Z",
+      "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=36309",
+      "packages": [
+        {
+          "root": "sdk/oracledatabase/arm-oracledatabase",
+          "name": "@azure/arm-oracledatabase",
+          "version": "3.1.0",
+          "apiVersions": [
+            {
+              "namespace": "Oracle.Database",
+              "versions": [
+                "2025-11-01-preview"
+              ]
+            }
+          ],
+          "state": "available"
+        }
+      ],
+      "checks": {
+        "failedCount": 5,
+        "qualification": "complete",
+        "observedCount": 194
+      },
+      "conflicts": true,
+      "completeness": {
+        "changedFiles": "complete",
+        "checks": "complete",
+        "metadata": "complete"
+      },
+      "warnings": []
+    },
+    {
+      "repository": "Azure/azure-sdk-for-js",
+      "number": 39890,
+      "url": "https://github.com/Azure/azure-sdk-for-js/pull/39890",
+      "title": "[AutoPR @azure-arm-elastic]-generated-from-SDK Generation - JS-6798074",
+      "draft": false,
+      "plane": "management",
+      "headSha": "bf3f60602ec20cf8f3e2f4c14982de800a092d18",
+      "createdAt": "2026-09-08T08:22:21Z",
+      "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=36441",
+      "packages": [
+        {
+          "root": "sdk/elastic/arm-elastic",
+          "name": "@azure/arm-elastic",
+          "version": "3.1.0-beta.1",
+          "apiVersions": [
+            {
+              "namespace": "Microsoft.Elastic",
+              "versions": [
+                "2026-03-15-preview"
+              ]
+            }
+          ],
+          "state": "available"
+        }
+      ],
+      "checks": {
+        "failedCount": 0,
+        "qualification": "complete",
+        "observedCount": 14
+      },
+      "conflicts": false,
+      "completeness": {
+        "changedFiles": "complete",
+        "checks": "complete",
+        "metadata": "complete"
+      },
+      "warnings": []
+    },
+    {
+      "repository": "Azure/azure-sdk-for-js",
+      "number": 39879,
+      "url": "https://github.com/Azure/azure-sdk-for-js/pull/39879",
+      "title": "[AutoPR @azure-arm-edgeoperator]-generated-from-SDK Generation - JS-6792096",
+      "draft": false,
+      "plane": "management",
+      "headSha": "87aa6b5b21f3447e3cedecf1a38f9b770e500357",
+      "createdAt": "2026-09-04T23:04:16Z",
+      "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=36420",
+      "packages": [
+        {
+          "root": "sdk/edgeoperator/arm-edgeoperator",
+          "name": "@azure/arm-edgeoperator",
+          "version": "1.0.0-beta.1",
+          "apiVersions": [
+            {
+              "namespace": "Microsoft.EdgeOperator",
+              "versions": [
+                "2026-06-01-preview"
+              ]
+            }
+          ],
+          "state": "available"
+        }
+      ],
+      "checks": {
+        "failedCount": 0,
+        "qualification": "complete",
+        "observedCount": 196
+      },
+      "conflicts": false,
+      "completeness": {
+        "changedFiles": "complete",
+        "checks": "complete",
+        "metadata": "complete"
+      },
+      "warnings": []
+    },
+    {
+      "repository": "Azure/azure-sdk-for-js",
+      "number": 39858,
+      "url": "https://github.com/Azure/azure-sdk-for-js/pull/39858",
+      "title": "[AutoPR @azure-arm-avs]-generated-from-SDK Generation - JS-6785615",
+      "draft": false,
+      "plane": "management",
+      "headSha": "8983768d07a64d5ceb153056dda11e947b337cc9",
+      "createdAt": "2026-09-03T17:37:52Z",
+      "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=36378",
+      "packages": [
+        {
+          "root": "sdk/avs/arm-avs",
+          "name": "@azure/arm-avs",
+          "version": "7.2.0",
+          "apiVersions": [
+            {
+              "namespace": "Microsoft.AVS",
+              "versions": [
+                "2026-03-01"
+              ]
+            }
+          ],
+          "state": "available"
+        }
+      ],
+      "checks": {
+        "failedCount": 0,
+        "qualification": "complete",
+        "observedCount": 194
+      },
+      "conflicts": true,
+      "completeness": {
+        "changedFiles": "complete",
+        "checks": "complete",
+        "metadata": "complete"
+      },
+      "warnings": []
+    },
+    {
+      "repository": "Azure/azure-sdk-for-js",
+      "number": 39663,
+      "url": "https://github.com/Azure/azure-sdk-for-js/pull/39663",
+      "title": "[AutoPR @azure-arm-platformvalidation]-generated-from-SDK Generation - JS-6720528",
+      "draft": false,
+      "plane": "management",
+      "headSha": "7a85b1e6432e3dc42feda65e33f88d3fd6d6319c",
+      "createdAt": "2026-08-19T15:38:48Z",
+      "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=36144",
+      "packages": [
+        {
+          "root": "sdk/platformvalidation/arm-platformvalidation",
+          "name": "@azure/arm-platformvalidation",
+          "version": "1.0.0-beta.1",
+          "apiVersions": [
+            {
+              "namespace": "Microsoft.PlatformValidation",
+              "versions": [
+                "2026-08-01-preview"
+              ]
+            }
+          ],
+          "state": "available"
+        }
+      ],
+      "checks": {
+        "failedCount": 0,
+        "qualification": "complete",
+        "observedCount": 3
+      },
+      "conflicts": true,
+      "completeness": {
+        "changedFiles": "complete",
+        "checks": "complete",
+        "metadata": "complete"
+      },
+      "warnings": []
+    },
+    {
+      "repository": "Azure/azure-sdk-for-js",
+      "number": 39577,
+      "url": "https://github.com/Azure/azure-sdk-for-js/pull/39577",
+      "title": "[AutoPR @azure-arm-relationships]-generated-from-SDK Generation - JS-6782643",
+      "draft": false,
+      "plane": "management",
+      "headSha": "82136c7cc12aedced511563109250d617302e83c",
+      "createdAt": "2026-08-12T19:37:00Z",
+      "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=36017",
+      "packages": [
+        {
+          "root": "sdk/relationships/arm-relationships",
+          "name": "@azure/arm-relationships",
+          "version": "1.0.0",
+          "apiVersions": [
+            {
+              "namespace": "Microsoft.Relationships",
+              "versions": [
+                "2026-08-01"
+              ]
+            }
+          ],
+          "state": "available"
+        }
+      ],
+      "checks": {
+        "failedCount": 0,
+        "qualification": "complete",
+        "observedCount": 72
+      },
+      "conflicts": false,
+      "completeness": {
+        "changedFiles": "complete",
+        "checks": "complete",
+        "metadata": "complete"
+      },
+      "warnings": []
+    },
+    {
+      "repository": "Azure/azure-sdk-for-js",
+      "number": 39823,
+      "url": "https://github.com/Azure/azure-sdk-for-js/pull/39823",
+      "title": "[AutoPR @azure-arm-managedops]-generated-from-SDK Generation - JS-6775367",
+      "draft": false,
+      "plane": "management",
+      "headSha": "97530b33a1fbed6da50109ec14476749fc745d4a",
+      "createdAt": "2026-09-02T00:55:20Z",
+      "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=36365",
+      "packages": [
+        {
+          "root": "sdk/managedops/arm-managedops",
+          "name": "@azure/arm-managedops",
+          "version": "1.0.0-beta.3",
+          "apiVersions": [
+            {
+              "namespace": "Microsoft.ManagedOps",
+              "versions": [
+                "2026-01-06-preview"
+              ]
+            }
+          ],
+          "state": "available"
+        }
+      ],
+      "checks": {
+        "failedCount": 0,
+        "qualification": "complete",
+        "observedCount": 247
+      },
+      "conflicts": true,
+      "completeness": {
+        "changedFiles": "complete",
+        "checks": "complete",
+        "metadata": "complete"
+      },
+      "warnings": []
+    },
+    {
+      "repository": "Azure/azure-sdk-for-js",
+      "number": 39639,
+      "url": "https://github.com/Azure/azure-sdk-for-js/pull/39639",
+      "title": "[AutoPR @azure-arm-storagecache]-generated-from-SDK Generation - JS-6777362",
+      "draft": false,
+      "plane": "management",
+      "headSha": "8cf215ea0216bfbfdb0b122792576bb7fa7e9452",
+      "createdAt": "2026-08-17T21:27:28Z",
+      "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=36107",
+      "packages": [
+        {
+          "root": "sdk/storagecache/arm-storagecache",
+          "name": "@azure/arm-storagecache",
+          "version": "9.1.0",
+          "apiVersions": [
+            {
+              "namespace": "Microsoft.StorageCache",
+              "versions": [
+                "2026-08-01"
+              ]
+            }
+          ],
+          "state": "available"
+        }
+      ],
+      "checks": {
+        "failedCount": 0,
+        "qualification": "complete",
+        "observedCount": 13
+      },
+      "conflicts": false,
+      "completeness": {
+        "changedFiles": "complete",
+        "checks": "complete",
+        "metadata": "complete"
+      },
+      "warnings": []
+    },
+    {
+      "repository": "Azure/azure-sdk-for-js",
+      "number": 39656,
+      "url": "https://github.com/Azure/azure-sdk-for-js/pull/39656",
+      "title": "[AutoPR @azure-arm-securityinsight]-generated-from-SDK Generation - JS-6719296",
+      "draft": false,
+      "plane": "management",
+      "headSha": "b444f11779fdb92e384e0df90af8518ae4643762",
+      "createdAt": "2026-08-19T05:50:34Z",
+      "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=35295",
+      "packages": [
+        {
+          "root": "sdk/securityinsight/arm-securityinsight",
+          "name": "@azure/arm-securityinsight",
+          "version": "1.0.0-beta.9",
+          "apiVersions": [
+            {
+              "namespace": "Microsoft.SecurityInsights",
+              "versions": [
+                "2025-10-01-preview"
+              ]
+            }
+          ],
+          "state": "available"
+        }
+      ],
+      "checks": {
+        "failedCount": 0,
+        "qualification": "complete",
+        "observedCount": 128
+      },
+      "conflicts": true,
+      "completeness": {
+        "changedFiles": "complete",
+        "checks": "complete",
+        "metadata": "complete"
+      },
+      "warnings": []
+    },
+    {
+      "repository": "Azure/azure-sdk-for-js",
+      "number": 39641,
+      "url": "https://github.com/Azure/azure-sdk-for-js/pull/39641",
+      "title": "[AutoPR @azure-arm-servicegroups]-generated-from-SDK Generation - JS-6712454",
+      "draft": false,
+      "plane": "management",
+      "headSha": "7f3337748368963b6dba0a3361ed71bae38463f2",
+      "createdAt": "2026-08-18T02:35:36Z",
+      "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=35595",
+      "packages": [
+        {
+          "root": "sdk/servicegroups/arm-servicegroups",
+          "name": "@azure/arm-servicegroups",
+          "version": "1.0.0",
+          "apiVersions": [
+            {
+              "namespace": "Microsoft.Management",
+              "versions": [
+                "2026-08-01"
+              ]
+            }
+          ],
+          "state": "available"
+        }
+      ],
+      "checks": {
+        "failedCount": 0,
+        "qualification": "complete",
+        "observedCount": 14
+      },
+      "conflicts": false,
+      "completeness": {
+        "changedFiles": "complete",
+        "checks": "complete",
+        "metadata": "complete"
+      },
+      "warnings": []
+    },
+    {
+      "repository": "Azure/azure-sdk-for-js",
+      "number": 39740,
+      "url": "https://github.com/Azure/azure-sdk-for-js/pull/39740",
+      "title": "[AutoPR @azure-arm-migrate]-generated-from-SDK Generation - JS-6746544",
+      "draft": false,
+      "plane": "management",
+      "headSha": "759022bd358c0c4ff99c35bd1942fd7750646332",
+      "createdAt": "2026-08-26T06:53:39Z",
+      "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=36266",
+      "packages": [
+        {
+          "root": "sdk/migrate/arm-migrate",
+          "name": "@azure/arm-migrate",
+          "version": "3.0.0-beta.1",
+          "apiVersions": [
+            {
+              "namespace": "Microsoft.Migrate",
+              "versions": [
+                "2026-06-01-preview"
+              ]
+            }
+          ],
+          "state": "available"
+        }
+      ],
+      "checks": {
+        "failedCount": 0,
+        "qualification": "complete",
+        "observedCount": 128
+      },
+      "conflicts": true,
+      "completeness": {
+        "changedFiles": "complete",
+        "checks": "complete",
+        "metadata": "complete"
+      },
+      "warnings": []
+    },
+    {
+      "repository": "Azure/azure-sdk-for-js",
+      "number": 39794,
+      "url": "https://github.com/Azure/azure-sdk-for-js/pull/39794",
+      "title": "[AutoPR @azure-arm-dataprotection]-generated-from-SDK Generation - JS-6764681",
+      "draft": true,
+      "plane": "management",
+      "headSha": "7d4ec312a5921e44c8719426a99a5e97c4a59f98",
+      "createdAt": "2026-08-31T07:24:23Z",
+      "releasePlanUrl": null,
+      "packages": [
+        {
+          "root": "sdk/dataprotection/arm-dataprotection",
+          "name": "@azure/arm-dataprotection",
+          "version": "5.0.0-beta.2",
+          "apiVersions": [
+            {
+              "namespace": "Microsoft.DataProtection",
+              "versions": [
+                "2026-04-01-preview"
+              ]
+            }
+          ],
+          "state": "available"
+        }
+      ],
+      "checks": {
+        "failedCount": 0,
+        "qualification": "complete",
+        "observedCount": 14
+      },
+      "conflicts": true,
+      "completeness": {
+        "changedFiles": "complete",
+        "checks": "complete",
+        "metadata": "complete"
+      },
+      "warnings": []
+    },
+    {
+      "repository": "Azure/azure-sdk-for-js",
+      "number": 39746,
+      "url": "https://github.com/Azure/azure-sdk-for-js/pull/39746",
+      "title": "[AutoPR @azure-arm-storage]-generated-from-SDK Generation - JS-6764466",
+      "draft": false,
+      "plane": "management",
+      "headSha": "ad6507e3b790823886303d9c3947dd6925f88562",
+      "createdAt": "2026-08-26T20:07:30Z",
+      "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=36284",
+      "packages": [
+        {
+          "root": "sdk/eventhub/arm-eventhub",
+          "name": "@azure/arm-eventhub",
+          "version": "6.0.0",
+          "apiVersions": [
+            {
+              "namespace": "Microsoft.EventHub",
+              "versions": [
+                "2026-01-01"
+              ]
+            }
+          ],
+          "state": "available"
+        },
+        {
+          "root": "sdk/storage/arm-storage",
+          "name": "@azure/arm-storage",
+          "version": "20.2.0",
+          "apiVersions": [
+            {
+              "namespace": "Microsoft.Storage",
+              "versions": [
+                "2026-06-01"
+              ]
+            }
+          ],
+          "state": "available"
+        }
+      ],
+      "checks": {
+        "failedCount": 0,
+        "qualification": "complete",
+        "observedCount": 15
+      },
+      "conflicts": true,
+      "completeness": {
+        "changedFiles": "complete",
+        "checks": "complete",
+        "metadata": "complete"
+      },
+      "warnings": []
+    },
+    {
+      "repository": "Azure/azure-sdk-for-js",
+      "number": 39731,
+      "url": "https://github.com/Azure/azure-sdk-for-js/pull/39731",
+      "title": "[AutoPR @azure-iot-device-registry-software-update]-generated-from-SDK Generation - JS-6744503",
+      "draft": false,
+      "plane": "data",
+      "headSha": "ad20c2c6ccc8fa00186e1a4112aa275229963b44",
+      "createdAt": "2026-08-25T21:06:03Z",
+      "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=36134",
+      "packages": [
+        {
+          "root": "sdk/deviceregistry/iot-device-registry-software-update",
+          "name": "@azure/iot-device-registry-software-update",
+          "version": "1.0.0-beta.1",
+          "apiVersions": [
+            {
+              "namespace": "DeviceRegistrySoftwareUpdateClient",
+              "versions": [
+                "2026-11-02-preview"
+              ]
+            }
+          ],
+          "state": "available"
+        }
+      ],
+      "checks": {
+        "failedCount": 2,
+        "qualification": "complete",
+        "observedCount": 81
+      },
+      "conflicts": true,
+      "completeness": {
+        "changedFiles": "complete",
+        "checks": "complete",
+        "metadata": "complete"
+      },
+      "warnings": []
+    },
+    {
+      "repository": "Azure/azure-sdk-for-js",
+      "number": 39708,
+      "url": "https://github.com/Azure/azure-sdk-for-js/pull/39708",
+      "title": "[AutoPR @azure-arm-playwright]-generated-from-SDK Generation - JS-6737475",
+      "draft": false,
+      "plane": "management",
+      "headSha": "76a3658a5f969f20a652c1539c001d0b903a11f1",
+      "createdAt": "2026-08-24T13:52:25Z",
+      "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=36244",
+      "packages": [
+        {
+          "root": "sdk/playwright/arm-playwright",
+          "name": "@azure/arm-playwright",
+          "version": "1.1.0-beta.2",
+          "apiVersions": [
+            {
+              "namespace": "Playwright.Management",
+              "versions": [
+                "2026-08-01-preview"
+              ]
+            }
+          ],
+          "state": "available"
+        }
+      ],
+      "checks": {
+        "failedCount": 0,
+        "qualification": "complete",
+        "observedCount": 194
+      },
+      "conflicts": false,
+      "completeness": {
+        "changedFiles": "complete",
+        "checks": "complete",
+        "metadata": "complete"
+      },
+      "warnings": []
+    },
+    {
+      "repository": "Azure/azure-sdk-for-js",
+      "number": 39680,
+      "url": "https://github.com/Azure/azure-sdk-for-js/pull/39680",
+      "title": "[AutoPR @azure-arm-quota]-generated-from-SDK Generation - JS-6739881",
+      "draft": false,
+      "plane": "management",
+      "headSha": "be46e333444913754996b04b7b8c832e3505da49",
+      "createdAt": "2026-08-20T15:25:54Z",
+      "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=36140",
+      "packages": [
+        {
+          "root": "sdk/quota/arm-quota",
+          "name": "@azure/arm-quota",
+          "version": "2.1.0-beta.1",
+          "apiVersions": [
+            {
+              "namespace": "Microsoft.Quota",
+              "versions": [
+                "2026-09-01-preview"
+              ]
+            }
+          ],
+          "state": "available"
+        }
+      ],
+      "checks": {
+        "failedCount": 0,
+        "qualification": "complete",
+        "observedCount": 15
+      },
+      "conflicts": false,
+      "completeness": {
+        "changedFiles": "complete",
+        "checks": "complete",
+        "metadata": "complete"
+      },
+      "warnings": []
+    },
+    {
+      "repository": "Azure/azure-sdk-for-js",
+      "number": 39694,
+      "url": "https://github.com/Azure/azure-sdk-for-js/pull/39694",
+      "title": "[AutoPR @azure-arm-hybridconnectivity]-generated-from-SDK Generation - JS-6732171",
+      "draft": false,
+      "plane": "management",
+      "headSha": "f26652ca03532dc92f502b71977cb2b3f5e6c02f",
+      "createdAt": "2026-08-21T18:48:40Z",
+      "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=36231",
+      "packages": [
+        {
+          "root": "sdk/hybridconnectivity/arm-hybridconnectivity",
+          "name": "@azure/arm-hybridconnectivity",
+          "version": "2.0.0",
+          "apiVersions": [
+            {
+              "namespace": "Microsoft.HybridConnectivity",
+              "versions": [
+                "2027-01-01"
+              ]
+            }
+          ],
+          "state": "available"
+        }
+      ],
+      "checks": {
+        "failedCount": 0,
+        "qualification": "complete",
+        "observedCount": 16
+      },
+      "conflicts": false,
+      "completeness": {
+        "changedFiles": "complete",
+        "checks": "complete",
+        "metadata": "complete"
+      },
+      "warnings": []
+    },
+    {
+      "repository": "Azure/azure-sdk-for-js",
+      "number": 39697,
+      "url": "https://github.com/Azure/azure-sdk-for-js/pull/39697",
+      "title": "[AutoPR @azure-arm-iotfirmwaredefense]-generated-from-SDK Generation - JS-6732593",
+      "draft": false,
+      "plane": "management",
+      "headSha": "0271c796d4ec67e4b54ccf2f2e7d8b01391aa452",
+      "createdAt": "2026-08-21T20:02:04Z",
+      "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=36233",
+      "packages": [
+        {
+          "root": "sdk/iotfirmwaredefense/arm-iotfirmwaredefense",
+          "name": "@azure/arm-iotfirmwaredefense",
+          "version": "2.1.0-beta.1",
+          "apiVersions": [
+            {
+              "namespace": "Microsoft.IoTFirmwareDefense",
+              "versions": [
+                "2026-06-01-preview"
+              ]
+            }
+          ],
+          "state": "available"
+        }
+      ],
+      "checks": {
+        "failedCount": 0,
+        "qualification": "complete",
+        "observedCount": 14
+      },
+      "conflicts": false,
+      "completeness": {
+        "changedFiles": "complete",
+        "checks": "complete",
+        "metadata": "complete"
+      },
+      "warnings": []
+    },
+    {
+      "repository": "Azure/azure-sdk-for-js",
+      "number": 39684,
+      "url": "https://github.com/Azure/azure-sdk-for-js/pull/39684",
+      "title": "[AutoPR @azure-arm-cosmosdb]-generated-from-SDK Generation - JS-6726933",
+      "draft": false,
+      "plane": "management",
+      "headSha": "0a8deece11576350034aed224a57141f52167cf1",
+      "createdAt": "2026-08-20T19:16:00Z",
+      "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=36189",
+      "packages": [
+        {
+          "root": "sdk/cosmosdb/arm-cosmosdb",
+          "name": "@azure/arm-cosmosdb",
+          "version": "17.1.0-beta.1",
+          "apiVersions": [
+            {
+              "namespace": "Microsoft.DocumentDB",
+              "versions": [
+                "2026-04-01-preview"
+              ]
+            }
+          ],
+          "state": "available"
+        }
+      ],
+      "checks": {
+        "failedCount": 0,
+        "qualification": "complete",
+        "observedCount": 192
+      },
+      "conflicts": true,
+      "completeness": {
+        "changedFiles": "complete",
+        "checks": "complete",
+        "metadata": "complete"
+      },
+      "warnings": []
+    },
+    {
+      "repository": "Azure/azure-sdk-for-js",
+      "number": 39686,
+      "url": "https://github.com/Azure/azure-sdk-for-js/pull/39686",
+      "title": "[AutoPR @azure-arm-cdn]-generated-from-SDK Generation - JS-6727893",
+      "draft": false,
+      "plane": "management",
+      "headSha": "dd766d4206c3d21dc58b81fc93f15ef7548ced64",
+      "createdAt": "2026-08-20T22:52:27Z",
+      "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=36194",
+      "packages": [
+        {
+          "root": "sdk/cdn/arm-cdn",
+          "name": "@azure/arm-cdn",
+          "version": "10.1.0",
+          "apiVersions": [
+            {
+              "namespace": "Microsoft.Cdn",
+              "versions": [
+                "2026-07-01"
+              ]
+            }
+          ],
+          "state": "available"
+        }
+      ],
+      "checks": {
+        "failedCount": 0,
+        "qualification": "complete",
+        "observedCount": 14
+      },
+      "conflicts": true,
+      "completeness": {
+        "changedFiles": "complete",
+        "checks": "complete",
+        "metadata": "complete"
+      },
+      "warnings": []
+    },
+    {
+      "repository": "Azure/azure-sdk-for-js",
+      "number": 39669,
+      "url": "https://github.com/Azure/azure-sdk-for-js/pull/39669",
+      "title": "[AutoPR @azure-arm-machinelearning]-generated-from-SDK Generation - JS-6722077",
+      "draft": false,
+      "plane": "management",
+      "headSha": "cfd2253fb5d367fdf518519e07b7a2de3be8f7a2",
+      "createdAt": "2026-08-19T21:28:40Z",
+      "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=36147",
+      "packages": [
+        {
+          "root": "sdk/machinelearning/arm-machinelearning",
+          "name": "@azure/arm-machinelearning",
+          "version": "4.0.0",
+          "apiVersions": [
+            {
+              "namespace": "Microsoft.MachineLearningServices",
+              "versions": [
+                "2026-07-01"
+              ]
+            }
+          ],
+          "state": "available"
+        }
+      ],
+      "checks": {
+        "failedCount": 0,
+        "qualification": "complete",
+        "observedCount": 13
+      },
+      "conflicts": true,
+      "completeness": {
+        "changedFiles": "complete",
+        "checks": "complete",
+        "metadata": "complete"
+      },
+      "warnings": []
+    },
+    {
+      "repository": "Azure/azure-sdk-for-js",
+      "number": 39618,
+      "url": "https://github.com/Azure/azure-sdk-for-js/pull/39618",
+      "title": "[AutoPR @azure-arm-consumption]-generated-from-SDK Generation - JS-6707978",
+      "draft": false,
+      "plane": "management",
+      "headSha": "74a2bb4a9c4c48a9c06c5f51e399e310e20860f5",
+      "createdAt": "2026-08-14T21:58:23Z",
+      "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=36087",
+      "packages": [
+        {
+          "root": "sdk/consumption/arm-consumption",
+          "name": "@azure/arm-consumption",
+          "version": "10.1.0",
+          "apiVersions": [
+            {
+              "namespace": "Microsoft.Consumption",
+              "versions": [
+                "2026-06-01"
+              ]
+            }
+          ],
+          "state": "available"
+        }
+      ],
+      "checks": {
+        "failedCount": 0,
+        "qualification": "complete",
+        "observedCount": 71
+      },
+      "conflicts": false,
+      "completeness": {
+        "changedFiles": "complete",
+        "checks": "complete",
+        "metadata": "complete"
+      },
+      "warnings": []
+    },
+    {
+      "repository": "Azure/azure-sdk-for-js",
+      "number": 39565,
+      "url": "https://github.com/Azure/azure-sdk-for-js/pull/39565",
+      "title": "[AutoPR @azure-arm-napsteromniagentapi]-generated-from-SDK Generation - JS-6690001",
+      "draft": false,
+      "plane": "management",
+      "headSha": "f57f7b9cd9da7c0b88fbe513690bcab85786d97e",
+      "createdAt": "2026-08-12T05:50:41Z",
+      "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=36000",
+      "packages": [
+        {
+          "root": "sdk/napsteromniagentapi/arm-napsteromniagentapi",
+          "name": "@azure/arm-napsteromniagentapi",
+          "version": "1.0.0",
+          "apiVersions": [
+            {
+              "namespace": "Napster.CompanionAPI",
+              "versions": [
+                "2026-08-11"
+              ]
+            }
+          ],
+          "state": "available"
+        }
+      ],
+      "checks": {
+        "failedCount": 1,
+        "qualification": "complete",
+        "observedCount": 303
+      },
+      "conflicts": false,
+      "completeness": {
+        "changedFiles": "complete",
+        "checks": "complete",
+        "metadata": "complete"
+      },
+      "warnings": []
+    },
+    {
+      "repository": "Azure/azure-sdk-for-js",
+      "number": 39561,
+      "url": "https://github.com/Azure/azure-sdk-for-js/pull/39561",
+      "title": "[AutoPR @azure-arm-costmanagement]-generated-from-SDK Generation - JS-6689521",
+      "draft": false,
+      "plane": "management",
+      "headSha": "5db26b043146e385ad466c28d02936cf42733e78",
+      "createdAt": "2026-08-11T17:13:58Z",
+      "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=35986",
+      "packages": [
+        {
+          "root": "sdk/cost-management/arm-costmanagement",
+          "name": "@azure/arm-costmanagement",
+          "version": "1.1.0",
+          "apiVersions": [
+            {
+              "namespace": "Microsoft.CostManagement",
+              "versions": [
+                "2026-06-01"
+              ]
+            }
+          ],
+          "state": "available"
+        }
+      ],
+      "checks": {
+        "failedCount": 0,
+        "qualification": "complete",
+        "observedCount": 13
+      },
+      "conflicts": false,
+      "completeness": {
+        "changedFiles": "complete",
+        "checks": "complete",
+        "metadata": "complete"
+      },
+      "warnings": []
+    },
+    {
+      "repository": "Azure/azure-sdk-for-js",
+      "number": 39546,
+      "url": "https://github.com/Azure/azure-sdk-for-js/pull/39546",
+      "title": "[AutoPR @azure-arm-paloaltonetworksngfw]-generated-from-SDK Generation - JS-6680037",
+      "draft": false,
+      "plane": "management",
+      "headSha": "f4a632a21d0cb8d9b179d201e0f7f0d8d5fae88b",
+      "createdAt": "2026-08-10T10:57:36Z",
+      "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=35972",
+      "packages": [
+        {
+          "root": "sdk/paloaltonetworksngfw/arm-paloaltonetworksngfw",
+          "name": "@azure/arm-paloaltonetworksngfw",
+          "version": "2.0.0-beta.2",
+          "apiVersions": [
+            {
+              "namespace": "PaloAltoNetworks.Cloudngfw",
+              "versions": [
+                "2026-07-29-preview"
+              ]
+            }
+          ],
+          "state": "available"
+        }
+      ],
+      "checks": {
+        "failedCount": 1,
+        "qualification": "complete",
+        "observedCount": 248
+      },
+      "conflicts": true,
+      "completeness": {
+        "changedFiles": "complete",
+        "checks": "complete",
+        "metadata": "complete"
+      },
+      "warnings": []
+    },
+    {
+      "repository": "Azure/azure-sdk-for-js",
+      "number": 39541,
+      "url": "https://github.com/Azure/azure-sdk-for-js/pull/39541",
+      "title": "[AutoPR @azure-arm-operationalinsights]-generated-from-SDK Generation - JS-6677927",
+      "draft": false,
+      "plane": "management",
+      "headSha": "f236e79a27e25e369cf01a7cbf3c143d6722a2de",
+      "createdAt": "2026-08-09T11:21:35Z",
+      "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=35969",
+      "packages": [
+        {
+          "root": "sdk/operationalinsights/arm-operationalinsights",
+          "name": "@azure/arm-operationalinsights",
+          "version": "11.1.0",
+          "apiVersions": [
+            {
+              "namespace": "Microsoft.OperationalInsights",
+              "versions": [
+                "2026-03-01"
+              ]
+            }
+          ],
+          "state": "available"
+        }
+      ],
+      "checks": {
+        "failedCount": 0,
+        "qualification": "complete",
+        "observedCount": 13
+      },
+      "conflicts": true,
+      "completeness": {
+        "changedFiles": "complete",
+        "checks": "complete",
+        "metadata": "complete"
+      },
+      "warnings": []
+    },
+    {
+      "repository": "Azure/azure-sdk-for-js",
+      "number": 39365,
+      "url": "https://github.com/Azure/azure-sdk-for-js/pull/39365",
+      "title": "[AutoPR @azure-arm-servicebus]-generated-from-SDK Generation - JS-6671694",
+      "draft": false,
+      "plane": "management",
+      "headSha": "158c943cb8fd087a66691d4aae3b880f36f27cc8",
+      "createdAt": "2026-07-22T19:04:59Z",
+      "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=35433",
+      "packages": [
+        {
+          "root": "sdk/servicebus/arm-servicebus",
+          "name": "@azure/arm-servicebus",
+          "version": "8.0.0-beta.1",
+          "apiVersions": [
+            {
+              "namespace": "Microsoft.ServiceBus",
+              "versions": [
+                "2026-07-01-preview"
+              ]
+            }
+          ],
+          "state": "available"
+        }
+      ],
+      "checks": {
+        "failedCount": 1,
+        "qualification": "complete",
+        "observedCount": 131
+      },
+      "conflicts": true,
+      "completeness": {
+        "changedFiles": "complete",
+        "checks": "complete",
+        "metadata": "complete"
+      },
+      "warnings": []
+    },
+    {
+      "repository": "Azure/azure-sdk-for-js",
+      "number": 39374,
+      "url": "https://github.com/Azure/azure-sdk-for-js/pull/39374",
+      "title": "[AutoPR @azure-arm-containerinstance]-generated-from-SDK Generation - JS-6605344",
+      "draft": false,
+      "plane": "management",
+      "headSha": "1fe798e8af64432e7ddcd668096d75e4a157cd23",
+      "createdAt": "2026-07-23T02:27:10Z",
+      "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=35440",
+      "packages": [
+        {
+          "root": "sdk/containerinstance/arm-containerinstance",
+          "name": "@azure/arm-containerinstance",
+          "version": "10.0.0-beta.2",
+          "apiVersions": [
+            {
+              "namespace": "Microsoft.ContainerInstance",
+              "versions": [
+                "2026-08-01-preview"
+              ]
+            }
+          ],
+          "state": "available"
+        }
+      ],
+      "checks": {
+        "failedCount": 0,
+        "qualification": "complete",
+        "observedCount": 14
+      },
+      "conflicts": false,
+      "completeness": {
+        "changedFiles": "complete",
+        "checks": "complete",
+        "metadata": "complete"
+      },
+      "warnings": []
+    },
+    {
+      "repository": "Azure/azure-sdk-for-js",
+      "number": 39362,
+      "url": "https://github.com/Azure/azure-sdk-for-js/pull/39362",
+      "title": "[AutoPR @azure-arm-machinelearning]-generated-from-SDK Generation - JS-6635636",
+      "draft": false,
+      "plane": "management",
+      "headSha": "22cf4aff14af982dbe6bfb6e22348e98f8337fdb",
+      "createdAt": "2026-07-22T09:15:42Z",
+      "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=35305",
+      "packages": [
+        {
+          "root": "sdk/machinelearning/arm-machinelearning",
+          "name": "@azure/arm-machinelearning",
+          "version": "4.0.0-beta.2",
+          "apiVersions": [
+            {
+              "namespace": "Microsoft.MachineLearningServices",
+              "versions": [
+                "2026-05-15-preview"
+              ]
+            }
+          ],
+          "state": "available"
+        }
+      ],
+      "checks": {
+        "failedCount": 0,
+        "qualification": "complete",
+        "observedCount": 70
+      },
+      "conflicts": false,
+      "completeness": {
+        "changedFiles": "complete",
+        "checks": "complete",
+        "metadata": "complete"
+      },
+      "warnings": []
+    },
+    {
+      "repository": "Azure/azure-sdk-for-js",
+      "number": 39373,
+      "url": "https://github.com/Azure/azure-sdk-for-js/pull/39373",
+      "title": "[AutoPR @azure-arm-devopsinfrastructure]-generated-from-SDK Generation - JS-6632648",
+      "draft": false,
+      "plane": "management",
+      "headSha": "1033becaa20955916bef4c7945316282ecb9d808",
+      "createdAt": "2026-07-23T01:19:10Z",
+      "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=35438",
+      "packages": [
+        {
+          "root": "sdk/devopsinfrastructure/arm-devopsinfrastructure",
+          "name": "@azure/arm-devopsinfrastructure",
+          "version": "2.0.0-beta.1",
+          "apiVersions": [
+            {
+              "namespace": "Microsoft.DevOpsInfrastructure",
+              "versions": [
+                "2026-07-03-preview"
+              ]
+            }
+          ],
+          "state": "available"
+        }
+      ],
+      "checks": {
+        "failedCount": 0,
+        "qualification": "complete",
+        "observedCount": 72
+      },
+      "conflicts": false,
+      "completeness": {
+        "changedFiles": "complete",
+        "checks": "complete",
+        "metadata": "complete"
+      },
+      "warnings": []
+    },
+    {
+      "repository": "Azure/azure-sdk-for-js",
+      "number": 39434,
+      "url": "https://github.com/Azure/azure-sdk-for-js/pull/39434",
+      "title": "[AutoPR @azure-arm-mongocluster]-generated-from-SDK Generation - JS-6627027",
+      "draft": false,
+      "plane": "management",
+      "headSha": "c58684950d5b95956ec763c2aa148441906bf1ed",
+      "createdAt": "2026-07-28T10:57:10Z",
+      "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=35659",
+      "packages": [
+        {
+          "root": "sdk/mongocluster/arm-mongocluster",
+          "name": "@azure/arm-mongocluster",
+          "version": "1.3.0-beta.1",
+          "apiVersions": [
+            {
+              "namespace": "Microsoft.DocumentDB",
+              "versions": [
+                "2026-06-15-preview"
+              ]
+            }
+          ],
+          "state": "available"
+        }
+      ],
+      "checks": {
+        "failedCount": 0,
+        "qualification": "complete",
+        "observedCount": 14
+      },
+      "conflicts": false,
+      "completeness": {
+        "changedFiles": "complete",
+        "checks": "complete",
+        "metadata": "complete"
+      },
+      "warnings": []
+    },
+    {
+      "repository": "Azure/azure-sdk-for-js",
+      "number": 39498,
+      "url": "https://github.com/Azure/azure-sdk-for-js/pull/39498",
+      "title": "[AutoPR @azure-arm-cognitiveservices]-generated-from-SDK Generation - JS-6654555",
+      "draft": false,
+      "plane": "management",
+      "headSha": "7d42bcadd35046d2a43e75126267cfdc7d70243f",
+      "createdAt": "2026-08-03T22:28:43Z",
+      "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=35847",
+      "packages": [
+        {
+          "root": "sdk/cognitiveservices/arm-cognitiveservices",
+          "name": "@azure/arm-cognitiveservices",
+          "version": "9.0.0",
+          "apiVersions": [
+            {
+              "namespace": "Microsoft.CognitiveServices",
+              "versions": [
+                "2026-07-01"
+              ]
+            }
+          ],
+          "state": "available"
+        }
+      ],
+      "checks": {
+        "failedCount": 0,
+        "qualification": "complete",
+        "observedCount": 13
+      },
+      "conflicts": true,
+      "completeness": {
+        "changedFiles": "complete",
+        "checks": "complete",
+        "metadata": "complete"
+      },
+      "warnings": []
+    },
+    {
+      "repository": "Azure/azure-sdk-for-js",
+      "number": 39346,
+      "url": "https://github.com/Azure/azure-sdk-for-js/pull/39346",
+      "title": "[AutoPR @azure-arm-keyvault]-generated-from-SDK Generation - JS-6678703",
+      "draft": false,
+      "plane": "management",
+      "headSha": "a535f44156daea0ca4483ca7eb71be0a663a9c97",
+      "createdAt": "2026-07-21T10:02:03Z",
+      "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=34988",
+      "packages": [
+        {
+          "root": "sdk/keyvault/arm-keyvault",
+          "name": "@azure/arm-keyvault",
+          "version": "6.0.0-beta.1",
+          "apiVersions": [
+            {
+              "namespace": "Microsoft.KeyVault",
+              "versions": [
+                "2026-03-01-preview"
+              ]
+            }
+          ],
+          "state": "available"
+        }
+      ],
+      "checks": {
+        "failedCount": 0,
+        "qualification": "complete",
+        "observedCount": 15
+      },
+      "conflicts": true,
+      "completeness": {
+        "changedFiles": "complete",
+        "checks": "complete",
+        "metadata": "complete"
+      },
+      "warnings": []
+    },
+    {
+      "repository": "Azure/azure-sdk-for-js",
+      "number": 39474,
+      "url": "https://github.com/Azure/azure-sdk-for-js/pull/39474",
+      "title": "[AutoPR @azure-rest-ai-content-safety]-generated-from-SDK Generation - JS-6652878",
+      "draft": false,
+      "plane": "data",
+      "headSha": "be10380f416838036b3143511ff58b2bfdfe1ff3",
+      "createdAt": "2026-07-30T17:24:59Z",
+      "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=2242",
+      "packages": [
+        {
+          "root": "sdk/contentsafety/ai-content-safety-rest",
+          "name": "@azure-rest/ai-content-safety",
+          "version": "2.0.0-beta.1",
+          "apiVersions": [
+            {
+              "namespace": "ContentSafety",
+              "versions": [
+                "2026-07-01-preview"
+              ]
+            }
+          ],
+          "state": "available"
+        }
+      ],
+      "checks": {
+        "failedCount": 0,
+        "qualification": "complete",
+        "observedCount": 14
+      },
+      "conflicts": true,
+      "completeness": {
+        "changedFiles": "complete",
+        "checks": "complete",
+        "metadata": "complete"
+      },
+      "warnings": []
+    },
+    {
+      "repository": "Azure/azure-sdk-for-js",
+      "number": 39403,
+      "url": "https://github.com/Azure/azure-sdk-for-js/pull/39403",
+      "title": "[AutoPR @azure-arm-relay]-generated-from-SDK Generation - JS-6671870",
+      "draft": false,
+      "plane": "management",
+      "headSha": "32a2088c208443ed8b1beeea2885e0bff4cf7812",
+      "createdAt": "2026-07-25T17:45:59Z",
+      "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=35569",
+      "packages": [
+        {
+          "root": "sdk/relay/arm-relay",
+          "name": "@azure/arm-relay",
+          "version": "4.1.0",
+          "apiVersions": [
+            {
+              "namespace": "Microsoft.Relay",
+              "versions": [
+                "2026-01-01"
+              ]
+            }
+          ],
+          "state": "available"
+        }
+      ],
+      "checks": {
+        "failedCount": 0,
+        "qualification": "complete",
+        "observedCount": 14
+      },
+      "conflicts": true,
+      "completeness": {
+        "changedFiles": "complete",
+        "checks": "complete",
+        "metadata": "complete"
+      },
+      "warnings": []
+    },
+    {
+      "repository": "Azure/azure-sdk-for-js",
+      "number": 39381,
+      "url": "https://github.com/Azure/azure-sdk-for-js/pull/39381",
+      "title": "[AutoPR @azure-arm-storagemover]-generated-from-SDK Generation - JS-6608674",
+      "draft": false,
+      "plane": "management",
+      "headSha": "1b8bc3d75b2cc0b1b1efae0ba844b60ef55da1b0",
+      "createdAt": "2026-07-23T16:43:59Z",
+      "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=35443",
+      "packages": [
+        {
+          "root": "sdk/storagemover/arm-storagemover",
+          "name": "@azure/arm-storagemover",
+          "version": "3.2.0",
+          "apiVersions": [
+            {
+              "namespace": "Microsoft.StorageMover",
+              "versions": [
+                "2026-05-01"
+              ]
+            }
+          ],
+          "state": "available"
+        }
+      ],
+      "checks": {
+        "failedCount": 4,
+        "qualification": "complete",
+        "observedCount": 16
+      },
+      "conflicts": false,
+      "completeness": {
+        "changedFiles": "complete",
+        "checks": "complete",
+        "metadata": "complete"
+      },
+      "warnings": []
+    },
+    {
+      "repository": "Azure/azure-sdk-for-js",
+      "number": 39515,
+      "url": "https://github.com/Azure/azure-sdk-for-js/pull/39515",
+      "title": "[AutoPR @azure-arm-sql]-generated-from-SDK Generation - JS-6662434",
+      "draft": false,
+      "plane": "management",
+      "headSha": "a0ffc29576124b61cf567c76a5532d232dcbd3d0",
+      "createdAt": "2026-08-05T14:44:47Z",
+      "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=35926",
+      "packages": [
+        {
+          "root": "sdk/sql/arm-sql",
+          "name": "@azure/arm-sql",
+          "version": "12.0.0-beta.1",
+          "apiVersions": [
+            {
+              "namespace": "Microsoft.Sql",
+              "versions": [
+                "2025-08-01-preview"
+              ]
+            }
+          ],
+          "state": "available"
+        }
+      ],
+      "checks": {
+        "failedCount": 0,
+        "qualification": "complete",
+        "observedCount": 189
+      },
+      "conflicts": false,
+      "completeness": {
+        "changedFiles": "complete",
+        "checks": "complete",
+        "metadata": "complete"
+      },
+      "warnings": []
+    },
+    {
+      "repository": "Azure/azure-sdk-for-js",
+      "number": 39501,
+      "url": "https://github.com/Azure/azure-sdk-for-js/pull/39501",
+      "title": "[AutoPR @azure-arm-compute]-generated-from-SDK Generation - JS-6653997",
+      "draft": true,
+      "plane": "management",
+      "headSha": "2fb1b2a4f5dd2441541b78cf026b527d3b601d83",
+      "createdAt": "2026-08-04T02:01:26Z",
+      "releasePlanUrl": null,
+      "packages": [
+        {
+          "root": "sdk/compute/arm-compute",
+          "name": "@azure/arm-compute",
+          "version": "25.0.0",
+          "apiVersions": [
+            {
+              "namespace": "Compute",
+              "versions": [
+                "2026-03-01"
+              ]
+            },
+            {
+              "namespace": "ComputeDisk",
+              "versions": [
+                "2026-03-02"
+              ]
+            },
+            {
+              "namespace": "ComputeGallery",
+              "versions": [
+                "2025-12-03"
+              ]
+            },
+            {
+              "namespace": "ComputeSku",
+              "versions": [
+                "2021-07-01"
+              ]
+            }
+          ],
+          "state": "available"
+        }
+      ],
+      "checks": {
+        "failedCount": 0,
+        "qualification": "complete",
+        "observedCount": 71
+      },
+      "conflicts": true,
+      "completeness": {
+        "changedFiles": "complete",
+        "checks": "complete",
+        "metadata": "complete"
+      },
+      "warnings": []
+    },
+    {
+      "repository": "Azure/azure-sdk-for-js",
+      "number": 39366,
+      "url": "https://github.com/Azure/azure-sdk-for-js/pull/39366",
+      "title": "[AutoPR @azure-arm-eventhub]-generated-from-SDK Generation - JS-6632569",
+      "draft": false,
+      "plane": "management",
+      "headSha": "51b81a2185824f8694d044886a7c8160c6afba51",
+      "createdAt": "2026-07-22T19:05:47Z",
+      "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=35435",
+      "packages": [
+        {
+          "root": "sdk/eventhub/arm-eventhub",
+          "name": "@azure/arm-eventhub",
+          "version": "7.0.0-beta.1",
+          "apiVersions": [
+            {
+              "namespace": "Microsoft.EventHub",
+              "versions": [
+                "2026-07-01-preview"
+              ]
+            }
+          ],
+          "state": "available"
+        }
+      ],
+      "checks": {
+        "failedCount": 0,
+        "qualification": "complete",
+        "observedCount": 71
+      },
+      "conflicts": false,
+      "completeness": {
+        "changedFiles": "complete",
+        "checks": "complete",
+        "metadata": "complete"
+      },
+      "warnings": []
+    },
+    {
+      "repository": "Azure/azure-sdk-for-js",
+      "number": 39239,
+      "url": "https://github.com/Azure/azure-sdk-for-js/pull/39239",
+      "title": "[AutoPR @azure-arm-containerinstance]-generated-from-SDK Generation - JS-6547220",
+      "draft": false,
+      "plane": "management",
+      "headSha": "cfdf4eb8363114e6c9afc4ef82298e195f0bcc4e",
+      "createdAt": "2026-07-10T18:35:37Z",
+      "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=35262",
+      "packages": [
+        {
+          "root": "sdk/containerinstance/arm-containerinstance",
+          "name": "@azure/arm-containerinstance",
+          "version": "10.0.0",
+          "apiVersions": [
+            {
+              "namespace": "Microsoft.ContainerInstance",
+              "versions": [
+                "2026-07-01"
+              ]
+            }
+          ],
+          "state": "available"
+        }
+      ],
+      "checks": {
+        "failedCount": 0,
+        "qualification": "complete",
+        "observedCount": 70
+      },
+      "conflicts": false,
+      "completeness": {
+        "changedFiles": "complete",
+        "checks": "complete",
+        "metadata": "complete"
+      },
+      "warnings": []
+    }
+  ]
+}
