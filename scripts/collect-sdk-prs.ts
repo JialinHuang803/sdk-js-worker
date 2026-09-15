@@ -9,6 +9,8 @@ import {
 } from "../src/data/contracts.ts";
 import {
   extractReleasePlanUrl,
+  isNamedAutoPrPackage,
+  isReleasePackageChange,
   packageRootsFromFiles,
   parsePackageMetadata,
   summarizeChecks,
@@ -250,29 +252,30 @@ async function getJsonFile(
 async function collectPackage(
   root: string,
   pull: PullDetails,
-): Promise<PackageMetadata> {
+): Promise<{ metadata: PackageMetadata; isRelease: boolean }> {
   const headRepository = pull.head.repo?.full_name;
   if (!headRepository) {
     return {
-      root,
-      name: null,
-      version: null,
-      apiVersions: [],
-      state: "missing",
-      note: "Head repository is unavailable.",
+      isRelease: false,
+      metadata: {
+        root,
+        name: null,
+        version: null,
+        apiVersions: [],
+        state: "missing",
+        note: "Head repository is unavailable.",
+      },
     };
   }
-  const packageJson = await getJsonFile(
-    headRepository,
-    `${root}/package.json`,
-    pull.head.sha,
-  );
-  if (!packageJson) {
-    const basePackage = await getJsonFile(
+  const [packageJson, basePackage] = await Promise.all([
+    getJsonFile(headRepository, `${root}/package.json`, pull.head.sha),
+    getJsonFile(
       pull.base.repo.full_name,
       `${root}/package.json`,
       pull.base.sha,
-    );
+    ),
+  ]);
+  if (!packageJson) {
     const baseMetadata = await getJsonFile(
       pull.base.repo.full_name,
       `${root}/metadata.json`,
@@ -280,18 +283,24 @@ async function collectPackage(
     );
     if (basePackage) {
       return {
-        ...parsePackageMetadata(root, basePackage, baseMetadata),
-        state: "removed",
-        note: "Package is removed or renamed by this pull request.",
+        isRelease: false,
+        metadata: {
+          ...parsePackageMetadata(root, basePackage, baseMetadata),
+          state: "removed",
+          note: "Package is removed or renamed by this pull request.",
+        },
       };
     }
     return {
-      root,
-      name: null,
-      version: null,
-      apiVersions: [],
-      state: "missing",
-      note: "No package.json found at the pull request head.",
+      isRelease: false,
+      metadata: {
+        root,
+        name: null,
+        version: null,
+        apiVersions: [],
+        state: "missing",
+        note: "No package.json found at the pull request head.",
+      },
     };
   }
   const metadataJson = await getJsonFile(
@@ -300,13 +309,18 @@ async function collectPackage(
     pull.head.sha,
   );
   const parsed = parsePackageMetadata(root, packageJson, metadataJson);
-  return metadataJson
-    ? parsed
-    : {
-        ...parsed,
-        state: "metadata-missing",
-        note: "No metadata.json found at the pull request head.",
-      };
+  return {
+    isRelease:
+      isReleasePackageChange(basePackage, packageJson) ||
+      isNamedAutoPrPackage(pull.title, packageJson),
+    metadata: metadataJson
+      ? parsed
+      : {
+          ...parsed,
+          state: "metadata-missing",
+          note: "No metadata.json found at the pull request head.",
+        },
+  };
 }
 
 async function collectPull(
@@ -328,21 +342,16 @@ async function collectPull(
   const packages: PackageMetadata[] = [];
   for (const root of roots) {
     try {
-      packages.push(await collectPackage(root, pull));
-    } catch (error) {
-      const message = error instanceof Error ? error.message : "Unknown metadata error";
-      packages.push({
-        root,
-        name: null,
-        version: null,
-        apiVersions: [],
-        state: "missing",
-        note: message,
-      });
+      const collected = await collectPackage(root, pull);
+      if (collected.isRelease) packages.push(collected.metadata);
+    } catch {
       warnings.push(`Metadata unavailable for ${root}.`);
     }
   }
   if (roots.length === 0) warnings.push("No SDK package roots were identified.");
+  if (roots.length > 0 && packages.length === 0) {
+    warnings.push("No version-bumped SDK packages were identified.");
+  }
   if (!reviewsComplete || reviewDecision === "unknown") {
     warnings.push("Required review status could not be collected.");
   }

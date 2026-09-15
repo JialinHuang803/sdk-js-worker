@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
   extractReleasePlanUrl,
+  isNamedAutoPrPackage,
+  isReleasePackageChange,
   packageRootsFromFiles,
   parsePackageMetadata,
   summarizeChecks,
@@ -53,6 +55,60 @@ describe("packageRootsFromFiles", () => {
       "sdk/new/new-package",
       "sdk/old/old-package",
     ]);
+  });
+});
+
+describe("isReleasePackageChange", () => {
+  it("includes version bumps and new packages", () => {
+    expect(
+      isReleasePackageChange(
+        { name: "@azure/arm-storage", version: "20.1.1" },
+        { name: "@azure/arm-storage", version: "20.2.0" },
+      ),
+    ).toBe(true);
+    expect(
+      isReleasePackageChange(null, {
+        name: "@azure/new-package",
+        version: "1.0.0",
+      }),
+    ).toBe(true);
+  });
+
+  it("excludes incidental edits without a version change", () => {
+    expect(
+      isReleasePackageChange(
+        { name: "@azure/arm-eventhub", version: "6.0.0" },
+        { name: "@azure/arm-eventhub", version: "6.0.0" },
+      ),
+    ).toBe(false);
+  });
+});
+
+describe("isNamedAutoPrPackage", () => {
+  it("matches canonical package names without including incidental packages", () => {
+    const title =
+      "[AutoPR @azure-arm-storage]-generated-from-SDK Generation - JS-6764466";
+    expect(
+      isNamedAutoPrPackage(title, {
+        name: "@azure/arm-storage",
+        version: "20.2.0",
+      }),
+    ).toBe(true);
+    expect(
+      isNamedAutoPrPackage(title, {
+        name: "@azure/arm-eventhub",
+        version: "6.0.0",
+      }),
+    ).toBe(false);
+  });
+
+  it("supports scoped Azure REST package names", () => {
+    expect(
+      isNamedAutoPrPackage(
+        "[AutoPR @azure-rest-ai-content-safety]-generated-from-SDK Generation",
+        { name: "@azure-rest/ai-content-safety", version: "1.0.3" },
+      ),
+    ).toBe(true);
   });
 });
 

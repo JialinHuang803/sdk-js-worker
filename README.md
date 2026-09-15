@@ -16,7 +16,7 @@ Each AutoPR row includes:
 
 - PR number, title, draft status, creation date, and age
 - management plane when the PR has the `Mgmt` label; data plane otherwise
-- affected package name and version from `package.json` at the current PR head
+- release package name and version from `package.json` at the current PR head
 - namespace-to-version values from the package's `metadata.json`
 - the public release-plan URL referenced in the PR body
 - failed check count across GitHub check runs and commit status contexts,
@@ -93,10 +93,14 @@ npm run build
 | Static snapshot | `public/data/sdk-prs.json` | Only data copied into the public site |
 
 The collector enumerates changed files (including rename origins) to discover
-package roots even when `package.json` and `metadata.json` themselves are
-unchanged. It reads metadata at the PR's head SHA and can fall back to the base
-revision to identify a removed package. Forks are read through the head
-repository. Missing files, removed packages, multi-package PRs, unknown
+candidate package roots, then compares each package version at the PR base and
+head. Only new or version-bumped packages—the packages actually being
+released—are displayed; incidental cross-package cleanup is excluded. When the
+current base already contains the same version, the collector falls back to an
+exact match between the AutoPR package token and the package's actual
+`package.json` name. It reads metadata at the PR's head SHA and can fall back to
+the base revision to identify a removed package. Forks are read through the head
+repository. Missing files, removed packages, multi-package releases, unknown
 mergeability, and API truncation become explicit states instead of aborting the
 whole dashboard.
 

@@ -128,6 +128,29 @@ export function packageRootsFromFiles(
   return [...roots].sort();
 }
 
+export function isReleasePackageChange(
+  basePackageJson: unknown,
+  headPackageJson: unknown,
+): boolean {
+  const headVersion = asRecord(headPackageJson)?.version;
+  if (typeof headVersion !== "string") return false;
+  const baseVersion = asRecord(basePackageJson)?.version;
+  return typeof baseVersion !== "string" || baseVersion !== headVersion;
+}
+
+export function isNamedAutoPrPackage(
+  title: string,
+  packageJson: unknown,
+): boolean {
+  const token = title.match(/^\[AutoPR\s+([^\]]+)\]/)?.[1];
+  const packageName = asRecord(packageJson)?.name;
+  return (
+    typeof token === "string" &&
+    typeof packageName === "string" &&
+    token === packageName.replace("/", "-")
+  );
+}
+
 export function parsePackageMetadata(
   root: string,
   packageJson: unknown,
