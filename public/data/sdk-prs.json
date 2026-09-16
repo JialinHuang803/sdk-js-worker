@@ -1,15 +1,15 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-09-16T02:17:11.075Z",
+  "generatedAt": "2026-09-16T02:43:15.169Z",
   "stale": false,
   "source": {
     "repository": "Azure/azure-sdk-for-js",
     "query": "state:open title-prefix:[AutoPR",
-    "fetchedAt": "2026-09-16T02:17:11.075Z"
+    "fetchedAt": "2026-09-16T02:43:15.169Z"
   },
   "inbox": {
-    "comparisonFrom": "2026-09-15T07:59:48.403Z",
-    "generatedAt": "2026-09-16T02:17:11.075Z",
+    "comparisonFrom": "2026-09-16T02:22:46.239Z",
+    "generatedAt": "2026-09-16T02:43:15.169Z",
     "baselineAvailable": true,
     "defaultPlane": "management",
     "items": [
@@ -17,197 +17,33 @@
         "repository": "Azure/azure-sdk-for-js",
         "pullRequestNumber": 39966,
         "reasons": [
-          "new-commit",
-          "new-comment",
           "review-needed"
         ],
         "activityAt": "2026-09-16T00:53:19Z",
-        "comments": [
-          {
-            "id": "review-comment:4021001366",
-            "kind": "review-comment",
-            "author": "huliang-microsoft",
-            "createdAt": "2026-09-15T23:08:37Z",
-            "url": "https://github.com/Azure/azure-sdk-for-js/pull/39966#discussion_r4021001366"
-          },
-          {
-            "id": "review-comment:4021003417",
-            "kind": "review-comment",
-            "author": "huliang-microsoft",
-            "createdAt": "2026-09-15T23:08:55Z",
-            "url": "https://github.com/Azure/azure-sdk-for-js/pull/39966#discussion_r4021003417"
-          },
-          {
-            "id": "review-comment:4021003566",
-            "kind": "review-comment",
-            "author": "huliang-microsoft",
-            "createdAt": "2026-09-15T23:08:57Z",
-            "url": "https://github.com/Azure/azure-sdk-for-js/pull/39966#discussion_r4021003566"
-          },
-          {
-            "id": "review-comment:4021003695",
-            "kind": "review-comment",
-            "author": "huliang-microsoft",
-            "createdAt": "2026-09-15T23:08:58Z",
-            "url": "https://github.com/Azure/azure-sdk-for-js/pull/39966#discussion_r4021003695"
-          },
-          {
-            "id": "review-comment:4021003791",
-            "kind": "review-comment",
-            "author": "huliang-microsoft",
-            "createdAt": "2026-09-15T23:08:59Z",
-            "url": "https://github.com/Azure/azure-sdk-for-js/pull/39966#discussion_r4021003791"
-          },
-          {
-            "id": "review-comment:4021003902",
-            "kind": "review-comment",
-            "author": "huliang-microsoft",
-            "createdAt": "2026-09-15T23:09:00Z",
-            "url": "https://github.com/Azure/azure-sdk-for-js/pull/39966#discussion_r4021003902"
-          },
-          {
-            "id": "review-comment:4021004007",
-            "kind": "review-comment",
-            "author": "huliang-microsoft",
-            "createdAt": "2026-09-15T23:09:01Z",
-            "url": "https://github.com/Azure/azure-sdk-for-js/pull/39966#discussion_r4021004007"
-          },
-          {
-            "id": "review-comment:4021005507",
-            "kind": "review-comment",
-            "author": "huliang-microsoft",
-            "createdAt": "2026-09-15T23:09:13Z",
-            "url": "https://github.com/Azure/azure-sdk-for-js/pull/39966#discussion_r4021005507"
-          },
-          {
-            "id": "review-comment:4021005680",
-            "kind": "review-comment",
-            "author": "huliang-microsoft",
-            "createdAt": "2026-09-15T23:09:15Z",
-            "url": "https://github.com/Azure/azure-sdk-for-js/pull/39966#discussion_r4021005680"
-          },
-          {
-            "id": "review-comment:4021005795",
-            "kind": "review-comment",
-            "author": "huliang-microsoft",
-            "createdAt": "2026-09-15T23:09:16Z",
-            "url": "https://github.com/Azure/azure-sdk-for-js/pull/39966#discussion_r4021005795"
-          },
-          {
-            "id": "review-comment:4021006907",
-            "kind": "review-comment",
-            "author": "huliang-microsoft",
-            "createdAt": "2026-09-15T23:09:26Z",
-            "url": "https://github.com/Azure/azure-sdk-for-js/pull/39966#discussion_r4021006907"
-          },
-          {
-            "id": "review-comment:4021007036",
-            "kind": "review-comment",
-            "author": "huliang-microsoft",
-            "createdAt": "2026-09-15T23:09:27Z",
-            "url": "https://github.com/Azure/azure-sdk-for-js/pull/39966#discussion_r4021007036"
-          },
-          {
-            "id": "review-comment:4021007161",
-            "kind": "review-comment",
-            "author": "huliang-microsoft",
-            "createdAt": "2026-09-15T23:09:28Z",
-            "url": "https://github.com/Azure/azure-sdk-for-js/pull/39966#discussion_r4021007161"
-          },
-          {
-            "id": "review-comment:4021007345",
-            "kind": "review-comment",
-            "author": "huliang-microsoft",
-            "createdAt": "2026-09-15T23:09:29Z",
-            "url": "https://github.com/Azure/azure-sdk-for-js/pull/39966#discussion_r4021007345"
-          },
-          {
-            "id": "review-comment:4021397158",
-            "kind": "review-comment",
-            "author": "huliang-microsoft",
-            "createdAt": "2026-09-16T00:19:35Z",
-            "url": "https://github.com/Azure/azure-sdk-for-js/pull/39966#discussion_r4021397158"
-          },
-          {
-            "id": "review-comment:4021522244",
-            "kind": "review-comment",
-            "author": "huliang-microsoft",
-            "createdAt": "2026-09-16T00:47:26Z",
-            "url": "https://github.com/Azure/azure-sdk-for-js/pull/39966#discussion_r4021522244"
-          }
-        ]
+        "comments": []
       },
       {
         "repository": "Azure/azure-sdk-for-js",
         "pullRequestNumber": 39898,
         "reasons": [
-          "new-commit",
-          "new-comment",
           "review-needed"
         ],
         "activityAt": "2026-09-15T23:35:22Z",
-        "comments": [
-          {
-            "id": "review-comment:3986956892",
-            "kind": "review-comment",
-            "author": "JohnRFraser",
-            "createdAt": "2026-09-11T07:43:14Z",
-            "url": "https://github.com/Azure/azure-sdk-for-js/pull/39898#discussion_r3986956892"
-          },
-          {
-            "id": "conversation:5687800899",
-            "kind": "conversation",
-            "author": "azure-pipelines[bot]",
-            "createdAt": "2026-09-15T20:42:16Z",
-            "url": "https://github.com/Azure/azure-sdk-for-js/pull/39898#issuecomment-5687800899"
-          },
-          {
-            "id": "review-comment:4020477378",
-            "kind": "review-comment",
-            "author": "JohnRFraser",
-            "createdAt": "2026-09-15T21:43:26Z",
-            "url": "https://github.com/Azure/azure-sdk-for-js/pull/39898#discussion_r4020477378"
-          },
-          {
-            "id": "review-comment:4020477541",
-            "kind": "review-comment",
-            "author": "JohnRFraser",
-            "createdAt": "2026-09-15T21:43:28Z",
-            "url": "https://github.com/Azure/azure-sdk-for-js/pull/39898#discussion_r4020477541"
-          },
-          {
-            "id": "review-comment:4020479312",
-            "kind": "review-comment",
-            "author": "JohnRFraser",
-            "createdAt": "2026-09-15T21:43:43Z",
-            "url": "https://github.com/Azure/azure-sdk-for-js/pull/39898#discussion_r4020479312"
-          }
-        ]
+        "comments": []
       },
       {
         "repository": "Azure/azure-sdk-for-js",
         "pullRequestNumber": 39977,
         "reasons": [
-          "new-pr",
-          "new-comment",
           "review-needed"
         ],
         "activityAt": "2026-09-15T18:36:22Z",
-        "comments": [
-          {
-            "id": "conversation:5685558692",
-            "kind": "conversation",
-            "author": "azure-pipelines[bot]",
-            "createdAt": "2026-09-15T18:12:38Z",
-            "url": "https://github.com/Azure/azure-sdk-for-js/pull/39977#issuecomment-5685558692"
-          }
-        ]
+        "comments": []
       },
       {
         "repository": "Azure/azure-sdk-for-js",
         "pullRequestNumber": 39434,
         "reasons": [
-          "new-commit",
           "ci-failure"
         ],
         "activityAt": "2026-09-15T18:26:20Z",
@@ -217,27 +53,16 @@
         "repository": "Azure/azure-sdk-for-js",
         "pullRequestNumber": 39975,
         "reasons": [
-          "new-pr",
-          "new-comment",
           "review-needed",
           "ci-failure"
         ],
         "activityAt": "2026-09-15T17:43:05Z",
-        "comments": [
-          {
-            "id": "conversation:5685053397",
-            "kind": "conversation",
-            "author": "azure-pipelines[bot]",
-            "createdAt": "2026-09-15T17:38:36Z",
-            "url": "https://github.com/Azure/azure-sdk-for-js/pull/39975#issuecomment-5685053397"
-          }
-        ]
+        "comments": []
       },
       {
         "repository": "Azure/azure-sdk-for-js",
         "pullRequestNumber": 39879,
         "reasons": [
-          "new-commit",
           "review-needed"
         ],
         "activityAt": "2026-09-15T18:02:15Z",
@@ -247,58 +72,28 @@
         "repository": "Azure/azure-sdk-for-js",
         "pullRequestNumber": 39969,
         "reasons": [
-          "new-pr",
-          "new-comment",
           "review-needed"
         ],
         "activityAt": "2026-09-15T09:09:14Z",
-        "comments": [
-          {
-            "id": "conversation:5677213411",
-            "kind": "conversation",
-            "author": "azure-pipelines[bot]",
-            "createdAt": "2026-09-15T08:34:20Z",
-            "url": "https://github.com/Azure/azure-sdk-for-js/pull/39969#issuecomment-5677213411"
-          }
-        ]
+        "comments": []
       },
       {
         "repository": "Azure/azure-sdk-for-js",
         "pullRequestNumber": 39970,
         "reasons": [
-          "new-pr",
-          "new-comment",
           "review-needed"
         ],
         "activityAt": "2026-09-15T09:06:29Z",
-        "comments": [
-          {
-            "id": "conversation:5677212531",
-            "kind": "conversation",
-            "author": "azure-pipelines[bot]",
-            "createdAt": "2026-09-15T08:34:16Z",
-            "url": "https://github.com/Azure/azure-sdk-for-js/pull/39970#issuecomment-5677212531"
-          }
-        ]
+        "comments": []
       },
       {
         "repository": "Azure/azure-sdk-for-js",
         "pullRequestNumber": 39968,
         "reasons": [
-          "new-pr",
-          "new-comment",
           "review-needed"
         ],
         "activityAt": "2026-09-15T09:06:17Z",
-        "comments": [
-          {
-            "id": "conversation:5677178492",
-            "kind": "conversation",
-            "author": "azure-pipelines[bot]",
-            "createdAt": "2026-09-15T08:31:23Z",
-            "url": "https://github.com/Azure/azure-sdk-for-js/pull/39968#issuecomment-5677178492"
-          }
-        ]
+        "comments": []
       },
       {
         "repository": "Azure/azure-sdk-for-js",

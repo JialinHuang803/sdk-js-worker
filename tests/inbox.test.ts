@@ -47,12 +47,14 @@ describe("comment author exclusion", () => {
     "JialinHuang803",
     "kazrael2119",
     "github-actions*",
+    "azure-pipelines*",
     "*copilot*",
   ];
 
   it("matches exact and wildcard patterns case-insensitively", () => {
     expect(isExcludedCommentAuthor("jialinhuang803", patterns)).toBe(true);
     expect(isExcludedCommentAuthor("github-actions[bot]", patterns)).toBe(true);
+    expect(isExcludedCommentAuthor("azure-pipelines[bot]", patterns)).toBe(true);
     expect(isExcludedCommentAuthor("copilot-pull-request-reviewer", patterns)).toBe(
       true,
     );

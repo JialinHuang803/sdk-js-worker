@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import type { ReactNode } from "react";
 import type {
   DashboardSnapshot,
   InboxReason,
@@ -13,7 +14,7 @@ const reasonLabels: Record<InboxReason, string> = {
   "new-commit": "New commit",
   "new-comment": "New comment",
   "review-needed": "Review needed",
-  "ci-failure": "CI help",
+  "ci-failure": "CI failure",
 };
 
 const activityReasons = new Set<InboxReason>([
@@ -21,6 +22,14 @@ const activityReasons = new Set<InboxReason>([
   "new-commit",
   "new-comment",
 ]);
+
+const reasonPriority: InboxReason[] = [
+  "new-commit",
+  "new-pr",
+  "new-comment",
+  "review-needed",
+  "ci-failure",
+];
 
 export function ReviewInbox({ snapshot }: { snapshot: DashboardSnapshot }) {
   const [plane, setPlane] = useState<Plane>(snapshot.inbox.defaultPlane);
@@ -85,10 +94,18 @@ export function ReviewInbox({ snapshot }: { snapshot: DashboardSnapshot }) {
       ) : (
         <div className="inbox-sections">
           {updated.length > 0 && (
-            <InboxSection title="Updated since last refresh" entries={updated} />
+            <InboxSection
+              title="New activity"
+              description="What changed since the last refresh"
+              entries={updated}
+            />
           )}
           {attention.length > 0 && (
-            <InboxSection title="Still needs attention" entries={attention} />
+            <InboxSection
+              title="Needs attention"
+              description="Open review and CI work without a new update"
+              entries={attention}
+            />
           )}
         </div>
       )}
@@ -124,59 +141,132 @@ function PlaneTab({
 
 function InboxSection({
   title,
+  description,
   entries,
 }: {
   title: string;
+  description: string;
   entries: Array<{ item: ReviewInboxItem; pull: PullRequestRecord }>;
 }) {
   return (
     <section className="inbox-section">
-      <h3>{title}</h3>
+      <div className="inbox-section__heading">
+        <h3>{title}</h3>
+        <span>{description}</span>
+      </div>
       <div className="inbox-list">
-        {entries.map(({ item, pull }) => (
-          <article className="inbox-card" key={`${item.repository}:${item.pullRequestNumber}`}>
-            <div className="inbox-card__main">
-              <a href={pull.url} target="_blank" rel="noreferrer">
-                #{pull.number} {pull.packages[0]?.name ?? pull.title}
-              </a>
-              <div className="badges">
-                {item.reasons.map((reason) => (
-                  <span className={`activity-badge activity-badge--${reason}`} key={reason}>
-                    {reasonLabels[reason]}
-                    {reason === "ci-failure" && pull.checks.failedCount
-                      ? ` · ${pull.checks.failedCount}`
-                      : ""}
+        {entries.map(({ item, pull }) => {
+          const primaryReason = getPrimaryReason(item);
+          const latestComment = item.comments.at(-1);
+          return (
+            <article
+              className={`inbox-notification inbox-notification--${primaryReason}`}
+              key={`${item.repository}:${item.pullRequestNumber}`}
+            >
+              <ActivityIcon reason={primaryReason} />
+              <div className="inbox-notification__content">
+                <div className="inbox-notification__topline">
+                  <span className="activity-label">
+                    {reasonLabels[primaryReason]}
                   </span>
-                ))}
-              </div>
-              <small>{pull.title}</small>
-            </div>
-            <div className="inbox-card__meta">
-              {item.comments.length > 0 ? (
-                <>
-                  <span>
-                    Latest comment by{" "}
-                    <strong>{item.comments.at(-1)?.author}</strong>
-                  </span>
-                  <a
-                    href={item.comments.at(-1)?.url}
-                    target="_blank"
-                    rel="noreferrer"
+                  <time
+                    dateTime={item.activityAt}
+                    title={new Date(item.activityAt).toLocaleString()}
                   >
-                    Open comment
-                  </a>
-                </>
-              ) : (
-                <time dateTime={item.activityAt}>
-                  Updated {new Date(item.activityAt).toLocaleString()}
-                </time>
-              )}
-            </div>
-          </article>
-        ))}
+                    {formatRelativeTime(item.activityAt)}
+                  </time>
+                </div>
+                <h4>{getHeadline(primaryReason, pull)}</h4>
+                <a
+                  className="inbox-notification__pr"
+                  href={pull.url}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  #{pull.number} {pull.title}
+                </a>
+                <div className="inbox-notification__footer">
+                  <div className="badges">
+                    {item.reasons
+                      .filter((reason) => reason !== primaryReason)
+                      .map((reason) => (
+                        <span
+                          className={`activity-badge activity-badge--${reason}`}
+                          key={reason}
+                        >
+                          {reasonLabels[reason]}
+                          {reason === "ci-failure" && pull.checks.failedCount
+                            ? ` · ${pull.checks.failedCount}`
+                            : ""}
+                        </span>
+                      ))}
+                  </div>
+                  {latestComment && (
+                    <span className="inbox-notification__comment">
+                      From <strong>{latestComment.author}</strong>
+                      <a href={latestComment.url} target="_blank" rel="noreferrer">
+                        View comment
+                      </a>
+                    </span>
+                  )}
+                </div>
+              </div>
+            </article>
+          );
+        })}
       </div>
     </section>
   );
+}
+
+function ActivityIcon({ reason }: { reason: InboxReason }) {
+  const paths: Record<InboxReason, ReactNode> = {
+    "new-pr": <path d="M6 3v12m0-9h5a3 3 0 0 1 3 3v6m-2-2 2 2 2-2" />,
+    "new-commit": <path d="M3 9h3m6 0h3M9 6a3 3 0 1 1 0 6 3 3 0 0 1 0-6Z" />,
+    "new-comment": <path d="M4 4h10v8H9l-3 3v-3H4V4Z" />,
+    "review-needed": <path d="m4 9 3 3 7-7m-5 9h6" />,
+    "ci-failure": <path d="M9 3v7m0 4v.01M3.5 16h11L9 3 3.5 16Z" />,
+  };
+  return (
+    <span className="inbox-notification__icon" aria-hidden="true">
+      <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="1.7">
+        {paths[reason]}
+      </svg>
+    </span>
+  );
+}
+
+function getPrimaryReason(item: ReviewInboxItem): InboxReason {
+  return (
+    reasonPriority.find((reason) => item.reasons.includes(reason)) ??
+    "review-needed"
+  );
+}
+
+function getHeadline(reason: InboxReason, pull: PullRequestRecord): string {
+  const subject = pull.packages[0]?.name ?? `PR #${pull.number}`;
+  const headlines: Record<InboxReason, string> = {
+    "new-pr": `${subject} is ready for first review`,
+    "new-commit": `New commits landed in ${subject}`,
+    "new-comment": `New conversation on ${subject}`,
+    "review-needed": `${subject} is waiting for approval`,
+    "ci-failure": `${subject} needs CI help`,
+  };
+  return headlines[reason];
+}
+
+function formatRelativeTime(timestamp: string): string {
+  const elapsedSeconds = Math.max(
+    0,
+    Math.floor((Date.now() - Date.parse(timestamp)) / 1_000),
+  );
+  if (elapsedSeconds < 60) return "Just now";
+  const minutes = Math.floor(elapsedSeconds / 60);
+  if (minutes < 60) return `${minutes}m ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  return `${days}d ago`;
 }
 
 function getPull(

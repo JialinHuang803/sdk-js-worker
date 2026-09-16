@@ -5,6 +5,7 @@
       "JialinHuang803",
       "kazrael2119",
       "github-actions*",
+      "azure-pipelines*",
       "*copilot*"
     ],
     "includeConversationComments": true,

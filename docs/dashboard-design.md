@@ -37,6 +37,12 @@ Priority is new commit, new PR, new comment, review needed, then CI help.
 Items with activity are shown under **Updated since last refresh**. Persistent
 review/CI items with no new activity are shown under **Still needs attention**.
 
+The inbox uses a single-column notification feed rather than a compact status
+grid. Each item emphasizes one primary activity with a color, icon, verb-first
+headline, and relative timestamp. Additional reasons remain visible as
+secondary badges so reviewers can understand the full state without opening
+the PR.
+
 ### Deliberately excluded
 
 These remain visible in the full table but do not independently create inbox
@@ -65,7 +71,9 @@ kind, and direct GitHub URL. Comment bodies are never published.
 
 Author exclusion is configured in `.github/dashboard-config.json`. Matching is
 case-insensitive and supports `*` wildcards. Invalid configuration fails the
-collection instead of silently weakening privacy rules.
+collection instead of silently weakening privacy rules. Azure Pipelines bot
+comments are excluded because their CI state is already represented by the
+dedicated CI reason.
 
 ## Refresh and comparison
 
