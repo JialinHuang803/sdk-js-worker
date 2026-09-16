@@ -141,6 +141,10 @@ hours without a successful refresh. The collector paginates every list endpoint
 and marks changed-file data partial if GitHub's 3,000-file limit or another
 discrepancy is detected.
 
+The dashboard's **Refresh data** button opens this workflow in GitHub Actions.
+Choose **Run workflow** there to start a manual collection; the public static
+site cannot trigger an authenticated workflow directly.
+
 The workflow uses the repository `GITHUB_TOKEN` with read access for public
 GitHub API requests and grants only the Pages permissions required to deploy.
 No Azure organization app installation is needed for public reads. If GitHub's

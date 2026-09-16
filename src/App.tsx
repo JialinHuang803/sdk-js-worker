@@ -49,14 +49,25 @@ export default function App() {
               <h1>{feature.label}</h1>
               <p>{feature.description}</p>
             </div>
-            <a
-              className="button-secondary"
-              href="https://github.com/Azure/azure-sdk-for-js/pulls"
-              target="_blank"
-              rel="noreferrer"
-            >
-              View repository
-            </a>
+            <div className="page-heading__actions">
+              <a
+                className="button-primary"
+                href="https://github.com/JialinHuang803/sdk-js-worker/actions/workflows/collect-and-deploy.yml"
+                target="_blank"
+                rel="noreferrer"
+                title="Open GitHub Actions, then choose Run workflow"
+              >
+                Refresh data
+              </a>
+              <a
+                className="button-secondary"
+                href="https://github.com/Azure/azure-sdk-for-js/pulls"
+                target="_blank"
+                rel="noreferrer"
+              >
+                View repository
+              </a>
+            </div>
           </div>
           <Feature />
         </main>
