@@ -37,11 +37,12 @@ Priority is new commit, new PR, new comment, review needed, then CI help.
 Items with activity are shown under **Updated since last refresh**. Persistent
 review/CI items with no new activity are shown under **Still needs attention**.
 
-The inbox uses a compact, single-column notification feed rather than a status
-grid. Each item emphasizes one primary activity with a color, icon, verb-first
-headline, and relative timestamp. Labels use readable title case rather than
-all-capital text. Additional reasons remain visible as secondary badges so
-reviewers can understand the full state without opening the PR.
+The inbox uses a compact, two-column notification feed on wider screens and a
+single column on smaller screens. The PR number, primary activity, verb-first
+headline, and relative timestamp share one scan line. Labels use readable title
+case rather than all-capital text. Additional reasons remain visible as
+secondary badges so reviewers can understand the full state without opening
+the PR.
 
 ### Deliberately excluded
 

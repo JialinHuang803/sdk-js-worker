@@ -165,10 +165,20 @@ function InboxSection({
             >
               <ActivityIcon reason={primaryReason} />
               <div className="inbox-notification__content">
-                <div className="inbox-notification__topline">
+                <div className="inbox-notification__headline">
+                  <a
+                    className="inbox-notification__number"
+                    href={pull.url}
+                    target="_blank"
+                    rel="noreferrer"
+                    title={pull.title}
+                  >
+                    #{pull.number}
+                  </a>
                   <span className="activity-label">
                     {reasonLabels[primaryReason]}
                   </span>
+                  <h4>{getHeadline(primaryReason, pull)}</h4>
                   <time
                     dateTime={item.activityAt}
                     title={new Date(item.activityAt).toLocaleString()}
@@ -176,15 +186,6 @@ function InboxSection({
                     {formatRelativeTime(item.activityAt)}
                   </time>
                 </div>
-                <h4>{getHeadline(primaryReason, pull)}</h4>
-                <a
-                  className="inbox-notification__pr"
-                  href={pull.url}
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  #{pull.number} {pull.title}
-                </a>
                 <div className="inbox-notification__footer">
                   <div className="badges">
                     {item.reasons
