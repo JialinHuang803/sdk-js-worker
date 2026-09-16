@@ -1,4 +1,4 @@
-export const DASHBOARD_SCHEMA_VERSION = 2 as const;
+export const DASHBOARD_SCHEMA_VERSION = 3 as const;
 
 export type Plane = "management" | "data";
 export type Completeness = "complete" | "partial";
@@ -46,6 +46,7 @@ export interface PullRequestRecord {
   url: string;
   title: string;
   draft: boolean;
+  holdOn: boolean;
   plane: Plane;
   headSha: string;
   createdAt: string;

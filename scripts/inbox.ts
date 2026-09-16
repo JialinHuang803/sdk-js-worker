@@ -68,6 +68,7 @@ export function buildReviewInbox({
     (previous?.pullRequests ?? []).map((pull) => [pull.number, pull]),
   );
   const items = current.flatMap((pull) => {
+    if (pull.holdOn) return [];
     const prior = previousByNumber.get(pull.number);
     const pullComments = comments.get(pull.number) ?? [];
     const reasons: InboxReason[] = [];

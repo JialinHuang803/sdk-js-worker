@@ -19,6 +19,7 @@ const defaults: SdkPrFilters = {
 
 function isNextStepKind(value: string | null): value is NextStepKind {
   return (
+    value === "hold" ||
     value === "draft" ||
     value === "resolve" ||
     value === "review" ||

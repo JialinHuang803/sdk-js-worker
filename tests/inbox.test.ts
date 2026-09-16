@@ -18,6 +18,7 @@ function pull(
     url: `https://example.test/pull/${number}`,
     title: `[AutoPR @azure-example-${number}]`,
     draft: false,
+    holdOn: false,
     plane: "management",
     headSha: `head-${number}`,
     createdAt: "2026-09-15T00:00:00Z",
@@ -63,6 +64,27 @@ describe("comment author exclusion", () => {
 });
 
 describe("buildReviewInbox", () => {
+  it("excludes PRs carrying the HoldOn label", () => {
+    const inbox = buildReviewInbox({
+      current: [
+        pull(1, {
+          holdOn: true,
+          reviewDecision: "review-required",
+          checks: {
+            failedCount: 2,
+            qualification: "complete",
+            observedCount: 3,
+          },
+        }),
+      ],
+      previous: null,
+      comments: new Map(),
+      generatedAt: "2026-09-16T00:07:00Z",
+      defaultPlane: "management",
+    });
+    expect(inbox.items).toEqual([]);
+  });
+
   it("combines activity and persistent attention without duplicating PRs", () => {
     const current = [
       pull(1, {

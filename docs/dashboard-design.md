@@ -49,6 +49,7 @@ the PR.
 These remain visible in the full table but do not independently create inbox
 items:
 
+- PRs carrying the `HoldOn` label;
 - merge conflicts;
 - waiting for checks;
 - waiting to merge;
@@ -58,6 +59,9 @@ items:
 
 A conflict resolution that changes the head SHA naturally appears as a new
 commit.
+
+`HoldOn` takes precedence over every other derived next step in the full table.
+It indicates that the PR is paused for service-team action.
 
 ## Comment activity and privacy
 

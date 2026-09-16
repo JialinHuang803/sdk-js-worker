@@ -1,6 +1,7 @@
 import type { PullRequestRecord } from "../../data/contracts";
 
 export type NextStepKind =
+  | "hold"
   | "draft"
   | "resolve"
   | "review"
@@ -15,6 +16,14 @@ export interface NextStep {
 }
 
 export function getNextStep(pr: PullRequestRecord): NextStep {
+  if (pr.holdOn) {
+    return {
+      kind: "hold",
+      label: "HoldOn",
+      detail: "Paused for service-team action.",
+    };
+  }
+
   if (pr.draft) {
     return {
       kind: "draft",

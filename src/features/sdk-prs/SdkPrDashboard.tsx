@@ -89,6 +89,7 @@ export function SdkPrDashboard() {
             onChange={(value) => setFilter("nextStep", value)}
             options={[
               ["all", "All next steps"],
+              ["hold", "HoldOn"],
               ["resolve", "Needs resolution"],
               ["review", "Review needed"],
               ["waiting", "Waiting for checks"],

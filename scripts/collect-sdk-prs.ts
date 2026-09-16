@@ -531,6 +531,9 @@ async function collectPull(
     url: pull.html_url,
     title: pull.title,
     draft: pull.draft,
+    holdOn: pull.labels.some(
+      (label) => label.name.toLowerCase() === "holdon",
+    ),
     plane: pull.labels.some((label) => label.name.toLowerCase() === "mgmt")
       ? "management"
       : "data",

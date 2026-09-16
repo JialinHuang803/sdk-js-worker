@@ -15,6 +15,7 @@ function pull(
     url: "https://example.test/pull/1",
     title: "[AutoPR example]",
     draft: false,
+    holdOn: false,
     plane: "data",
     headSha: "abc",
     createdAt: "2026-01-01T00:00:00Z",
@@ -40,6 +41,18 @@ function pull(
 }
 
 describe("getNextStep", () => {
+  it("prioritizes the HoldOn label over actionable states", () => {
+    expect(
+      getNextStep(
+        pull({
+          holdOn: true,
+          reviewDecision: "review-required",
+          conflicts: true,
+        }),
+      ),
+    ).toMatchObject({ kind: "hold", label: "HoldOn" });
+  });
+
   it("prioritizes resolution before required review", () => {
     expect(
       getNextStep(

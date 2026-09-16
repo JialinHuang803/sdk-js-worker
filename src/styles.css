@@ -211,6 +211,7 @@ tbody tr:hover { background: #fbfcfe; }
   white-space: nowrap;
 }
 .next-step__badge--resolve { color: #a32626; background: #fbe2e2; }
+.next-step__badge--hold { color: #5d466f; background: #eee5f5; }
 .next-step__badge--review { color: #075eaf; background: #deeffe; }
 .next-step__badge--waiting,
 .next-step__badge--unknown { color: #754d09; background: #fff0cb; }
