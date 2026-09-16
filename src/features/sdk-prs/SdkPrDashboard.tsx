@@ -4,6 +4,7 @@ import { Panel } from "../../shared/Panel";
 import { useSdkPrData } from "./useSdkPrData";
 import { useSdkPrFilters } from "./useSdkPrFilters";
 import { PrTable } from "./PrTable";
+import { ReviewInbox } from "./ReviewInbox";
 
 export function SdkPrDashboard() {
   const { snapshot, error, loading } = useSdkPrData();
@@ -38,7 +39,7 @@ export function SdkPrDashboard() {
     0,
     Math.floor((Date.now() - Date.parse(snapshot.generatedAt)) / 60_000),
   );
-  const stale = snapshot.stale || ageMinutes > 45;
+  const stale = snapshot.stale || ageMinutes > 26 * 60;
 
   return (
     <div className="dashboard-stack">
@@ -55,6 +56,8 @@ export function SdkPrDashboard() {
         <Summary label="With conflicts" value={conflicts} tone="warning" />
         <Summary label="Drafts" value={drafts} />
       </section>
+
+      <ReviewInbox snapshot={snapshot} />
 
       <Panel
         title="SDK pull requests"

@@ -1,4 +1,4 @@
-export const DASHBOARD_SCHEMA_VERSION = 1 as const;
+export const DASHBOARD_SCHEMA_VERSION = 2 as const;
 
 export type Plane = "management" | "data";
 export type Completeness = "complete" | "partial";
@@ -15,6 +15,16 @@ export type ReviewDecision =
   | "changes-requested"
   | "not-required"
   | "unknown";
+export type InboxReason =
+  | "new-pr"
+  | "new-commit"
+  | "new-comment"
+  | "review-needed"
+  | "ci-failure";
+export type CommentKind =
+  | "conversation"
+  | "review-comment"
+  | "review-summary";
 
 export interface ApiVersion {
   namespace: string;
@@ -39,6 +49,7 @@ export interface PullRequestRecord {
   plane: Plane;
   headSha: string;
   createdAt: string;
+  updatedAt: string;
   releasePlanUrl: string | null;
   reviewDecision: ReviewDecision;
   packages: PackageMetadata[];
@@ -57,6 +68,30 @@ export interface PullRequestRecord {
   warnings: string[];
 }
 
+export interface InboxCommentActivity {
+  id: string;
+  kind: CommentKind;
+  author: string;
+  createdAt: string;
+  url: string;
+}
+
+export interface ReviewInboxItem {
+  repository: string;
+  pullRequestNumber: number;
+  reasons: InboxReason[];
+  activityAt: string;
+  comments: InboxCommentActivity[];
+}
+
+export interface ReviewInbox {
+  comparisonFrom: string | null;
+  generatedAt: string;
+  baselineAvailable: boolean;
+  defaultPlane: Plane;
+  items: ReviewInboxItem[];
+}
+
 export interface DashboardSnapshot {
   schemaVersion: typeof DASHBOARD_SCHEMA_VERSION;
   generatedAt: string;
@@ -67,6 +102,7 @@ export interface DashboardSnapshot {
     query: string;
     fetchedAt: string;
   };
+  inbox: ReviewInbox;
   pullRequests: PullRequestRecord[];
 }
 
@@ -77,6 +113,7 @@ export function isDashboardSnapshot(value: unknown): value is DashboardSnapshot 
     snapshot.schemaVersion === DASHBOARD_SCHEMA_VERSION &&
     typeof snapshot.generatedAt === "string" &&
     typeof snapshot.stale === "boolean" &&
+    Array.isArray(snapshot.inbox?.items) &&
     Array.isArray(snapshot.pullRequests) &&
     typeof snapshot.source?.repository === "string"
   );

@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "activity": {
+    "excludedCommentAuthorPatterns": [
+      "JialinHuang803",
+      "kazrael2119",
+      "github-actions*",
+      "*copilot*"
+    ],
+    "includeConversationComments": true,
+    "includeReviewComments": true,
+    "includeReviewSummaries": true,
+    "publishCommentBody": false
+  },
+  "inbox": {
+    "defaultPlane": "management"
+  }
+}

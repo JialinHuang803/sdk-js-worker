@@ -1,95 +1,467 @@
 {
-  "schemaVersion": 1,
-  "generatedAt": "2026-09-15T06:24:05.741Z",
+  "schemaVersion": 2,
+  "generatedAt": "2026-09-16T02:17:11.075Z",
   "stale": false,
   "source": {
     "repository": "Azure/azure-sdk-for-js",
     "query": "state:open title-prefix:[AutoPR",
-    "fetchedAt": "2026-09-15T06:24:05.741Z"
+    "fetchedAt": "2026-09-16T02:17:11.075Z"
+  },
+  "inbox": {
+    "comparisonFrom": "2026-09-15T07:59:48.403Z",
+    "generatedAt": "2026-09-16T02:17:11.075Z",
+    "baselineAvailable": true,
+    "defaultPlane": "management",
+    "items": [
+      {
+        "repository": "Azure/azure-sdk-for-js",
+        "pullRequestNumber": 39966,
+        "reasons": [
+          "new-commit",
+          "new-comment",
+          "review-needed"
+        ],
+        "activityAt": "2026-09-16T00:53:19Z",
+        "comments": [
+          {
+            "id": "review-comment:4021001366",
+            "kind": "review-comment",
+            "author": "huliang-microsoft",
+            "createdAt": "2026-09-15T23:08:37Z",
+            "url": "https://github.com/Azure/azure-sdk-for-js/pull/39966#discussion_r4021001366"
+          },
+          {
+            "id": "review-comment:4021003417",
+            "kind": "review-comment",
+            "author": "huliang-microsoft",
+            "createdAt": "2026-09-15T23:08:55Z",
+            "url": "https://github.com/Azure/azure-sdk-for-js/pull/39966#discussion_r4021003417"
+          },
+          {
+            "id": "review-comment:4021003566",
+            "kind": "review-comment",
+            "author": "huliang-microsoft",
+            "createdAt": "2026-09-15T23:08:57Z",
+            "url": "https://github.com/Azure/azure-sdk-for-js/pull/39966#discussion_r4021003566"
+          },
+          {
+            "id": "review-comment:4021003695",
+            "kind": "review-comment",
+            "author": "huliang-microsoft",
+            "createdAt": "2026-09-15T23:08:58Z",
+            "url": "https://github.com/Azure/azure-sdk-for-js/pull/39966#discussion_r4021003695"
+          },
+          {
+            "id": "review-comment:4021003791",
+            "kind": "review-comment",
+            "author": "huliang-microsoft",
+            "createdAt": "2026-09-15T23:08:59Z",
+            "url": "https://github.com/Azure/azure-sdk-for-js/pull/39966#discussion_r4021003791"
+          },
+          {
+            "id": "review-comment:4021003902",
+            "kind": "review-comment",
+            "author": "huliang-microsoft",
+            "createdAt": "2026-09-15T23:09:00Z",
+            "url": "https://github.com/Azure/azure-sdk-for-js/pull/39966#discussion_r4021003902"
+          },
+          {
+            "id": "review-comment:4021004007",
+            "kind": "review-comment",
+            "author": "huliang-microsoft",
+            "createdAt": "2026-09-15T23:09:01Z",
+            "url": "https://github.com/Azure/azure-sdk-for-js/pull/39966#discussion_r4021004007"
+          },
+          {
+            "id": "review-comment:4021005507",
+            "kind": "review-comment",
+            "author": "huliang-microsoft",
+            "createdAt": "2026-09-15T23:09:13Z",
+            "url": "https://github.com/Azure/azure-sdk-for-js/pull/39966#discussion_r4021005507"
+          },
+          {
+            "id": "review-comment:4021005680",
+            "kind": "review-comment",
+            "author": "huliang-microsoft",
+            "createdAt": "2026-09-15T23:09:15Z",
+            "url": "https://github.com/Azure/azure-sdk-for-js/pull/39966#discussion_r4021005680"
+          },
+          {
+            "id": "review-comment:4021005795",
+            "kind": "review-comment",
+            "author": "huliang-microsoft",
+            "createdAt": "2026-09-15T23:09:16Z",
+            "url": "https://github.com/Azure/azure-sdk-for-js/pull/39966#discussion_r4021005795"
+          },
+          {
+            "id": "review-comment:4021006907",
+            "kind": "review-comment",
+            "author": "huliang-microsoft",
+            "createdAt": "2026-09-15T23:09:26Z",
+            "url": "https://github.com/Azure/azure-sdk-for-js/pull/39966#discussion_r4021006907"
+          },
+          {
+            "id": "review-comment:4021007036",
+            "kind": "review-comment",
+            "author": "huliang-microsoft",
+            "createdAt": "2026-09-15T23:09:27Z",
+            "url": "https://github.com/Azure/azure-sdk-for-js/pull/39966#discussion_r4021007036"
+          },
+          {
+            "id": "review-comment:4021007161",
+            "kind": "review-comment",
+            "author": "huliang-microsoft",
+            "createdAt": "2026-09-15T23:09:28Z",
+            "url": "https://github.com/Azure/azure-sdk-for-js/pull/39966#discussion_r4021007161"
+          },
+          {
+            "id": "review-comment:4021007345",
+            "kind": "review-comment",
+            "author": "huliang-microsoft",
+            "createdAt": "2026-09-15T23:09:29Z",
+            "url": "https://github.com/Azure/azure-sdk-for-js/pull/39966#discussion_r4021007345"
+          },
+          {
+            "id": "review-comment:4021397158",
+            "kind": "review-comment",
+            "author": "huliang-microsoft",
+            "createdAt": "2026-09-16T00:19:35Z",
+            "url": "https://github.com/Azure/azure-sdk-for-js/pull/39966#discussion_r4021397158"
+          },
+          {
+            "id": "review-comment:4021522244",
+            "kind": "review-comment",
+            "author": "huliang-microsoft",
+            "createdAt": "2026-09-16T00:47:26Z",
+            "url": "https://github.com/Azure/azure-sdk-for-js/pull/39966#discussion_r4021522244"
+          }
+        ]
+      },
+      {
+        "repository": "Azure/azure-sdk-for-js",
+        "pullRequestNumber": 39898,
+        "reasons": [
+          "new-commit",
+          "new-comment",
+          "review-needed"
+        ],
+        "activityAt": "2026-09-15T23:35:22Z",
+        "comments": [
+          {
+            "id": "review-comment:3986956892",
+            "kind": "review-comment",
+            "author": "JohnRFraser",
+            "createdAt": "2026-09-11T07:43:14Z",
+            "url": "https://github.com/Azure/azure-sdk-for-js/pull/39898#discussion_r3986956892"
+          },
+          {
+            "id": "conversation:5687800899",
+            "kind": "conversation",
+            "author": "azure-pipelines[bot]",
+            "createdAt": "2026-09-15T20:42:16Z",
+            "url": "https://github.com/Azure/azure-sdk-for-js/pull/39898#issuecomment-5687800899"
+          },
+          {
+            "id": "review-comment:4020477378",
+            "kind": "review-comment",
+            "author": "JohnRFraser",
+            "createdAt": "2026-09-15T21:43:26Z",
+            "url": "https://github.com/Azure/azure-sdk-for-js/pull/39898#discussion_r4020477378"
+          },
+          {
+            "id": "review-comment:4020477541",
+            "kind": "review-comment",
+            "author": "JohnRFraser",
+            "createdAt": "2026-09-15T21:43:28Z",
+            "url": "https://github.com/Azure/azure-sdk-for-js/pull/39898#discussion_r4020477541"
+          },
+          {
+            "id": "review-comment:4020479312",
+            "kind": "review-comment",
+            "author": "JohnRFraser",
+            "createdAt": "2026-09-15T21:43:43Z",
+            "url": "https://github.com/Azure/azure-sdk-for-js/pull/39898#discussion_r4020479312"
+          }
+        ]
+      },
+      {
+        "repository": "Azure/azure-sdk-for-js",
+        "pullRequestNumber": 39977,
+        "reasons": [
+          "new-pr",
+          "new-comment",
+          "review-needed"
+        ],
+        "activityAt": "2026-09-15T18:36:22Z",
+        "comments": [
+          {
+            "id": "conversation:5685558692",
+            "kind": "conversation",
+            "author": "azure-pipelines[bot]",
+            "createdAt": "2026-09-15T18:12:38Z",
+            "url": "https://github.com/Azure/azure-sdk-for-js/pull/39977#issuecomment-5685558692"
+          }
+        ]
+      },
+      {
+        "repository": "Azure/azure-sdk-for-js",
+        "pullRequestNumber": 39434,
+        "reasons": [
+          "new-commit",
+          "ci-failure"
+        ],
+        "activityAt": "2026-09-15T18:26:20Z",
+        "comments": []
+      },
+      {
+        "repository": "Azure/azure-sdk-for-js",
+        "pullRequestNumber": 39975,
+        "reasons": [
+          "new-pr",
+          "new-comment",
+          "review-needed",
+          "ci-failure"
+        ],
+        "activityAt": "2026-09-15T17:43:05Z",
+        "comments": [
+          {
+            "id": "conversation:5685053397",
+            "kind": "conversation",
+            "author": "azure-pipelines[bot]",
+            "createdAt": "2026-09-15T17:38:36Z",
+            "url": "https://github.com/Azure/azure-sdk-for-js/pull/39975#issuecomment-5685053397"
+          }
+        ]
+      },
+      {
+        "repository": "Azure/azure-sdk-for-js",
+        "pullRequestNumber": 39879,
+        "reasons": [
+          "new-commit",
+          "review-needed"
+        ],
+        "activityAt": "2026-09-15T18:02:15Z",
+        "comments": []
+      },
+      {
+        "repository": "Azure/azure-sdk-for-js",
+        "pullRequestNumber": 39969,
+        "reasons": [
+          "new-pr",
+          "new-comment",
+          "review-needed"
+        ],
+        "activityAt": "2026-09-15T09:09:14Z",
+        "comments": [
+          {
+            "id": "conversation:5677213411",
+            "kind": "conversation",
+            "author": "azure-pipelines[bot]",
+            "createdAt": "2026-09-15T08:34:20Z",
+            "url": "https://github.com/Azure/azure-sdk-for-js/pull/39969#issuecomment-5677213411"
+          }
+        ]
+      },
+      {
+        "repository": "Azure/azure-sdk-for-js",
+        "pullRequestNumber": 39970,
+        "reasons": [
+          "new-pr",
+          "new-comment",
+          "review-needed"
+        ],
+        "activityAt": "2026-09-15T09:06:29Z",
+        "comments": [
+          {
+            "id": "conversation:5677212531",
+            "kind": "conversation",
+            "author": "azure-pipelines[bot]",
+            "createdAt": "2026-09-15T08:34:16Z",
+            "url": "https://github.com/Azure/azure-sdk-for-js/pull/39970#issuecomment-5677212531"
+          }
+        ]
+      },
+      {
+        "repository": "Azure/azure-sdk-for-js",
+        "pullRequestNumber": 39968,
+        "reasons": [
+          "new-pr",
+          "new-comment",
+          "review-needed"
+        ],
+        "activityAt": "2026-09-15T09:06:17Z",
+        "comments": [
+          {
+            "id": "conversation:5677178492",
+            "kind": "conversation",
+            "author": "azure-pipelines[bot]",
+            "createdAt": "2026-09-15T08:31:23Z",
+            "url": "https://github.com/Azure/azure-sdk-for-js/pull/39968#issuecomment-5677178492"
+          }
+        ]
+      },
+      {
+        "repository": "Azure/azure-sdk-for-js",
+        "pullRequestNumber": 39961,
+        "reasons": [
+          "review-needed",
+          "ci-failure"
+        ],
+        "activityAt": "2026-09-15T07:07:44Z",
+        "comments": []
+      },
+      {
+        "repository": "Azure/azure-sdk-for-js",
+        "pullRequestNumber": 39891,
+        "reasons": [
+          "review-needed"
+        ],
+        "activityAt": "2026-09-15T02:27:09Z",
+        "comments": []
+      },
+      {
+        "repository": "Azure/azure-sdk-for-js",
+        "pullRequestNumber": 39222,
+        "reasons": [
+          "review-needed",
+          "ci-failure"
+        ],
+        "activityAt": "2026-09-11T05:09:16Z",
+        "comments": []
+      },
+      {
+        "repository": "Azure/azure-sdk-for-js",
+        "pullRequestNumber": 39925,
+        "reasons": [
+          "review-needed",
+          "ci-failure"
+        ],
+        "activityAt": "2026-09-11T03:11:03Z",
+        "comments": []
+      },
+      {
+        "repository": "Azure/azure-sdk-for-js",
+        "pullRequestNumber": 39768,
+        "reasons": [
+          "review-needed",
+          "ci-failure"
+        ],
+        "activityAt": "2026-09-10T07:56:28Z",
+        "comments": []
+      },
+      {
+        "repository": "Azure/azure-sdk-for-js",
+        "pullRequestNumber": 39663,
+        "reasons": [
+          "review-needed"
+        ],
+        "activityAt": "2026-09-04T09:30:20Z",
+        "comments": []
+      },
+      {
+        "repository": "Azure/azure-sdk-for-js",
+        "pullRequestNumber": 39639,
+        "reasons": [
+          "review-needed"
+        ],
+        "activityAt": "2026-09-02T10:08:03Z",
+        "comments": []
+      },
+      {
+        "repository": "Azure/azure-sdk-for-js",
+        "pullRequestNumber": 39740,
+        "reasons": [
+          "review-needed"
+        ],
+        "activityAt": "2026-09-01T07:59:06Z",
+        "comments": []
+      },
+      {
+        "repository": "Azure/azure-sdk-for-js",
+        "pullRequestNumber": 39794,
+        "reasons": [
+          "review-needed"
+        ],
+        "activityAt": "2026-08-31T07:46:12Z",
+        "comments": []
+      },
+      {
+        "repository": "Azure/azure-sdk-for-js",
+        "pullRequestNumber": 39746,
+        "reasons": [
+          "review-needed"
+        ],
+        "activityAt": "2026-08-31T06:38:02Z",
+        "comments": []
+      },
+      {
+        "repository": "Azure/azure-sdk-for-js",
+        "pullRequestNumber": 39731,
+        "reasons": [
+          "review-needed",
+          "ci-failure"
+        ],
+        "activityAt": "2026-08-26T15:33:41Z",
+        "comments": []
+      },
+      {
+        "repository": "Azure/azure-sdk-for-js",
+        "pullRequestNumber": 39565,
+        "reasons": [
+          "ci-failure"
+        ],
+        "activityAt": "2026-08-14T06:49:49Z",
+        "comments": []
+      },
+      {
+        "repository": "Azure/azure-sdk-for-js",
+        "pullRequestNumber": 39546,
+        "reasons": [
+          "ci-failure"
+        ],
+        "activityAt": "2026-08-11T08:43:36Z",
+        "comments": []
+      },
+      {
+        "repository": "Azure/azure-sdk-for-js",
+        "pullRequestNumber": 39365,
+        "reasons": [
+          "ci-failure"
+        ],
+        "activityAt": "2026-08-11T02:45:47Z",
+        "comments": []
+      },
+      {
+        "repository": "Azure/azure-sdk-for-js",
+        "pullRequestNumber": 39474,
+        "reasons": [
+          "review-needed"
+        ],
+        "activityAt": "2026-08-10T19:55:50Z",
+        "comments": []
+      },
+      {
+        "repository": "Azure/azure-sdk-for-js",
+        "pullRequestNumber": 39381,
+        "reasons": [
+          "review-needed",
+          "ci-failure"
+        ],
+        "activityAt": "2026-08-07T03:28:50Z",
+        "comments": []
+      },
+      {
+        "repository": "Azure/azure-sdk-for-js",
+        "pullRequestNumber": 39501,
+        "reasons": [
+          "review-needed"
+        ],
+        "activityAt": "2026-08-05T03:06:38Z",
+        "comments": []
+      }
+    ]
   },
   "pullRequests": [
-    {
-      "repository": "Azure/azure-sdk-for-js",
-      "number": 39403,
-      "url": "https://github.com/Azure/azure-sdk-for-js/pull/39403",
-      "title": "[AutoPR @azure-arm-relay]-generated-from-SDK Generation - JS-6836607",
-      "draft": false,
-      "plane": "management",
-      "headSha": "85a8c8533624451441c5ef805f7a647af961fe93",
-      "createdAt": "2026-07-25T17:45:59Z",
-      "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=35569",
-      "reviewDecision": "review-required",
-      "packages": [
-        {
-          "root": "sdk/relay/arm-relay",
-          "name": "@azure/arm-relay",
-          "version": "5.0.0",
-          "apiVersions": [
-            {
-              "namespace": "Microsoft.Relay",
-              "versions": [
-                "2026-01-01"
-              ]
-            }
-          ],
-          "state": "available"
-        }
-      ],
-      "checks": {
-        "failedCount": 0,
-        "qualification": "pending",
-        "observedCount": 10
-      },
-      "conflicts": false,
-      "completeness": {
-        "changedFiles": "complete",
-        "checks": "complete",
-        "metadata": "complete",
-        "reviews": "complete"
-      },
-      "warnings": []
-    },
-    {
-      "repository": "Azure/azure-sdk-for-js",
-      "number": 39702,
-      "url": "https://github.com/Azure/azure-sdk-for-js/pull/39702",
-      "title": "[AutoPR @azure-arm-resiliencemanagement]-generated-from-SDK Generation - JS-6836486",
-      "draft": false,
-      "plane": "management",
-      "headSha": "4c64d8dca1bc8b72681955aee51dd9c0e01e3876",
-      "createdAt": "2026-08-22T13:53:27Z",
-      "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=36239",
-      "reviewDecision": "not-required",
-      "packages": [
-        {
-          "root": "sdk/resiliencemanagement/arm-resiliencemanagement",
-          "name": "@azure/arm-resiliencemanagement",
-          "version": "1.0.0-beta.2",
-          "apiVersions": [
-            {
-              "namespace": "Microsoft.AzureResilienceManagement",
-              "versions": [
-                "2026-09-30-preview"
-              ]
-            }
-          ],
-          "state": "available"
-        }
-      ],
-      "checks": {
-        "failedCount": 0,
-        "qualification": "complete",
-        "observedCount": 14
-      },
-      "conflicts": false,
-      "completeness": {
-        "changedFiles": "complete",
-        "checks": "complete",
-        "metadata": "complete",
-        "reviews": "complete"
-      },
-      "warnings": []
-    },
     {
       "repository": "Azure/azure-sdk-for-js",
       "number": 39966,
@@ -97,15 +469,16 @@
       "title": "[AutoPR @azure-rest-ai-content-safety]-generated-from-SDK Generation - JS-6834989",
       "draft": false,
       "plane": "data",
-      "headSha": "68eaaa7c0a16e69351ccd49d993b0ff0cb2898d8",
+      "headSha": "31b6edb00c456ac33040c0985f4ea3cd46459031",
       "createdAt": "2026-09-14T22:46:32Z",
+      "updatedAt": "2026-09-16T00:53:19Z",
       "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=36522",
       "reviewDecision": "review-required",
       "packages": [
         {
           "root": "sdk/contentsafety/ai-content-safety-rest",
           "name": "@azure-rest/ai-content-safety",
-          "version": "1.0.3",
+          "version": "2.0.0-beta.1",
           "apiVersions": [
             {
               "namespace": "ContentSafety",
@@ -118,9 +491,183 @@
         }
       ],
       "checks": {
-        "failedCount": 4,
+        "failedCount": 0,
         "qualification": "complete",
         "observedCount": 14
+      },
+      "conflicts": false,
+      "completeness": {
+        "changedFiles": "complete",
+        "checks": "complete",
+        "metadata": "complete",
+        "reviews": "complete"
+      },
+      "warnings": []
+    },
+    {
+      "repository": "Azure/azure-sdk-for-js",
+      "number": 39898,
+      "url": "https://github.com/Azure/azure-sdk-for-js/pull/39898",
+      "title": "[AutoPR @azure-communication-identity]-generated-from-SDK Generation - JS-6802370",
+      "draft": false,
+      "plane": "data",
+      "headSha": "ff79f6c358f30ec4a93f2815c88f16f8731fbd14",
+      "createdAt": "2026-09-09T02:36:35Z",
+      "updatedAt": "2026-09-15T23:35:22Z",
+      "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=36401",
+      "reviewDecision": "review-required",
+      "packages": [
+        {
+          "root": "sdk/communication/communication-identity",
+          "name": "@azure/communication-identity",
+          "version": "2.0.0",
+          "apiVersions": [
+            {
+              "namespace": "Azure.Communication.Identity",
+              "versions": [
+                "2026-09-23"
+              ]
+            }
+          ],
+          "state": "available"
+        }
+      ],
+      "checks": {
+        "failedCount": 0,
+        "qualification": "complete",
+        "observedCount": 14
+      },
+      "conflicts": false,
+      "completeness": {
+        "changedFiles": "complete",
+        "checks": "complete",
+        "metadata": "complete",
+        "reviews": "complete"
+      },
+      "warnings": []
+    },
+    {
+      "repository": "Azure/azure-sdk-for-js",
+      "number": 39977,
+      "url": "https://github.com/Azure/azure-sdk-for-js/pull/39977",
+      "title": "[AutoPR @azure-arm-network]-generated-from-SDK Generation - JS-6839402",
+      "draft": false,
+      "plane": "management",
+      "headSha": "4fc3725bfac7d11e5cee52671761b46ae03dbcd4",
+      "createdAt": "2026-09-15T18:11:45Z",
+      "updatedAt": "2026-09-15T18:36:22Z",
+      "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=36551",
+      "reviewDecision": "review-required",
+      "packages": [
+        {
+          "root": "sdk/network/arm-network",
+          "name": "@azure/arm-network",
+          "version": "39.0.0",
+          "apiVersions": [
+            {
+              "namespace": "Microsoft.Compute",
+              "versions": [
+                "2018-10-01"
+              ]
+            },
+            {
+              "namespace": "Microsoft.Network",
+              "versions": [
+                "2026-01-01"
+              ]
+            }
+          ],
+          "state": "available"
+        }
+      ],
+      "checks": {
+        "failedCount": 0,
+        "qualification": "cancelled",
+        "observedCount": 75
+      },
+      "conflicts": false,
+      "completeness": {
+        "changedFiles": "complete",
+        "checks": "complete",
+        "metadata": "complete",
+        "reviews": "complete"
+      },
+      "warnings": []
+    },
+    {
+      "repository": "Azure/azure-sdk-for-js",
+      "number": 39434,
+      "url": "https://github.com/Azure/azure-sdk-for-js/pull/39434",
+      "title": "[AutoPR @azure-arm-mongocluster]-generated-from-SDK Generation - JS-6627027",
+      "draft": false,
+      "plane": "management",
+      "headSha": "07e8dd74017bcf36bf4773614427e3e9e18b000d",
+      "createdAt": "2026-07-28T10:57:10Z",
+      "updatedAt": "2026-09-15T18:26:20Z",
+      "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=35659",
+      "reviewDecision": "not-required",
+      "packages": [
+        {
+          "root": "sdk/mongocluster/arm-mongocluster",
+          "name": "@azure/arm-mongocluster",
+          "version": "1.3.0-beta.1",
+          "apiVersions": [
+            {
+              "namespace": "Microsoft.DocumentDB",
+              "versions": [
+                "2026-06-15-preview"
+              ]
+            }
+          ],
+          "state": "available"
+        }
+      ],
+      "checks": {
+        "failedCount": 5,
+        "qualification": "complete",
+        "observedCount": 15
+      },
+      "conflicts": false,
+      "completeness": {
+        "changedFiles": "complete",
+        "checks": "complete",
+        "metadata": "complete",
+        "reviews": "complete"
+      },
+      "warnings": []
+    },
+    {
+      "repository": "Azure/azure-sdk-for-js",
+      "number": 39975,
+      "url": "https://github.com/Azure/azure-sdk-for-js/pull/39975",
+      "title": "[AutoPR @azure-arm-workloadorchestration]-generated-from-SDK Generation - JS-6839252",
+      "draft": false,
+      "plane": "data",
+      "headSha": "0ebcbe2099c2f508a0ab29792c08d85862aee4b3",
+      "createdAt": "2026-09-15T17:37:56Z",
+      "updatedAt": "2026-09-15T17:43:05Z",
+      "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=36547",
+      "reviewDecision": "review-required",
+      "packages": [
+        {
+          "root": "sdk/workloadorchestration/arm-workloadorchestration",
+          "name": "@azure/arm-workloadorchestration",
+          "version": "1.0.0-beta.2",
+          "apiVersions": [
+            {
+              "namespace": "Microsoft.Edge",
+              "versions": [
+                "2026-05-01-preview"
+              ]
+            }
+          ],
+          "state": "available"
+        }
+      ],
+      "checks": {
+        "failedCount": 5,
+        "qualification": "complete",
+        "observedCount": 77
       },
       "conflicts": false,
       "completeness": {
@@ -138,10 +685,11 @@
       "title": "[AutoPR @azure-arm-edgeoperator]-generated-from-SDK Generation - JS-6835979",
       "draft": false,
       "plane": "management",
-      "headSha": "1a051fc5fe0120b8003fd35a941f69d068c39db9",
+      "headSha": "c250298b30211a74c290b0201478e61d47f0dc0f",
       "createdAt": "2026-09-04T23:04:16Z",
+      "updatedAt": "2026-09-15T18:02:15Z",
       "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=36420",
-      "reviewDecision": "not-required",
+      "reviewDecision": "review-required",
       "packages": [
         {
           "root": "sdk/edgeoperator/arm-edgeoperator",
@@ -160,47 +708,6 @@
       ],
       "checks": {
         "failedCount": 0,
-        "qualification": "cancelled",
-        "observedCount": 17
-      },
-      "conflicts": false,
-      "completeness": {
-        "changedFiles": "complete",
-        "checks": "complete",
-        "metadata": "complete",
-        "reviews": "complete"
-      },
-      "warnings": []
-    },
-    {
-      "repository": "Azure/azure-sdk-for-js",
-      "number": 39847,
-      "url": "https://github.com/Azure/azure-sdk-for-js/pull/39847",
-      "title": "[AutoPR @azure-arm-appcontainers]-generated-from-SDK Generation - JS-6833340",
-      "draft": false,
-      "plane": "management",
-      "headSha": "4a8ce6a6b8d67331e0a1663ce3599a07c362ce7a",
-      "createdAt": "2026-09-03T01:24:59Z",
-      "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=36380",
-      "reviewDecision": "review-required",
-      "packages": [
-        {
-          "root": "sdk/appcontainers/arm-appcontainers",
-          "name": "@azure/arm-appcontainers",
-          "version": "4.0.0",
-          "apiVersions": [
-            {
-              "namespace": "Microsoft.App",
-              "versions": [
-                "2026-07-01"
-              ]
-            }
-          ],
-          "state": "available"
-        }
-      ],
-      "checks": {
-        "failedCount": 0,
         "qualification": "complete",
         "observedCount": 14
       },
@@ -215,25 +722,26 @@
     },
     {
       "repository": "Azure/azure-sdk-for-js",
-      "number": 39891,
-      "url": "https://github.com/Azure/azure-sdk-for-js/pull/39891",
-      "title": "[AutoPR @azure-arm-storagemover]-generated-from-SDK Generation - JS-6798569",
+      "number": 39403,
+      "url": "https://github.com/Azure/azure-sdk-for-js/pull/39403",
+      "title": "[AutoPR @azure-arm-relay]-generated-from-SDK Generation - JS-6836607",
       "draft": false,
       "plane": "management",
-      "headSha": "a758145262a0808f03b8cf4e813cfdb2e5c93b14",
-      "createdAt": "2026-09-08T11:08:15Z",
-      "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=36443",
-      "reviewDecision": "review-required",
+      "headSha": "f0c4d84745d3e0b6c910a6bd54eddadd3e90968f",
+      "createdAt": "2026-07-25T17:45:59Z",
+      "updatedAt": "2026-09-15T10:52:27Z",
+      "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=35569",
+      "reviewDecision": "approved",
       "packages": [
         {
-          "root": "sdk/storagemover/arm-storagemover",
-          "name": "@azure/arm-storagemover",
-          "version": "3.2.0",
+          "root": "sdk/relay/arm-relay",
+          "name": "@azure/arm-relay",
+          "version": "4.1.0",
           "apiVersions": [
             {
-              "namespace": "Microsoft.StorageMover",
+              "namespace": "Microsoft.Relay",
               "versions": [
-                "2026-05-01"
+                "2026-01-01"
               ]
             }
           ],
@@ -243,7 +751,49 @@
       "checks": {
         "failedCount": 0,
         "qualification": "complete",
-        "observedCount": 15
+        "observedCount": 71
+      },
+      "conflicts": false,
+      "completeness": {
+        "changedFiles": "complete",
+        "checks": "complete",
+        "metadata": "complete",
+        "reviews": "complete"
+      },
+      "warnings": []
+    },
+    {
+      "repository": "Azure/azure-sdk-for-js",
+      "number": 39950,
+      "url": "https://github.com/Azure/azure-sdk-for-js/pull/39950",
+      "title": "[AutoPR @azure-arm-frontdoor]-generated-from-SDK Generation - JS-6831003",
+      "draft": false,
+      "plane": "management",
+      "headSha": "67378bcead95533457e23b44023f273ac148312e",
+      "createdAt": "2026-09-14T06:36:57Z",
+      "updatedAt": "2026-09-15T10:50:19Z",
+      "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=36510",
+      "reviewDecision": "approved",
+      "packages": [
+        {
+          "root": "sdk/frontdoor/arm-frontdoor",
+          "name": "@azure/arm-frontdoor",
+          "version": "6.1.0",
+          "apiVersions": [
+            {
+              "namespace": "Microsoft.Network",
+              "versions": [
+                "2026-04-01"
+              ]
+            }
+          ],
+          "state": "available"
+        }
+      ],
+      "checks": {
+        "failedCount": 0,
+        "qualification": "complete",
+        "observedCount": 14
       },
       "conflicts": false,
       "completeness": {
@@ -263,8 +813,9 @@
       "plane": "management",
       "headSha": "f7d625ae2de41da576c42026e48b1ea771d5f78c",
       "createdAt": "2026-09-14T18:00:57Z",
+      "updatedAt": "2026-09-15T10:47:40Z",
       "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=36517",
-      "reviewDecision": "review-required",
+      "reviewDecision": "approved",
       "packages": [
         {
           "root": "sdk/iothub/arm-iothub",
@@ -275,6 +826,90 @@
               "namespace": "Microsoft.Devices",
               "versions": [
                 "2026-10-01-preview"
+              ]
+            }
+          ],
+          "state": "available"
+        }
+      ],
+      "checks": {
+        "failedCount": 0,
+        "qualification": "complete",
+        "observedCount": 192
+      },
+      "conflicts": false,
+      "completeness": {
+        "changedFiles": "complete",
+        "checks": "complete",
+        "metadata": "complete",
+        "reviews": "complete"
+      },
+      "warnings": []
+    },
+    {
+      "repository": "Azure/azure-sdk-for-js",
+      "number": 39969,
+      "url": "https://github.com/Azure/azure-sdk-for-js/pull/39969",
+      "title": "[AutoPR @azure-arm-containerservicenodecustomization]-generated-from-SDK Generation - JS-6837269",
+      "draft": false,
+      "plane": "management",
+      "headSha": "a89c5007839a2beaacae061e9daece574783d8fa",
+      "createdAt": "2026-09-15T08:33:41Z",
+      "updatedAt": "2026-09-15T09:09:14Z",
+      "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=36534",
+      "reviewDecision": "review-required",
+      "packages": [
+        {
+          "root": "sdk/containerservice/arm-containerservicenodecustomization",
+          "name": "@azure/arm-containerservicenodecustomization",
+          "version": "1.0.0-beta.1",
+          "apiVersions": [
+            {
+              "namespace": "Microsoft.ContainerService",
+              "versions": [
+                "2025-09-02-preview"
+              ]
+            }
+          ],
+          "state": "available"
+        }
+      ],
+      "checks": {
+        "failedCount": 0,
+        "qualification": "complete",
+        "observedCount": 85
+      },
+      "conflicts": false,
+      "completeness": {
+        "changedFiles": "complete",
+        "checks": "complete",
+        "metadata": "complete",
+        "reviews": "complete"
+      },
+      "warnings": []
+    },
+    {
+      "repository": "Azure/azure-sdk-for-js",
+      "number": 39970,
+      "url": "https://github.com/Azure/azure-sdk-for-js/pull/39970",
+      "title": "[AutoPR @azure-arm-apimanagement]-generated-from-SDK Generation - JS-6837235",
+      "draft": false,
+      "plane": "management",
+      "headSha": "93977b4c673a5ed3e65c9b79b8ea4029d564cb56",
+      "createdAt": "2026-09-15T08:33:41Z",
+      "updatedAt": "2026-09-15T09:06:29Z",
+      "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=36532",
+      "reviewDecision": "review-required",
+      "packages": [
+        {
+          "root": "sdk/apimanagement/arm-apimanagement",
+          "name": "@azure/arm-apimanagement",
+          "version": "11.0.0-beta.2",
+          "apiVersions": [
+            {
+              "namespace": "Microsoft.ApiManagement",
+              "versions": [
+                "2025-09-01-preview"
               ]
             }
           ],
@@ -297,6 +932,48 @@
     },
     {
       "repository": "Azure/azure-sdk-for-js",
+      "number": 39968,
+      "url": "https://github.com/Azure/azure-sdk-for-js/pull/39968",
+      "title": "[AutoPR @azure-arm-appservicesreagent]-generated-from-SDK Generation - JS-6837240",
+      "draft": false,
+      "plane": "management",
+      "headSha": "f784c2648e9bc8dd1133381639e7002c4fc8ebf0",
+      "createdAt": "2026-09-15T08:30:47Z",
+      "updatedAt": "2026-09-15T09:06:17Z",
+      "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=36530",
+      "reviewDecision": "review-required",
+      "packages": [
+        {
+          "root": "sdk/sreagent/arm-appservicesreagent",
+          "name": "@azure/arm-appservicesreagent",
+          "version": "1.0.0-beta.1",
+          "apiVersions": [
+            {
+              "namespace": "Microsoft.App",
+              "versions": [
+                "2026-01-01"
+              ]
+            }
+          ],
+          "state": "available"
+        }
+      ],
+      "checks": {
+        "failedCount": 0,
+        "qualification": "complete",
+        "observedCount": 81
+      },
+      "conflicts": false,
+      "completeness": {
+        "changedFiles": "complete",
+        "checks": "complete",
+        "metadata": "complete",
+        "reviews": "complete"
+      },
+      "warnings": []
+    },
+    {
+      "repository": "Azure/azure-sdk-for-js",
       "number": 39961,
       "url": "https://github.com/Azure/azure-sdk-for-js/pull/39961",
       "title": "[AutoPR @azure-arm-compute]-generated-from-SDK Generation - JS-6832828",
@@ -304,6 +981,7 @@
       "plane": "management",
       "headSha": "986eb1a3f1904790f3932871e43252e9dd223283",
       "createdAt": "2026-09-14T16:21:52Z",
+      "updatedAt": "2026-09-15T07:07:44Z",
       "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=36304",
       "reviewDecision": "review-required",
       "packages": [
@@ -343,7 +1021,7 @@
       "checks": {
         "failedCount": 2,
         "qualification": "complete",
-        "observedCount": 77
+        "observedCount": 249
       },
       "conflicts": false,
       "completeness": {
@@ -356,25 +1034,26 @@
     },
     {
       "repository": "Azure/azure-sdk-for-js",
-      "number": 39728,
-      "url": "https://github.com/Azure/azure-sdk-for-js/pull/39728",
-      "title": "[AutoPR @azure-arm-policy]-generated-from-SDK Generation - JS-6830951",
+      "number": 39891,
+      "url": "https://github.com/Azure/azure-sdk-for-js/pull/39891",
+      "title": "[AutoPR @azure-arm-storagemover]-generated-from-SDK Generation - JS-6798569",
       "draft": false,
       "plane": "management",
-      "headSha": "3e502530e66feb0c013a8bbdf5ed4f58a31fd09e",
-      "createdAt": "2026-08-25T17:11:27Z",
-      "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=35307",
-      "reviewDecision": "approved",
+      "headSha": "a758145262a0808f03b8cf4e813cfdb2e5c93b14",
+      "createdAt": "2026-09-08T11:08:15Z",
+      "updatedAt": "2026-09-15T02:27:09Z",
+      "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=36443",
+      "reviewDecision": "review-required",
       "packages": [
         {
-          "root": "sdk/policy/arm-policy",
-          "name": "@azure/arm-policy",
-          "version": "8.0.0",
+          "root": "sdk/storagemover/arm-storagemover",
+          "name": "@azure/arm-storagemover",
+          "version": "3.2.0",
           "apiVersions": [
             {
-              "namespace": "Microsoft.Authorization",
+              "namespace": "Microsoft.StorageMover",
               "versions": [
-                "2026-07-01"
+                "2026-05-01"
               ]
             }
           ],
@@ -384,7 +1063,7 @@
       "checks": {
         "failedCount": 0,
         "qualification": "complete",
-        "observedCount": 128
+        "observedCount": 15
       },
       "conflicts": false,
       "completeness": {
@@ -404,6 +1083,7 @@
       "plane": "management",
       "headSha": "24a3175fc0108c2a2f99fe31b335e82f4d4548d4",
       "createdAt": "2026-09-13T16:31:31Z",
+      "updatedAt": "2026-09-14T07:50:32Z",
       "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=36506",
       "reviewDecision": "approved",
       "packages": [
@@ -438,88 +1118,6 @@
     },
     {
       "repository": "Azure/azure-sdk-for-js",
-      "number": 39950,
-      "url": "https://github.com/Azure/azure-sdk-for-js/pull/39950",
-      "title": "[AutoPR @azure-arm-frontdoor]-generated-from-SDK Generation - JS-6831003",
-      "draft": false,
-      "plane": "management",
-      "headSha": "7a64f09f1a17423e184da50e9c72e87e6ac8ca00",
-      "createdAt": "2026-09-14T06:36:57Z",
-      "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=36510",
-      "reviewDecision": "review-required",
-      "packages": [
-        {
-          "root": "sdk/frontdoor/arm-frontdoor",
-          "name": "@azure/arm-frontdoor",
-          "version": "6.1.0",
-          "apiVersions": [
-            {
-              "namespace": "Microsoft.Network",
-              "versions": [
-                "2026-04-01"
-              ]
-            }
-          ],
-          "state": "available"
-        }
-      ],
-      "checks": {
-        "failedCount": 5,
-        "qualification": "complete",
-        "observedCount": 77
-      },
-      "conflicts": false,
-      "completeness": {
-        "changedFiles": "complete",
-        "checks": "complete",
-        "metadata": "complete",
-        "reviews": "complete"
-      },
-      "warnings": []
-    },
-    {
-      "repository": "Azure/azure-sdk-for-js",
-      "number": 39898,
-      "url": "https://github.com/Azure/azure-sdk-for-js/pull/39898",
-      "title": "[AutoPR @azure-communication-identity]-generated-from-SDK Generation - JS-6802370",
-      "draft": true,
-      "plane": "data",
-      "headSha": "ead559ab9956ae502760c034740ccaa003c99698",
-      "createdAt": "2026-09-09T02:36:35Z",
-      "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=36401",
-      "reviewDecision": "review-required",
-      "packages": [
-        {
-          "root": "sdk/communication/communication-identity",
-          "name": "@azure/communication-identity",
-          "version": "2.0.0",
-          "apiVersions": [
-            {
-              "namespace": "Azure.Communication.Identity",
-              "versions": [
-                "2026-09-23"
-              ]
-            }
-          ],
-          "state": "available"
-        }
-      ],
-      "checks": {
-        "failedCount": 5,
-        "qualification": "complete",
-        "observedCount": 13
-      },
-      "conflicts": false,
-      "completeness": {
-        "changedFiles": "complete",
-        "checks": "complete",
-        "metadata": "complete",
-        "reviews": "complete"
-      },
-      "warnings": []
-    },
-    {
-      "repository": "Azure/azure-sdk-for-js",
       "number": 39222,
       "url": "https://github.com/Azure/azure-sdk-for-js/pull/39222",
       "title": "[AutoPR @azure-rest-developer-devcenter]-generated-from-SDK Generation - JS-6540159",
@@ -527,6 +1125,7 @@
       "plane": "data",
       "headSha": "ce8a16c8e78cf63b3815d5998d0fcdf4b4c236bf",
       "createdAt": "2026-07-09T09:43:05Z",
+      "updatedAt": "2026-09-11T05:09:16Z",
       "releasePlanUrl": null,
       "reviewDecision": "review-required",
       "packages": [
@@ -568,6 +1167,7 @@
       "plane": "management",
       "headSha": "4023f7d61aad98f575ef18a97ba9751761ece20e",
       "createdAt": "2026-09-10T17:11:57Z",
+      "updatedAt": "2026-09-11T03:11:03Z",
       "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=36491",
       "reviewDecision": "review-required",
       "packages": [
@@ -609,6 +1209,7 @@
       "plane": "management",
       "headSha": "6e11d88dd14d12515fa5de02978fea2bae908075",
       "createdAt": "2026-08-27T20:02:29Z",
+      "updatedAt": "2026-09-10T07:56:28Z",
       "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=36309",
       "reviewDecision": "review-required",
       "packages": [
@@ -650,6 +1251,7 @@
       "plane": "management",
       "headSha": "bf3f60602ec20cf8f3e2f4c14982de800a092d18",
       "createdAt": "2026-09-08T08:22:21Z",
+      "updatedAt": "2026-09-10T02:21:33Z",
       "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=36441",
       "reviewDecision": "approved",
       "packages": [
@@ -684,47 +1286,6 @@
     },
     {
       "repository": "Azure/azure-sdk-for-js",
-      "number": 39858,
-      "url": "https://github.com/Azure/azure-sdk-for-js/pull/39858",
-      "title": "[AutoPR @azure-arm-avs]-generated-from-SDK Generation - JS-6785615",
-      "draft": false,
-      "plane": "management",
-      "headSha": "8983768d07a64d5ceb153056dda11e947b337cc9",
-      "createdAt": "2026-09-03T17:37:52Z",
-      "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=36378",
-      "reviewDecision": "approved",
-      "packages": [
-        {
-          "root": "sdk/avs/arm-avs",
-          "name": "@azure/arm-avs",
-          "version": "7.2.0",
-          "apiVersions": [
-            {
-              "namespace": "Microsoft.AVS",
-              "versions": [
-                "2026-03-01"
-              ]
-            }
-          ],
-          "state": "available"
-        }
-      ],
-      "checks": {
-        "failedCount": 0,
-        "qualification": "complete",
-        "observedCount": 194
-      },
-      "conflicts": true,
-      "completeness": {
-        "changedFiles": "complete",
-        "checks": "complete",
-        "metadata": "complete",
-        "reviews": "complete"
-      },
-      "warnings": []
-    },
-    {
-      "repository": "Azure/azure-sdk-for-js",
       "number": 39663,
       "url": "https://github.com/Azure/azure-sdk-for-js/pull/39663",
       "title": "[AutoPR @azure-arm-platformvalidation]-generated-from-SDK Generation - JS-6720528",
@@ -732,6 +1293,7 @@
       "plane": "management",
       "headSha": "7a85b1e6432e3dc42feda65e33f88d3fd6d6319c",
       "createdAt": "2026-08-19T15:38:48Z",
+      "updatedAt": "2026-09-04T09:30:20Z",
       "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=36144",
       "reviewDecision": "review-required",
       "packages": [
@@ -766,47 +1328,6 @@
     },
     {
       "repository": "Azure/azure-sdk-for-js",
-      "number": 39577,
-      "url": "https://github.com/Azure/azure-sdk-for-js/pull/39577",
-      "title": "[AutoPR @azure-arm-relationships]-generated-from-SDK Generation - JS-6782643",
-      "draft": false,
-      "plane": "management",
-      "headSha": "82136c7cc12aedced511563109250d617302e83c",
-      "createdAt": "2026-08-12T19:37:00Z",
-      "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=36017",
-      "reviewDecision": "not-required",
-      "packages": [
-        {
-          "root": "sdk/relationships/arm-relationships",
-          "name": "@azure/arm-relationships",
-          "version": "1.0.0",
-          "apiVersions": [
-            {
-              "namespace": "Microsoft.Relationships",
-              "versions": [
-                "2026-08-01"
-              ]
-            }
-          ],
-          "state": "available"
-        }
-      ],
-      "checks": {
-        "failedCount": 0,
-        "qualification": "complete",
-        "observedCount": 72
-      },
-      "conflicts": false,
-      "completeness": {
-        "changedFiles": "complete",
-        "checks": "complete",
-        "metadata": "complete",
-        "reviews": "complete"
-      },
-      "warnings": []
-    },
-    {
-      "repository": "Azure/azure-sdk-for-js",
       "number": 39823,
       "url": "https://github.com/Azure/azure-sdk-for-js/pull/39823",
       "title": "[AutoPR @azure-arm-managedops]-generated-from-SDK Generation - JS-6775367",
@@ -814,6 +1335,7 @@
       "plane": "management",
       "headSha": "97530b33a1fbed6da50109ec14476749fc745d4a",
       "createdAt": "2026-09-02T00:55:20Z",
+      "updatedAt": "2026-09-03T02:26:05Z",
       "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=36365",
       "reviewDecision": "approved",
       "packages": [
@@ -855,6 +1377,7 @@
       "plane": "management",
       "headSha": "8cf215ea0216bfbfdb0b122792576bb7fa7e9452",
       "createdAt": "2026-08-17T21:27:28Z",
+      "updatedAt": "2026-09-02T10:08:03Z",
       "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=36107",
       "reviewDecision": "review-required",
       "packages": [
@@ -896,6 +1419,7 @@
       "plane": "management",
       "headSha": "b444f11779fdb92e384e0df90af8518ae4643762",
       "createdAt": "2026-08-19T05:50:34Z",
+      "updatedAt": "2026-09-02T08:10:15Z",
       "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=35295",
       "reviewDecision": "approved",
       "packages": [
@@ -937,6 +1461,7 @@
       "plane": "management",
       "headSha": "7f3337748368963b6dba0a3361ed71bae38463f2",
       "createdAt": "2026-08-18T02:35:36Z",
+      "updatedAt": "2026-09-01T10:16:33Z",
       "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=35595",
       "reviewDecision": "approved",
       "packages": [
@@ -978,6 +1503,7 @@
       "plane": "management",
       "headSha": "759022bd358c0c4ff99c35bd1942fd7750646332",
       "createdAt": "2026-08-26T06:53:39Z",
+      "updatedAt": "2026-09-01T07:59:06Z",
       "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=36266",
       "reviewDecision": "review-required",
       "packages": [
@@ -1019,6 +1545,7 @@
       "plane": "management",
       "headSha": "7d4ec312a5921e44c8719426a99a5e97c4a59f98",
       "createdAt": "2026-08-31T07:24:23Z",
+      "updatedAt": "2026-08-31T07:46:12Z",
       "releasePlanUrl": null,
       "reviewDecision": "review-required",
       "packages": [
@@ -1060,6 +1587,7 @@
       "plane": "management",
       "headSha": "ad6507e3b790823886303d9c3947dd6925f88562",
       "createdAt": "2026-08-26T20:07:30Z",
+      "updatedAt": "2026-08-31T06:38:02Z",
       "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=36284",
       "reviewDecision": "review-required",
       "packages": [
@@ -1101,6 +1629,7 @@
       "plane": "data",
       "headSha": "ad20c2c6ccc8fa00186e1a4112aa275229963b44",
       "createdAt": "2026-08-25T21:06:03Z",
+      "updatedAt": "2026-08-26T15:33:41Z",
       "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=36134",
       "reviewDecision": "review-required",
       "packages": [
@@ -1142,6 +1671,7 @@
       "plane": "management",
       "headSha": "76a3658a5f969f20a652c1539c001d0b903a11f1",
       "createdAt": "2026-08-24T13:52:25Z",
+      "updatedAt": "2026-08-25T07:39:39Z",
       "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=36244",
       "reviewDecision": "approved",
       "packages": [
@@ -1183,6 +1713,7 @@
       "plane": "management",
       "headSha": "be46e333444913754996b04b7b8c832e3505da49",
       "createdAt": "2026-08-20T15:25:54Z",
+      "updatedAt": "2026-08-24T23:07:12Z",
       "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=36140",
       "reviewDecision": "not-required",
       "packages": [
@@ -1224,6 +1755,7 @@
       "plane": "management",
       "headSha": "f26652ca03532dc92f502b71977cb2b3f5e6c02f",
       "createdAt": "2026-08-21T18:48:40Z",
+      "updatedAt": "2026-08-24T09:52:25Z",
       "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=36231",
       "reviewDecision": "approved",
       "packages": [
@@ -1265,6 +1797,7 @@
       "plane": "management",
       "headSha": "0271c796d4ec67e4b54ccf2f2e7d8b01391aa452",
       "createdAt": "2026-08-21T20:02:04Z",
+      "updatedAt": "2026-08-24T09:37:54Z",
       "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=36233",
       "reviewDecision": "approved",
       "packages": [
@@ -1306,6 +1839,7 @@
       "plane": "management",
       "headSha": "0a8deece11576350034aed224a57141f52167cf1",
       "createdAt": "2026-08-20T19:16:00Z",
+      "updatedAt": "2026-08-21T09:32:42Z",
       "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=36189",
       "reviewDecision": "approved",
       "packages": [
@@ -1347,6 +1881,7 @@
       "plane": "management",
       "headSha": "dd766d4206c3d21dc58b81fc93f15ef7548ced64",
       "createdAt": "2026-08-20T22:52:27Z",
+      "updatedAt": "2026-08-21T09:27:25Z",
       "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=36194",
       "reviewDecision": "approved",
       "packages": [
@@ -1388,6 +1923,7 @@
       "plane": "management",
       "headSha": "cfd2253fb5d367fdf518519e07b7a2de3be8f7a2",
       "createdAt": "2026-08-19T21:28:40Z",
+      "updatedAt": "2026-08-20T10:18:17Z",
       "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=36147",
       "reviewDecision": "approved",
       "packages": [
@@ -1429,6 +1965,7 @@
       "plane": "management",
       "headSha": "74a2bb4a9c4c48a9c06c5f51e399e310e20860f5",
       "createdAt": "2026-08-14T21:58:23Z",
+      "updatedAt": "2026-08-18T03:50:22Z",
       "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=36087",
       "reviewDecision": "approved",
       "packages": [
@@ -1470,6 +2007,7 @@
       "plane": "management",
       "headSha": "f57f7b9cd9da7c0b88fbe513690bcab85786d97e",
       "createdAt": "2026-08-12T05:50:41Z",
+      "updatedAt": "2026-08-14T06:49:49Z",
       "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=36000",
       "reviewDecision": "approved",
       "packages": [
@@ -1511,6 +2049,7 @@
       "plane": "management",
       "headSha": "5db26b043146e385ad466c28d02936cf42733e78",
       "createdAt": "2026-08-11T17:13:58Z",
+      "updatedAt": "2026-08-13T02:08:33Z",
       "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=35986",
       "reviewDecision": "approved",
       "packages": [
@@ -1552,6 +2091,7 @@
       "plane": "management",
       "headSha": "f4a632a21d0cb8d9b179d201e0f7f0d8d5fae88b",
       "createdAt": "2026-08-10T10:57:36Z",
+      "updatedAt": "2026-08-11T08:43:36Z",
       "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=35972",
       "reviewDecision": "approved",
       "packages": [
@@ -1593,6 +2133,7 @@
       "plane": "management",
       "headSha": "f236e79a27e25e369cf01a7cbf3c143d6722a2de",
       "createdAt": "2026-08-09T11:21:35Z",
+      "updatedAt": "2026-08-11T02:49:34Z",
       "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=35969",
       "reviewDecision": "approved",
       "packages": [
@@ -1634,6 +2175,7 @@
       "plane": "management",
       "headSha": "158c943cb8fd087a66691d4aae3b880f36f27cc8",
       "createdAt": "2026-07-22T19:04:59Z",
+      "updatedAt": "2026-08-11T02:45:47Z",
       "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=35433",
       "reviewDecision": "not-required",
       "packages": [
@@ -1675,6 +2217,7 @@
       "plane": "management",
       "headSha": "1fe798e8af64432e7ddcd668096d75e4a157cd23",
       "createdAt": "2026-07-23T02:27:10Z",
+      "updatedAt": "2026-08-11T02:43:19Z",
       "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=35440",
       "reviewDecision": "approved",
       "packages": [
@@ -1716,6 +2259,7 @@
       "plane": "management",
       "headSha": "22cf4aff14af982dbe6bfb6e22348e98f8337fdb",
       "createdAt": "2026-07-22T09:15:42Z",
+      "updatedAt": "2026-08-11T02:40:20Z",
       "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=35305",
       "reviewDecision": "approved",
       "packages": [
@@ -1750,47 +2294,6 @@
     },
     {
       "repository": "Azure/azure-sdk-for-js",
-      "number": 39434,
-      "url": "https://github.com/Azure/azure-sdk-for-js/pull/39434",
-      "title": "[AutoPR @azure-arm-mongocluster]-generated-from-SDK Generation - JS-6627027",
-      "draft": false,
-      "plane": "management",
-      "headSha": "c58684950d5b95956ec763c2aa148441906bf1ed",
-      "createdAt": "2026-07-28T10:57:10Z",
-      "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=35659",
-      "reviewDecision": "not-required",
-      "packages": [
-        {
-          "root": "sdk/mongocluster/arm-mongocluster",
-          "name": "@azure/arm-mongocluster",
-          "version": "1.3.0-beta.1",
-          "apiVersions": [
-            {
-              "namespace": "Microsoft.DocumentDB",
-              "versions": [
-                "2026-06-15-preview"
-              ]
-            }
-          ],
-          "state": "available"
-        }
-      ],
-      "checks": {
-        "failedCount": 0,
-        "qualification": "complete",
-        "observedCount": 14
-      },
-      "conflicts": false,
-      "completeness": {
-        "changedFiles": "complete",
-        "checks": "complete",
-        "metadata": "complete",
-        "reviews": "complete"
-      },
-      "warnings": []
-    },
-    {
-      "repository": "Azure/azure-sdk-for-js",
       "number": 39498,
       "url": "https://github.com/Azure/azure-sdk-for-js/pull/39498",
       "title": "[AutoPR @azure-arm-cognitiveservices]-generated-from-SDK Generation - JS-6654555",
@@ -1798,6 +2301,7 @@
       "plane": "management",
       "headSha": "7d42bcadd35046d2a43e75126267cfdc7d70243f",
       "createdAt": "2026-08-03T22:28:43Z",
+      "updatedAt": "2026-08-11T02:25:21Z",
       "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=35847",
       "reviewDecision": "approved",
       "packages": [
@@ -1839,6 +2343,7 @@
       "plane": "management",
       "headSha": "a535f44156daea0ca4483ca7eb71be0a663a9c97",
       "createdAt": "2026-07-21T10:02:03Z",
+      "updatedAt": "2026-08-11T02:17:34Z",
       "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=34988",
       "reviewDecision": "approved",
       "packages": [
@@ -1880,6 +2385,7 @@
       "plane": "data",
       "headSha": "be10380f416838036b3143511ff58b2bfdfe1ff3",
       "createdAt": "2026-07-30T17:24:59Z",
+      "updatedAt": "2026-08-10T19:55:50Z",
       "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=2242",
       "reviewDecision": "review-required",
       "packages": [
@@ -1921,6 +2427,7 @@
       "plane": "management",
       "headSha": "1b8bc3d75b2cc0b1b1efae0ba844b60ef55da1b0",
       "createdAt": "2026-07-23T16:43:59Z",
+      "updatedAt": "2026-08-07T03:28:50Z",
       "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=35443",
       "reviewDecision": "review-required",
       "packages": [
@@ -1962,6 +2469,7 @@
       "plane": "management",
       "headSha": "a0ffc29576124b61cf567c76a5532d232dcbd3d0",
       "createdAt": "2026-08-05T14:44:47Z",
+      "updatedAt": "2026-08-07T00:35:01Z",
       "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=35926",
       "reviewDecision": "approved",
       "packages": [
@@ -2003,6 +2511,7 @@
       "plane": "management",
       "headSha": "2fb1b2a4f5dd2441541b78cf026b527d3b601d83",
       "createdAt": "2026-08-04T02:01:26Z",
+      "updatedAt": "2026-08-05T03:06:38Z",
       "releasePlanUrl": null,
       "reviewDecision": "review-required",
       "packages": [
@@ -2062,6 +2571,7 @@
       "plane": "management",
       "headSha": "51b81a2185824f8694d044886a7c8160c6afba51",
       "createdAt": "2026-07-22T19:05:47Z",
+      "updatedAt": "2026-08-03T03:32:58Z",
       "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=35435",
       "reviewDecision": "not-required",
       "packages": [
@@ -2103,6 +2613,7 @@
       "plane": "management",
       "headSha": "cfdf4eb8363114e6c9afc4ef82298e195f0bcc4e",
       "createdAt": "2026-07-10T18:35:37Z",
+      "updatedAt": "2026-07-23T07:21:01Z",
       "releasePlanUrl": "https://azsdk-releaseplan-dashboard-hveph5aqhhcfhtgu.westus-01.azurewebsites.net/?releaseplan=35262",
       "reviewDecision": "approved",
       "packages": [

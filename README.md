@@ -10,6 +10,9 @@ GitHub Actions workflow collects a deliberately small, sanitized snapshot from
 GitHub's public APIs. There is no backend service, user sign-in, database, or
 client-side GitHub credential.
 
+The maintained product and decision contract is in
+[`docs/dashboard-design.md`](docs/dashboard-design.md).
+
 ## What the dashboard shows
 
 Each AutoPR row includes:
@@ -132,11 +135,11 @@ query behavior without requiring a plugin runtime or placeholder tabs.
 ## Collection and deployment
 
 `.github/workflows/collect-and-deploy.yml` runs on pushes to `main`, on manual
-dispatch, and approximately every 15 minutes at offset minutes to reduce
-scheduler congestion. GitHub does not guarantee exact schedule times, so the UI
-shows snapshot freshness and marks data older than 45 minutes. The collector
-paginates every list endpoint and marks changed-file data partial if GitHub's
-3,000-file limit or another discrepancy is detected.
+dispatch, and daily at approximately **00:07 UTC**. GitHub does not guarantee
+exact schedule times, so the UI shows snapshot freshness and warns after 26
+hours without a successful refresh. The collector paginates every list endpoint
+and marks changed-file data partial if GitHub's 3,000-file limit or another
+discrepancy is detected.
 
 The workflow uses the repository `GITHUB_TOKEN` with read access for public
 GitHub API requests and grants only the Pages permissions required to deploy.

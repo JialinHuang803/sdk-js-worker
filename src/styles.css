@@ -68,6 +68,49 @@ main { min-width: 0; padding: 30px; }
   padding: 12px 16px; color: #714c0c; background: #fff4d8;
   border: 1px solid #edcf86; border-radius: 8px;
 }
+.inbox-tabs {
+  display: flex; gap: 6px; padding: 14px 0; border-bottom: 1px solid #e5eaf1;
+}
+.inbox-tabs button {
+  padding: 8px 13px; color: #5d687b; background: transparent; border: 0;
+  border-radius: 6px; cursor: pointer; font-weight: 650;
+}
+.inbox-tabs button.active { color: #075eaf; background: #eaf4fc; }
+.inbox-tabs span {
+  display: inline-grid; min-width: 22px; height: 22px; margin-left: 5px;
+  place-items: center; border-radius: 999px; background: #dde5ef;
+  color: #43506a; font-size: 11px;
+}
+.inbox-sections { display: grid; gap: 22px; padding-top: 18px; }
+.inbox-section h3 {
+  margin: 0 0 10px; color: #505d72; font-size: 12px;
+  text-transform: uppercase; letter-spacing: 0.06em;
+}
+.inbox-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.inbox-card {
+  display: flex; justify-content: space-between; gap: 18px; min-width: 0;
+  padding: 14px; border: 1px solid #e0e6ef; border-radius: 8px;
+  background: #fbfcfe;
+}
+.inbox-card__main { min-width: 0; }
+.inbox-card__main > a { display: block; font-weight: 700; }
+.inbox-card__main > small {
+  display: block; overflow: hidden; margin-top: 7px; color: #707b8d;
+  text-overflow: ellipsis; white-space: nowrap;
+}
+.inbox-card__meta {
+  display: grid; flex: 0 0 150px; align-content: center; gap: 5px;
+  color: #6c7789; font-size: 11px; text-align: right;
+}
+.activity-badge {
+  display: inline-block; padding: 3px 7px; border-radius: 999px;
+  color: #075eaf; background: #deeffe; font-size: 10px; font-weight: 700;
+}
+.activity-badge--ci-failure { color: #a32626; background: #fbe2e2; }
+.activity-badge--new-pr,
+.activity-badge--new-commit,
+.activity-badge--new-comment { color: #64500c; background: #fff0cb; }
+.inbox-empty { padding: 32px; color: #687488; text-align: center; }
 .panel {
   background: white; border: 1px solid #dce3ed; border-radius: 10px;
   box-shadow: 0 3px 12px #14233a0a; overflow: hidden;
@@ -156,6 +199,7 @@ tbody tr:hover { background: #fbfcfe; }
   .sidebar small { display: none; }
   main { padding: 22px 18px; }
   .summary-grid { grid-template-columns: repeat(2, 1fr); }
+  .inbox-list { grid-template-columns: 1fr; }
 }
 @media (max-width: 560px) {
   .topbar { padding: 0 16px; }
@@ -166,4 +210,6 @@ tbody tr:hover { background: #fbfcfe; }
   .summary-card { padding: 13px; }
   .panel__body { padding: 0 12px 12px; }
   .filters label, .filters .button-secondary { flex: 1 1 130px; }
+  .inbox-card { display: block; }
+  .inbox-card__meta { margin-top: 10px; text-align: left; }
 }

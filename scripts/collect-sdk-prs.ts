@@ -3,6 +3,7 @@ import { dirname, resolve } from "node:path";
 import {
   DASHBOARD_SCHEMA_VERSION,
   type DashboardSnapshot,
+  type InboxCommentActivity,
   type PackageMetadata,
   type PullRequestRecord,
   type ReviewDecision,
@@ -17,6 +18,13 @@ import {
   type CheckRun,
   type CommitStatus,
 } from "./collector-lib.ts";
+import {
+  buildReviewInbox,
+  isExcludedCommentAuthor,
+  loadDashboardConfig,
+  type DashboardConfig,
+  type PreviousSnapshot,
+} from "./inbox.ts";
 
 const repository = process.env.SOURCE_REPOSITORY ?? "Azure/azure-sdk-for-js";
 const outputPath = resolve(
@@ -25,6 +33,9 @@ const outputPath = resolve(
 const apiRoot = process.env.GITHUB_API_URL ?? "https://api.github.com";
 const graphqlUrl =
   process.env.GITHUB_GRAPHQL_URL ?? "https://api.github.com/graphql";
+const previousSnapshotUrl =
+  process.env.PREVIOUS_SNAPSHOT_URL ??
+  "https://jialinhuang803.github.io/sdk-js-worker/data/sdk-prs.json";
 const token = process.env.GITHUB_TOKEN || process.env.GH_TOKEN;
 const headers: Record<string, string> = {
   Accept: "application/vnd.github+json",
@@ -36,6 +47,7 @@ if (token) headers.Authorization = `Bearer ${token}`;
 interface PullListItem {
   number: number;
   title: string;
+  updated_at: string;
 }
 
 interface PullDetails extends PullListItem {
@@ -43,6 +55,7 @@ interface PullDetails extends PullListItem {
   body: string | null;
   draft: boolean;
   created_at: string;
+  updated_at: string;
   changed_files: number;
   mergeable: boolean | null;
   labels: Array<{ name: string }>;
@@ -70,6 +83,22 @@ interface CheckRunsResponse {
 interface ReviewDecisionResult {
   decisions: Map<number, ReviewDecision>;
   complete: boolean;
+}
+
+interface GitHubComment {
+  id: number;
+  user: { login: string } | null;
+  created_at: string;
+  html_url: string;
+}
+
+interface GitHubReview {
+  id: number;
+  user: { login: string } | null;
+  submitted_at: string | null;
+  html_url: string;
+  state: string;
+  body: string | null;
 }
 
 async function request<T>(path: string): Promise<{
@@ -179,6 +208,130 @@ async function paginate<T>(path: string): Promise<T[]> {
     if (!hasNext(response.headers) && response.data.length < 100) break;
   }
   return results;
+}
+
+async function loadPreviousSnapshot(): Promise<PreviousSnapshot | null> {
+  const parse = (value: unknown): PreviousSnapshot | null => {
+    if (!value || typeof value !== "object") return null;
+    const snapshot = value as Partial<PreviousSnapshot>;
+    return typeof snapshot.generatedAt === "string" &&
+      Array.isArray(snapshot.pullRequests)
+      ? {
+          generatedAt: snapshot.generatedAt,
+          pullRequests: snapshot.pullRequests,
+        }
+      : null;
+  };
+  try {
+    const response = await fetch(previousSnapshotUrl, {
+      cache: "no-store",
+      signal: AbortSignal.timeout(15_000),
+    });
+    if (response.ok) {
+      const remote = parse(await response.json());
+      if (remote) return remote;
+    }
+  } catch {
+    console.warn("The deployed snapshot could not be loaded as an activity baseline.");
+  }
+  try {
+    return parse(JSON.parse(await readFile(outputPath, "utf8")));
+  } catch {
+    return null;
+  }
+}
+
+function normalizeComment(
+  comment: GitHubComment,
+  kind: InboxCommentActivity["kind"],
+  config: DashboardConfig,
+): InboxCommentActivity | null {
+  const author = comment.user?.login;
+  if (
+    !author ||
+    isExcludedCommentAuthor(
+      author,
+      config.activity.excludedCommentAuthorPatterns,
+    )
+  ) {
+    return null;
+  }
+  return {
+    id: `${kind}:${comment.id}`,
+    kind,
+    author,
+    createdAt: comment.created_at,
+    url: comment.html_url,
+  };
+}
+
+async function collectRecentComments(
+  pulls: PullListItem[],
+  comparisonFrom: string | null,
+  config: DashboardConfig,
+): Promise<Map<number, InboxCommentActivity[]>> {
+  const commentsByPull = new Map<number, InboxCommentActivity[]>();
+  if (!comparisonFrom) return commentsByPull;
+  const candidates = pulls.filter(
+    (pull) => Date.parse(pull.updated_at) > Date.parse(comparisonFrom),
+  );
+  const entries = await mapLimit(candidates, 3, async (pull) => {
+    const since = encodeURIComponent(comparisonFrom);
+    const [conversationComments, reviewComments, reviews] = await Promise.all([
+      config.activity.includeConversationComments
+        ? paginate<GitHubComment>(
+            `/repos/${repository}/issues/${pull.number}/comments?since=${since}`,
+          )
+        : [],
+      config.activity.includeReviewComments
+        ? paginate<GitHubComment>(
+            `/repos/${repository}/pulls/${pull.number}/comments?since=${since}`,
+          )
+        : [],
+      config.activity.includeReviewSummaries
+        ? paginate<GitHubReview>(
+            `/repos/${repository}/pulls/${pull.number}/reviews`,
+          )
+        : [],
+    ]);
+    const normalized = [
+      ...conversationComments.map((comment) =>
+        normalizeComment(comment, "conversation", config),
+      ),
+      ...reviewComments.map((comment) =>
+        normalizeComment(comment, "review-comment", config),
+      ),
+      ...reviews.flatMap((review) => {
+        if (
+          review.state === "APPROVED" ||
+          !review.body?.trim() ||
+          !review.submitted_at ||
+          Date.parse(review.submitted_at) <= Date.parse(comparisonFrom)
+        ) {
+          return [];
+        }
+        return [
+          normalizeComment(
+            {
+              id: review.id,
+              user: review.user,
+              created_at: review.submitted_at,
+              html_url: review.html_url,
+            },
+            "review-summary",
+            config,
+          ),
+        ];
+      }),
+    ]
+      .filter((comment): comment is InboxCommentActivity => comment !== null)
+      .sort((left, right) => left.createdAt.localeCompare(right.createdAt));
+    return [pull.number, normalized] as const;
+  });
+  for (const [number, comments] of entries) {
+    if (comments.length > 0) commentsByPull.set(number, comments);
+  }
+  return commentsByPull;
 }
 
 function hasNext(responseHeaders: Headers): boolean {
@@ -383,6 +536,7 @@ async function collectPull(
       : "data",
     headSha: pull.head.sha,
     createdAt: pull.created_at,
+    updatedAt: pull.updated_at,
     releasePlanUrl: extractReleasePlanUrl(pull.body),
     reviewDecision,
     packages,
@@ -442,6 +596,8 @@ async function preserveStaleSnapshot(error: unknown) {
 }
 
 async function main() {
+  const config = await loadDashboardConfig();
+  const previous = await loadPreviousSnapshot();
   const pulls = await paginate<PullListItem>(
     `/repos/${repository}/pulls?state=open&sort=updated&direction=desc`,
   );
@@ -454,6 +610,11 @@ async function main() {
       reviewDecisions.complete,
     ),
   );
+  const comments = await collectRecentComments(
+    autoPulls,
+    previous?.generatedAt ?? null,
+    config,
+  );
   const fetchedAt = new Date().toISOString();
   await writeSnapshot({
     schemaVersion: DASHBOARD_SCHEMA_VERSION,
@@ -464,6 +625,13 @@ async function main() {
       query: "state:open title-prefix:[AutoPR",
       fetchedAt,
     },
+    inbox: buildReviewInbox({
+      current: pullRequests,
+      previous,
+      comments,
+      generatedAt: fetchedAt,
+      defaultPlane: config.inbox.defaultPlane,
+    }),
     pullRequests,
   });
   console.log(`Collected ${pullRequests.length} AutoPRs from ${repository}.`);
