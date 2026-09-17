@@ -30,10 +30,11 @@ A PR appears once per tab and can carry multiple reasons.
 | `new-pr` | Current refresh cycle | PR did not exist in the preceding successful snapshot |
 | `new-commit` | Current refresh cycle | Current head SHA differs from the preceding snapshot |
 | `new-comment` | Current refresh cycle | A non-excluded comment was created after the preceding snapshot |
+| `merged` | Current refresh cycle | GitHub reports an AutoPR merge after the preceding snapshot |
 | `review-needed` | Until resolved | GitHub reports `REVIEW_REQUIRED` |
 | `ci-failure` | Until resolved | Current failed check/status count is above zero |
 
-Priority is new commit, new PR, new comment, review needed, then CI help.
+Priority is new commit, new PR, new comment, merged, review needed, then CI help.
 Items with activity are shown under **Updated since last refresh**. Persistent
 review/CI items with no new activity are shown under **Still needs attention**.
 
@@ -62,6 +63,23 @@ commit.
 
 `HoldOn` takes precedence over every other derived next step in the full table.
 It indicates that the PR is paused for service-team action.
+
+### Merge notifications
+
+The collector scans closed PRs ordered by latest update, paginating until it
+passes the previous snapshot timestamp. It selects only exact `[AutoPR` title
+prefixes with a `merged_at` timestamp inside the refresh window. Closing a PR
+without merging never creates a notification; an old merge with a recent
+comment does not either. This also catches PRs created and merged entirely
+between refreshes, without requiring them to appear in the prior open list.
+
+Merged PRs are stored as lightweight `mergedPullRequests` summaries, separate
+from the open table and its counts. Notifications use the merge timestamp,
+the current plane label, and a GitHub PR link, with no obsolete review/CI
+reasons or guessed package metadata. `HoldOn` exclusion still applies.
+Merge notifications last one data refresh cycle and survive UI-only deploys.
+Without a previous snapshot, historical merges are not backfilled.
+The new summaries are optional so existing schema-v3 snapshots still render.
 
 ## Comment activity and privacy
 

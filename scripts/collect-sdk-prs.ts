@@ -25,6 +25,7 @@ import {
   type DashboardConfig,
   type PreviousSnapshot,
 } from "./inbox.ts";
+import { collectMergedPullRequests, type ClosedPull } from "./merged-prs.ts";
 
 const repository = process.env.SOURCE_REPOSITORY ?? "Azure/azure-sdk-for-js";
 const outputPath = resolve(
@@ -618,7 +619,16 @@ async function main() {
     previous?.generatedAt ?? null,
     config,
   );
+  const mergedPullRequests = await collectMergedPullRequests(
+    repository,
+    previous?.generatedAt ?? null,
+    async (page) => (await request<ClosedPull[]>(
+      `/repos/${repository}/pulls?state=closed&sort=updated&direction=desc&per_page=100&page=${page}`,
+    )).data,
+  );
   const fetchedAt = new Date().toISOString();
+  const mergedNumbers = new Set(mergedPullRequests.map((pull) => pull.number));
+  const openPullRequests = pullRequests.filter((pull) => !mergedNumbers.has(pull.number));
   await writeSnapshot({
     schemaVersion: DASHBOARD_SCHEMA_VERSION,
     generatedAt: fetchedAt,
@@ -629,15 +639,17 @@ async function main() {
       fetchedAt,
     },
     inbox: buildReviewInbox({
-      current: pullRequests,
+      current: openPullRequests,
       previous,
       comments,
       generatedAt: fetchedAt,
       defaultPlane: config.inbox.defaultPlane,
+      merged: mergedPullRequests,
     }),
-    pullRequests,
+    pullRequests: openPullRequests,
+    mergedPullRequests,
   });
-  console.log(`Collected ${pullRequests.length} AutoPRs from ${repository}.`);
+  console.log(`Collected ${openPullRequests.length} open AutoPRs and ${mergedPullRequests.length} recent merges from ${repository}.`);
 }
 
 main().catch(async (error: unknown) => {

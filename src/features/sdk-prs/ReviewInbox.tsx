@@ -9,7 +9,13 @@ import type {
 } from "../../data/contracts";
 import { Panel } from "../../shared/Panel";
 
+type InboxPull = Pick<
+  PullRequestRecord,
+  "repository" | "number" | "url" | "title" | "plane"
+> & Partial<Pick<PullRequestRecord, "packages" | "checks">>;
+
 const reasonLabels: Record<InboxReason, string> = {
+  merged: "Merged",
   "new-pr": "New PR",
   "new-commit": "New commit",
   "new-comment": "New comment",
@@ -18,6 +24,7 @@ const reasonLabels: Record<InboxReason, string> = {
 };
 
 const activityReasons = new Set<InboxReason>([
+  "merged",
   "new-pr",
   "new-commit",
   "new-comment",
@@ -27,6 +34,7 @@ const reasonPriority: InboxReason[] = [
   "new-commit",
   "new-pr",
   "new-comment",
+  "merged",
   "review-needed",
   "ci-failure",
 ];
@@ -35,13 +43,13 @@ export function ReviewInbox({ snapshot }: { snapshot: DashboardSnapshot }) {
   const [plane, setPlane] = useState<Plane>(snapshot.inbox.defaultPlane);
   const pulls = useMemo(
     () =>
-      new Map(
-        snapshot.pullRequests.map((pull) => [
+      new Map<string, InboxPull>(
+        [...snapshot.pullRequests, ...(snapshot.mergedPullRequests ?? [])].map((pull) => [
           `${pull.repository}:${pull.number}`,
           pull,
         ]),
       ),
-    [snapshot.pullRequests],
+    [snapshot.pullRequests, snapshot.mergedPullRequests],
   );
   const items = snapshot.inbox.items
     .flatMap((item) => {
@@ -146,7 +154,7 @@ function InboxSection({
 }: {
   title: string;
   description: string;
-  entries: Array<{ item: ReviewInboxItem; pull: PullRequestRecord }>;
+  entries: Array<{ item: ReviewInboxItem; pull: InboxPull }>;
 }) {
   return (
     <section className="inbox-section">
@@ -196,7 +204,7 @@ function InboxSection({
                           key={reason}
                         >
                           {reasonLabels[reason]}
-                          {reason === "ci-failure" && pull.checks.failedCount
+                          {reason === "ci-failure" && pull.checks?.failedCount
                             ? ` · ${pull.checks.failedCount}`
                             : ""}
                         </span>
@@ -222,6 +230,7 @@ function InboxSection({
 
 function ActivityIcon({ reason }: { reason: InboxReason }) {
   const paths: Record<InboxReason, ReactNode> = {
+    merged: <path d="M5 3v12m0-9c0 5 8 1 8 6m-2-2 2 2 2-2" />,
     "new-pr": <path d="M6 3v12m0-9h5a3 3 0 0 1 3 3v6m-2-2 2 2 2-2" />,
     "new-commit": <path d="M3 9h3m6 0h3M9 6a3 3 0 1 1 0 6 3 3 0 0 1 0-6Z" />,
     "new-comment": <path d="M4 4h10v8H9l-3 3v-3H4V4Z" />,
@@ -244,9 +253,10 @@ function getPrimaryReason(item: ReviewInboxItem): InboxReason {
   );
 }
 
-function getHeadline(reason: InboxReason, pull: PullRequestRecord): string {
-  const subject = pull.packages[0]?.name ?? `PR #${pull.number}`;
+function getHeadline(reason: InboxReason, pull: InboxPull): string {
+  const subject = pull.packages?.[0]?.name ?? `PR #${pull.number}`;
   const headlines: Record<InboxReason, string> = {
+    merged: `Merged: ${pull.title}`,
     "new-pr": `${subject} is ready for first review`,
     "new-commit": `New commits landed in ${subject}`,
     "new-comment": `New conversation on ${subject}`,
@@ -272,22 +282,17 @@ function formatRelativeTime(timestamp: string): string {
 
 function getPull(
   item: ReviewInboxItem,
-  pulls: Map<string, PullRequestRecord>,
-): PullRequestRecord | undefined {
+  pulls: Map<string, InboxPull>,
+): InboxPull | undefined {
   return pulls.get(`${item.repository}:${item.pullRequestNumber}`);
 }
 
 function compareInboxEntries(
-  left: { item: ReviewInboxItem; pull: PullRequestRecord },
-  right: { item: ReviewInboxItem; pull: PullRequestRecord },
+  left: { item: ReviewInboxItem; pull: InboxPull },
+  right: { item: ReviewInboxItem; pull: InboxPull },
 ): number {
-  const rank = (item: ReviewInboxItem) => {
-    if (item.reasons.includes("new-commit")) return 0;
-    if (item.reasons.includes("new-pr")) return 1;
-    if (item.reasons.includes("new-comment")) return 2;
-    if (item.reasons.includes("review-needed")) return 3;
-    return 4;
-  };
+  const rank = (item: ReviewInboxItem) =>
+    reasonPriority.indexOf(getPrimaryReason(item));
   return (
     rank(left.item) - rank(right.item) ||
     right.item.activityAt.localeCompare(left.item.activityAt)

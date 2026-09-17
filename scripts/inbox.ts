@@ -3,6 +3,7 @@ import { resolve } from "node:path";
 import type {
   InboxCommentActivity,
   InboxReason,
+  MergedPullRequestRecord,
   Plane,
   PullRequestRecord,
   ReviewInbox,
@@ -57,12 +58,14 @@ export function buildReviewInbox({
   comments,
   generatedAt,
   defaultPlane,
+  merged = [],
 }: {
   current: PullRequestRecord[];
   previous: PreviousSnapshot | null;
   comments: Map<number, InboxCommentActivity[]>;
   generatedAt: string;
   defaultPlane: Plane;
+  merged?: MergedPullRequestRecord[];
 }): ReviewInbox {
   const previousByNumber = new Map(
     (previous?.pullRequests ?? []).map((pull) => [pull.number, pull]),
@@ -98,6 +101,30 @@ export function buildReviewInbox({
       },
     ];
   });
+  if (previous) {
+    for (const pull of merged) {
+      if (
+        pull.holdOn ||
+        Date.parse(pull.mergedAt) <= Date.parse(previous.generatedAt) ||
+        Date.parse(pull.mergedAt) > Date.parse(generatedAt)
+      ) {
+        continue;
+      }
+      // A merge may race the open-PR fetch: replace any now-obsolete attention.
+      const existing = items.findIndex(
+        (item) => item.repository === pull.repository &&
+          item.pullRequestNumber === pull.number,
+      );
+      if (existing !== -1) items.splice(existing, 1);
+      items.push({
+        repository: pull.repository,
+        pullRequestNumber: pull.number,
+        reasons: ["merged"],
+        activityAt: pull.mergedAt,
+        comments: [],
+      });
+    }
+  }
 
   return {
     comparisonFrom: previous?.generatedAt ?? null,

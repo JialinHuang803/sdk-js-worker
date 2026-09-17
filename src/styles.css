@@ -105,6 +105,7 @@ main { min-width: 0; padding: 30px; }
   transform: translateY(-1px);
 }
 .inbox-notification--new-pr { --activity-color: #8057c7; --activity-soft: #f3edff; }
+.inbox-notification--merged { --activity-color: #8057c7; --activity-soft: #f3edff; }
 .inbox-notification--new-commit { --activity-color: #087f5b; --activity-soft: #e5f8f1; }
 .inbox-notification--new-comment { --activity-color: #b05c00; --activity-soft: #fff3e2; }
 .inbox-notification--review-needed { --activity-color: #1668c1; --activity-soft: #eaf4ff; }

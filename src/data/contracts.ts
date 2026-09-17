@@ -16,6 +16,7 @@ export type ReviewDecision =
   | "not-required"
   | "unknown";
 export type InboxReason =
+  | "merged"
   | "new-pr"
   | "new-commit"
   | "new-comment"
@@ -85,6 +86,17 @@ export interface ReviewInboxItem {
   comments: InboxCommentActivity[];
 }
 
+export interface MergedPullRequestRecord {
+  repository: string;
+  number: number;
+  url: string;
+  title: string;
+  plane: Plane;
+  holdOn: boolean;
+  headSha: string;
+  mergedAt: string;
+}
+
 export interface ReviewInbox {
   comparisonFrom: string | null;
   generatedAt: string;
@@ -105,6 +117,7 @@ export interface DashboardSnapshot {
   };
   inbox: ReviewInbox;
   pullRequests: PullRequestRecord[];
+  mergedPullRequests?: MergedPullRequestRecord[];
 }
 
 export function isDashboardSnapshot(value: unknown): value is DashboardSnapshot {
