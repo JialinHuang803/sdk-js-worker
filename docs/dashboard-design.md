@@ -138,6 +138,24 @@ when:
 This includes the package being released while excluding incidental
 cross-package cleanup.
 
+## Breaking-change badges
+
+For each selected release package, the collector reads `CHANGELOG.md` (or
+`changelog.md`) at the PR head SHA and compares it with the PR base. It locates
+the exact release version from `package.json`; older release sections never
+trigger a badge. A nonempty `Breaking Changes` subsection with entries not
+already present in that same version at the base yields **Breaking change**.
+Empty headings, fenced examples and HTML comments are ignored. This describes
+declared changelog changes, not an independent API compatibility analysis.
+
+The table shows the badge next to the affected package and links to its
+head-SHA changelog. Existing inbox notifications also show the badge if any
+release package declares breaking changes; it does not create a new notification
+reason or override HoldOn/next-step rules. Missing files, unmatched versions,
+and failed reads remain unknown, not "no breaking changes". Changelog text is
+not published in the snapshot, only the detection result and source link.
+Existing snapshots remain compatible; data is populated on the next collection.
+
 ## Failure semantics
 
 - Unknown check, review, mergeability, or metadata state is never treated as

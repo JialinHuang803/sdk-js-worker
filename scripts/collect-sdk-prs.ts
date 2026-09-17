@@ -26,6 +26,7 @@ import {
   type PreviousSnapshot,
 } from "./inbox.ts";
 import { collectMergedPullRequests, type ClosedPull } from "./merged-prs.ts";
+import { detectBreakingChanges } from "./changelog.ts";
 
 const repository = process.env.SOURCE_REPOSITORY ?? "Azure/azure-sdk-for-js";
 const outputPath = resolve(
@@ -365,13 +366,13 @@ async function collectCheckRuns(sha: string): Promise<CheckRun[]> {
   return all;
 }
 
-const fileCache = new Map<string, unknown | null>();
+const fileCache = new Map<string, string | null>();
 
-async function getJsonFile(
+async function getTextFile(
   sourceRepository: string,
   path: string,
   sha: string,
-): Promise<unknown | null> {
+): Promise<string | null> {
   const key = `${sourceRepository}@${sha}:${path}`;
   if (fileCache.has(key)) return fileCache.get(key) ?? null;
   const encodedPath = path
@@ -396,11 +397,42 @@ async function getJsonFile(
   if (payload.encoding !== "base64" || typeof payload.content !== "string") {
     throw new Error(`Unexpected content response for ${path} at ${sha}`);
   }
-  const parsed: unknown = JSON.parse(
-    Buffer.from(payload.content.replace(/\n/g, ""), "base64").toString("utf8"),
-  );
-  fileCache.set(key, parsed);
-  return parsed;
+  const text = Buffer.from(payload.content.replace(/\n/g, ""), "base64").toString("utf8");
+  fileCache.set(key, text);
+  return text;
+}
+
+async function getJsonFile(
+  sourceRepository: string,
+  path: string,
+  sha: string,
+): Promise<unknown | null> {
+  const text = await getTextFile(sourceRepository, path, sha);
+  return text === null ? null : JSON.parse(text);
+}
+
+async function collectBreakingChanges(
+  pkg: PackageMetadata,
+  pull: PullDetails,
+): Promise<void> {
+  pkg.breakingChanges = null;
+  const headRepository = pull.head.repo?.full_name;
+  if (!headRepository) return;
+  // Most SDK packages use CHANGELOG.md; also support lowercase filenames.
+  for (const filename of ["CHANGELOG.md", "changelog.md"]) {
+    const path = `${pkg.root}/${filename}`;
+    const head = await getTextFile(headRepository, path, pull.head.sha);
+    if (head === null) continue;
+    const base = await getTextFile(pull.base.repo.full_name, path, pull.base.sha) ??
+      await getTextFile(
+        pull.base.repo.full_name,
+        `${pkg.root}/${filename === "CHANGELOG.md" ? "changelog.md" : "CHANGELOG.md"}`,
+        pull.base.sha,
+      );
+    pkg.breakingChanges = detectBreakingChanges(head, base, pkg.version);
+    pkg.changelogUrl = `https://github.com/${headRepository}/blob/${pull.head.sha}/${path}`;
+    return;
+  }
 }
 
 async function collectPackage(
@@ -505,6 +537,14 @@ async function collectPull(
   if (roots.length === 0) warnings.push("No SDK package roots were identified.");
   if (roots.length > 0 && packages.length === 0) {
     warnings.push("No version-bumped SDK packages were identified.");
+  }
+  for (const pkg of packages) {
+    try {
+      await collectBreakingChanges(pkg, pull);
+    } catch {
+      pkg.breakingChanges = null;
+      warnings.push(`Changelog could not be collected for ${pkg.root}.`);
+    }
   }
   if (!reviewsComplete || reviewDecision === "unknown") {
     warnings.push("Required review status could not be collected.");

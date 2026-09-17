@@ -39,6 +39,8 @@ export interface PackageMetadata {
   apiVersions: ApiVersion[];
   state: "available" | "metadata-missing" | "missing" | "removed";
   note?: string;
+  breakingChanges?: boolean | null;
+  changelogUrl?: string;
 }
 
 export interface PullRequestRecord {

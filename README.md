@@ -153,6 +153,10 @@ refreshed** (the current snapshot). Neither timestamp changes on UI-only pushes.
 New activity includes SDK AutoPR merges within that window, including PRs
 created and merged between refreshes. Closed-but-unmerged PRs do not notify.
 Merged PRs appear only in the inbox, not in the open-PR table or summary counts.
+Release packages with new entries under their version's **Breaking Changes**
+changelog heading receive a **Breaking change** badge in the table and existing
+inbox notifications. Historical releases do not trigger it. This is a
+dashboard badge, not a GitHub label or a full API compatibility assessment.
 Missing, invalid, or schema-incompatible published data blocks a UI deployment;
 run **Collect and deploy dashboard** explicitly for initial publication or a
 data-contract migration. Collector/configuration changes take effect on the

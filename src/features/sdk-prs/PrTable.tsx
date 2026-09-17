@@ -58,6 +58,9 @@ export function PrTable({
                     <div className="package" key={pkg.root}>
                       <div className="package__heading">
                         <strong>{pkg.name ?? pkg.root}</strong>
+                        {pkg.breakingChanges === true && (
+                          <span className="badge badge--warning">Breaking change</span>
+                        )}
                         {pkg.state !== "available" && (
                           <span className="badge badge--warning">
                             {pkg.state === "removed"
@@ -69,6 +72,14 @@ export function PrTable({
                         )}
                       </div>
                       <span>{pkg.version ?? "version unknown"}</span>
+                      {pkg.breakingChanges === null && (
+                        <small>Breaking-change status unavailable</small>
+                      )}
+                      {pkg.breakingChanges === true && pkg.changelogUrl && (
+                        <a href={pkg.changelogUrl} target="_blank" rel="noreferrer">
+                          Changelog
+                        </a>
+                      )}
                       {pkg.apiVersions.length > 0 ? (
                         <ul>
                           {pkg.apiVersions.map((api) => (

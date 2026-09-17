@@ -196,6 +196,9 @@ function InboxSection({
                 </div>
                 <div className="inbox-notification__footer">
                   <div className="badges">
+                    {pull.packages?.some((pkg) => pkg.breakingChanges === true) && (
+                      <span className="badge badge--warning">Breaking change</span>
+                    )}
                     {item.reasons
                       .filter((reason) => reason !== primaryReason)
                       .map((reason) => (

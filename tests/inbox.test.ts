@@ -1,4 +1,9 @@
 import { describe, expect, it } from "vitest";
+import { createElement } from "react";
+import { renderToStaticMarkup } from "react-dom/server";
+import { DASHBOARD_SCHEMA_VERSION, type DashboardSnapshot } from "../src/data/contracts";
+import { PrTable } from "../src/features/sdk-prs/PrTable";
+import { ReviewInbox } from "../src/features/sdk-prs/ReviewInbox";
 import type {
   InboxCommentActivity,
   PullRequestRecord,
@@ -42,6 +47,46 @@ function pull(
     ...overrides,
   };
 }
+
+describe("breaking-change badges", () => {
+  it.each([true, false, null, undefined])(
+    "renders package and inbox badges only for confirmed changes (%s)",
+    (breakingChanges) => {
+      const now = "2026-09-17T00:00:00Z";
+      const current = [pull(1, {
+        reviewDecision: "review-required",
+        packages: [{
+          root: "sdk/example/example",
+          name: "@azure/example",
+          version: "2.0.0",
+          state: "available",
+          apiVersions: [],
+          breakingChanges,
+          changelogUrl: "https://example.test/head/CHANGELOG.md",
+        }],
+      })];
+      const snapshot: DashboardSnapshot = {
+        schemaVersion: DASHBOARD_SCHEMA_VERSION,
+        generatedAt: now,
+        stale: false,
+        source: { repository: current[0].repository, fetchedAt: now, query: "" },
+        pullRequests: current,
+        inbox: buildReviewInbox({
+          current, previous: null, comments: new Map(),
+          generatedAt: now, defaultPlane: "management",
+        }),
+      };
+      const table = renderToStaticMarkup(createElement(PrTable, {
+        rows: current, now: new Date(now),
+      }));
+      const inbox = renderToStaticMarkup(createElement(ReviewInbox, { snapshot }));
+      expect(table.includes(">Breaking change</span>")).toBe(breakingChanges === true);
+      expect(inbox.includes(">Breaking change</span>")).toBe(breakingChanges === true);
+      expect(table.includes("https://example.test/head/CHANGELOG.md")).toBe(breakingChanges === true);
+      expect(table.includes("Breaking-change status unavailable")).toBe(breakingChanges === null);
+    },
+  );
+});
 
 describe("comment author exclusion", () => {
   const patterns = [
