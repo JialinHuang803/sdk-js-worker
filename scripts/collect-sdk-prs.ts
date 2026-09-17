@@ -27,6 +27,7 @@ import {
 } from "./inbox.ts";
 import { collectMergedPullRequests, mergeHistoryStart, type ClosedPull } from "./merged-prs.ts";
 import { detectBreakingChanges } from "./changelog.ts";
+import { collectCommitExclusions, type CommitComparison } from "./commit-activity.ts";
 
 const repository = process.env.SOURCE_REPOSITORY ?? "Azure/azure-sdk-for-js";
 const outputPath = resolve(
@@ -670,9 +671,25 @@ async function main() {
       `/repos/${repository}/pulls?state=closed&sort=updated&direction=desc&per_page=100&page=${page}`,
     )).data,
   );
-  const fetchedAt = new Date().toISOString();
   const mergedNumbers = new Set(mergedPullRequests.map((pull) => pull.number));
   const openPullRequests = pullRequests.filter((pull) => !mergedNumbers.has(pull.number));
+  const commitActivity = await collectCommitExclusions({
+    current: openPullRequests,
+    previous,
+    patterns: config.activity.excludedCommitAuthorPatterns ?? [],
+    getComparisonPage: async (pull, previousHead, page) =>
+      (await request<CommitComparison>(
+        `/repos/${pull.repository}/compare/${encodeURIComponent(previousHead)}...${encodeURIComponent(pull.headSha)}?per_page=100&page=${page}`,
+      )).data,
+  });
+  for (const pull of openPullRequests) {
+    const warning = commitActivity.warnings.get(pull.number);
+    if (warning) {
+      pull.warnings.push(warning);
+      console.warn(`PR #${pull.number}: ${warning}`);
+    }
+  }
+  const fetchedAt = new Date().toISOString();
   await writeSnapshot({
     schemaVersion: DASHBOARD_SCHEMA_VERSION,
     generatedAt: fetchedAt,
@@ -689,6 +706,7 @@ async function main() {
       generatedAt: fetchedAt,
       defaultPlane: config.inbox.defaultPlane,
       merged: mergedPullRequests,
+      excludedCommitPulls: commitActivity.excluded,
     }),
     pullRequests: openPullRequests,
     mergedPullRequests,

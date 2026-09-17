@@ -161,6 +161,12 @@ deployment cannot overlap.
 
 The inbox shows **Changes since** (the preceding data refresh) and **Last
 refreshed** (the current snapshot). Neither timestamp changes on UI-only pushes.
+`activity.excludedCommitAuthorPatterns` in `.github/dashboard-config.json`
+defaults to `["kazrael2119"]`. A changed head does not create a **New commit**
+notification when every added commit since the previous snapshot is authored
+by an excluded GitHub login. Mixed/unknown authors still notify. Patterns are
+case-insensitive and support `*`; use `[]` to disable. This does not hide the PR,
+its other activity, or its current status, and is separate from comment exclusions.
 New activity includes SDK AutoPR merges within that window, including PRs
 created and merged between refreshes. Closed-but-unmerged PRs do not notify.
 Merged PRs stay out of the open-PR table and open counts. The collector separately

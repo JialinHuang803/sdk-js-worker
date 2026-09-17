@@ -12,6 +12,7 @@ import type {
 export interface DashboardConfig {
   schemaVersion: 1;
   activity: {
+    excludedCommitAuthorPatterns?: string[];
     excludedCommentAuthorPatterns: string[];
     includeConversationComments: boolean;
     includeReviewComments: boolean;
@@ -59,6 +60,7 @@ export function buildReviewInbox({
   generatedAt,
   defaultPlane,
   merged = [],
+  excludedCommitPulls = new Set<number>(),
 }: {
   current: PullRequestRecord[];
   previous: PreviousSnapshot | null;
@@ -66,6 +68,7 @@ export function buildReviewInbox({
   generatedAt: string;
   defaultPlane: Plane;
   merged?: MergedPullRequestRecord[];
+  excludedCommitPulls?: ReadonlySet<number>;
 }): ReviewInbox {
   const previousByNumber = new Map(
     (previous?.pullRequests ?? []).map((pull) => [pull.number, pull]),
@@ -78,7 +81,10 @@ export function buildReviewInbox({
 
     if (previous) {
       if (!prior) reasons.push("new-pr");
-      else if (prior.headSha !== pull.headSha) reasons.push("new-commit");
+      else if (
+        prior.headSha !== pull.headSha &&
+        !excludedCommitPulls.has(pull.number)
+      ) reasons.push("new-commit");
       if (pullComments.length > 0) reasons.push("new-comment");
     }
     if (pull.reviewDecision === "review-required") {
@@ -135,11 +141,16 @@ export function buildReviewInbox({
   };
 }
 
-function isDashboardConfig(value: unknown): value is DashboardConfig {
+export function isDashboardConfig(value: unknown): value is DashboardConfig {
   if (!value || typeof value !== "object") return false;
   const config = value as Partial<DashboardConfig>;
   return (
     config.schemaVersion === 1 &&
+    (config.activity?.excludedCommitAuthorPatterns === undefined ||
+      (Array.isArray(config.activity.excludedCommitAuthorPatterns) &&
+        config.activity.excludedCommitAuthorPatterns.every(
+          (pattern) => typeof pattern === "string" && pattern.length > 0,
+        ))) &&
     Array.isArray(config.activity?.excludedCommentAuthorPatterns) &&
     config.activity.excludedCommentAuthorPatterns.every(
       (pattern) => typeof pattern === "string" && pattern.length > 0,

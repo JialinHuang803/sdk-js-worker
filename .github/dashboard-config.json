@@ -1,6 +1,9 @@
 {
   "schemaVersion": 1,
   "activity": {
+    "excludedCommitAuthorPatterns": [
+      "kazrael2119"
+    ],
     "excludedCommentAuthorPatterns": [
       "JialinHuang803",
       "kazrael2119",

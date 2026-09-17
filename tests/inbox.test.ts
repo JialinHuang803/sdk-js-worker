@@ -4,6 +4,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { DASHBOARD_SCHEMA_VERSION, type DashboardSnapshot } from "../src/data/contracts";
 import { PrTable } from "../src/features/sdk-prs/PrTable";
 import { ReviewInbox } from "../src/features/sdk-prs/ReviewInbox";
+import { collectCommitExclusions, type CommitComparison } from "../scripts/commit-activity";
 import type {
   InboxCommentActivity,
   PullRequestRecord,
@@ -109,6 +110,72 @@ describe("comment author exclusion", () => {
 });
 
 describe("buildReviewInbox", () => {
+  it("excludes only new-commit activity while keeping other reasons and the new baseline SHA", async () => {
+    const current = [pull(1, {
+      headSha: "new-head", reviewDecision: "review-required",
+      checks: { failedCount: 2, qualification: "complete", observedCount: 3 },
+    }), pull(2, { headSha: "mixed-head" }), pull(3, { headSha: "unreachable-head" })];
+    const previous = {
+      generatedAt: "2026-09-15T00:07:00Z",
+      pullRequests: [pull(1), pull(2), pull(3)],
+    };
+    const comparison = async (pr: PullRequestRecord): Promise<CommitComparison> => {
+      if (pr.number === 3) throw new Error("Previous SHA unreachable");
+      return {
+        status: "ahead", total_commits: 1,
+        commits: [{ sha: pr.headSha, author: { login: pr.number === 1 ? "kazrael2119" : "service-team" } }],
+      };
+    };
+    const result = await collectCommitExclusions({
+      current, previous, patterns: ["kazrael2119"], getComparisonPage: comparison,
+    });
+    expect([...result.excluded]).toEqual([1]);
+    expect(result.warnings.get(3)).toContain("activity was retained");
+    const inbox = buildReviewInbox({
+      current, previous,
+      comments: new Map([[1, [{
+        id: "conversation:1", kind: "conversation", author: "service-team",
+        createdAt: "2026-09-16T00:05:00Z", url: "https://example.test/comment/1",
+      }]]]),
+      generatedAt: "2026-09-16T00:07:00Z", defaultPlane: "management",
+      excludedCommitPulls: result.excluded,
+    });
+    expect(inbox.items.find((item) => item.pullRequestNumber === 1)?.reasons)
+      .toEqual(["new-comment", "review-needed", "ci-failure"]);
+    expect(inbox.items.find((item) => item.pullRequestNumber === 2)?.reasons).toEqual(["new-commit"]);
+    expect(inbox.items.find((item) => item.pullRequestNumber === 3)?.reasons).toEqual(["new-commit"]);
+    expect(current[0].headSha).toBe("new-head");
+    const nextComparison = async (): Promise<CommitComparison> => {
+      throw new Error("Unchanged heads should not be compared");
+    };
+    expect(await collectCommitExclusions({
+      current, previous: { generatedAt: inbox.generatedAt, pullRequests: current },
+      patterns: ["kazrael2119"], getComparisonPage: nextComparison,
+    })).toEqual({ excluded: new Set(), warnings: new Map() });
+  });
+
+  it("keeps new PRs and skips attribution for baseline, unchanged, or held PRs", async () => {
+    let requests = 0;
+    const getComparisonPage = async (): Promise<CommitComparison> => {
+      requests += 1;
+      throw new Error("Unexpected comparison");
+    };
+    const current = [pull(1), pull(2), pull(3, { holdOn: true, headSha: "changed" })];
+    const previous = { generatedAt: "2026-09-15T00:07:00Z", pullRequests: [pull(1), pull(3)] };
+    for (const baseline of [null, previous]) {
+      const result = await collectCommitExclusions({
+        current, previous: baseline, patterns: ["kazrael2119"], getComparisonPage,
+      });
+      expect(result.excluded.size).toBe(0);
+    }
+    expect(requests).toBe(0);
+    const inbox = buildReviewInbox({
+      current, previous, comments: new Map(), generatedAt: "2026-09-16T00:07:00Z",
+      defaultPlane: "management", excludedCommitPulls: new Set([2]),
+    });
+    expect(inbox.items.map((item) => [item.pullRequestNumber, item.reasons])).toEqual([[2, ["new-pr"]]]);
+  });
+
   it("excludes PRs carrying the HoldOn label", () => {
     const inbox = buildReviewInbox({
       current: [

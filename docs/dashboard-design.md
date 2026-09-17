@@ -56,7 +56,7 @@ A PR appears once per tab and can carry multiple reasons.
 | Reason | Persistence | Meaning |
 |---|---|---|
 | `new-pr` | Current refresh cycle | PR did not exist in the preceding successful snapshot |
-| `new-commit` | Current refresh cycle | Current head SHA differs from the preceding snapshot |
+| `new-commit` | Current refresh cycle | Current head SHA differs, unless all added commits match excluded authors |
 | `new-comment` | Current refresh cycle | A non-excluded comment was created after the preceding snapshot |
 | `merged` | Current refresh cycle | GitHub reports an AutoPR merge after the preceding snapshot |
 | `review-needed` | Until resolved | GitHub reports `REVIEW_REQUIRED` |
@@ -130,6 +130,29 @@ case-insensitive and supports `*` wildcards. Invalid configuration fails the
 collection instead of silently weakening privacy rules. Azure Pipelines bot
 comments are excluded because their CI state is already represented by the
 dedicated CI reason.
+
+## Commit activity exclusions
+
+`activity.excludedCommitAuthorPatterns` in `.github/dashboard-config.json`
+controls new-commit notifications independently of comment exclusions. It
+defaults to `["kazrael2119"]` in the repository configuration; removing the
+setting or using `[]` disables commit exclusions. Patterns match GitHub-linked
+commit author logins case-insensitively, with `*` wildcards, not committer,
+pusher, display name, or email.
+
+For changed heads on existing PRs, the collector compares the preceding
+snapshot's head SHA with the current head SHA and paginates the commit range.
+It suppresses only the `new-commit` reason when the nonempty range consists
+entirely of excluded authors. Mixed authors and unlinked/unknown authors still
+notify. Failed or incomplete comparisons (including unreachable old SHAs
+after force-pushes) retain activity with an explicit collection warning.
+History rewinds with no added commits also retain the head-change notification.
+
+New PRs, comments, required reviews, CI failures, merges, package data and
+report counts are unchanged. The current head SHA is always saved, even for
+suppressed activity, so it becomes the next comparison baseline. No commit
+messages, author emails, or raw comparison responses are published. Changes
+take effect on the next data refresh, not a UI-only deployment.
 
 ## Refresh and comparison
 
