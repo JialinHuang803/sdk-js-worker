@@ -134,12 +134,26 @@ query behavior without requiring a plugin runtime or placeholder tabs.
 
 ## Collection and deployment
 
-`.github/workflows/collect-and-deploy.yml` runs on pushes to `main`, on manual
-dispatch, and daily at approximately **00:07 UTC**. GitHub does not guarantee
+`.github/workflows/collect-and-deploy.yml` runs on manual dispatch and daily at
+approximately **00:07 UTC**. GitHub does not guarantee
 exact schedule times, so the UI shows snapshot freshness and warns after 26
 hours without a successful refresh. The collector paginates every list endpoint
 and marks changed-file data partial if GitHub's 3,000-file limit or another
 discrepancy is detected.
+
+`.github/workflows/deploy-ui.yml` handles pushes to `main`. It downloads the
+latest published snapshot with `npm run data:restore` and deploys the new UI
+with that JSON unchanged. It never collects data or advances the activity
+window, and never falls back to the older checked-in snapshot. Both deployment
+workflows share a concurrency group so snapshot download/collection and
+deployment cannot overlap.
+
+The inbox shows **Changes since** (the preceding data refresh) and **Last
+refreshed** (the current snapshot). Neither timestamp changes on UI-only pushes.
+Missing, invalid, or schema-incompatible published data blocks a UI deployment;
+run **Collect and deploy dashboard** explicitly for initial publication or a
+data-contract migration. Collector/configuration changes take effect on the
+next scheduled or manual collection, not on the code push.
 
 The dashboard's **Refresh data** button opens this workflow in GitHub Actions.
 Choose **Run workflow** there to start a manual collection; the public static
@@ -163,7 +177,8 @@ To publish:
 1. Merge the implementation into `main`.
 2. In **Settings → Pages**, select **GitHub Actions** as the build and deployment
    source if it is not already selected.
-3. Run **Collect and deploy dashboard** manually or wait for the `main` push.
+3. Run **Collect and deploy dashboard** manually for the initial data snapshot.
+   Subsequent `main` pushes deploy UI changes while preserving published data.
 
 PR workflows have read-only repository permission and never execute the Pages
 deployment job, preventing untrusted pull-request code from deploying with

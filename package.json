@@ -8,7 +8,8 @@
     "build": "tsc -b && vite build",
     "typecheck": "tsc -b",
     "test": "vitest run",
-    "collect": "tsx scripts/collect-sdk-prs.ts"
+    "collect": "tsx scripts/collect-sdk-prs.ts",
+    "data:restore": "tsx scripts/restore-published-snapshot.ts"
   },
   "dependencies": {
     "@vitejs/plugin-react": "^5.0.2",

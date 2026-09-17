@@ -86,7 +86,7 @@ The scheduled refresh target is **00:07 UTC daily**. GitHub Actions schedules
 are best effort and may start late. A manual refresh is available through
 workflow dispatch.
 
-Each run loads the preceding deployed snapshot before collecting current data.
+Each scheduled or manual collection loads the preceding deployed snapshot.
 The comparison window is:
 
 ```text
@@ -96,6 +96,17 @@ previous successful generatedAt → current generatedAt
 When no valid previous snapshot is available, the run establishes a baseline.
 It still shows persistent review and CI work but does not label all existing
 PRs as new.
+
+The inbox displays **Changes since** for the start of this window and **Last
+refreshed** for the current snapshot's collection time.
+
+Code pushes run a separate UI deployment workflow. They download and preserve
+the published JSON exactly, including its activity items, timestamps and stale
+state. They do not run the collector, apply changed collector configuration, or
+advance the comparison window. Missing or incompatible published data fails the
+UI deployment instead of restoring older checked-in data; initial publication
+and schema migrations require an explicit collection. The UI and collection
+workflows share the Pages concurrency group to serialize their entire runs.
 
 ## Package selection
 

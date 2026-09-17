@@ -1,9 +1,9 @@
-name: Collect and deploy dashboard
+name: Deploy dashboard UI
 
 on:
-  schedule:
-    - cron: "7 0 * * *"
-  workflow_dispatch:
+  push:
+    branches:
+      - main
 
 permissions:
   contents: read
@@ -15,7 +15,7 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  collect-build-deploy:
+  build-deploy:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -27,10 +27,8 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci --userconfig .npmrc.example
-      - name: Collect public Azure SDK pull request data
-        run: npm run collect
-        env:
-          GITHUB_TOKEN: ${{ secrets.AZURE_SDK_READ_TOKEN || github.token }}
+      - name: Preserve the latest published data without collecting
+        run: npm run data:restore
       - run: npm test
       - run: npm run build
       - uses: actions/configure-pages@v5

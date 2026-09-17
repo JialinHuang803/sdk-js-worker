@@ -69,8 +69,8 @@ export function ReviewInbox({ snapshot }: { snapshot: DashboardSnapshot }) {
       title="SDK review inbox"
       subtitle={
         snapshot.inbox.comparisonFrom
-          ? `Changes since ${new Date(snapshot.inbox.comparisonFrom).toLocaleString()}`
-          : "Baseline established; showing current review and CI work"
+          ? `Changes since ${new Date(snapshot.inbox.comparisonFrom).toLocaleString()} · Last refreshed ${new Date(snapshot.generatedAt).toLocaleString()}`
+          : `Baseline established; showing current review and CI work · Last refreshed ${new Date(snapshot.generatedAt).toLocaleString()}`
       }
     >
       <div className="inbox-tabs" role="tablist" aria-label="SDK plane">
