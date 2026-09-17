@@ -100,7 +100,7 @@ dedicated CI reason.
 
 ## Refresh and comparison
 
-The scheduled refresh target is **00:07 UTC daily**. GitHub Actions schedules
+The scheduled refresh target is **20:00 UTC daily**. GitHub Actions schedules
 are best effort and may start late. A manual refresh is available through
 workflow dispatch.
 

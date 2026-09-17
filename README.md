@@ -135,7 +135,7 @@ query behavior without requiring a plugin runtime or placeholder tabs.
 ## Collection and deployment
 
 `.github/workflows/collect-and-deploy.yml` runs on manual dispatch and daily at
-approximately **00:07 UTC**. GitHub does not guarantee
+approximately **20:00 UTC**. GitHub does not guarantee
 exact schedule times, so the UI shows snapshot freshness and warns after 26
 hours without a successful refresh. The collector paginates every list endpoint
 and marks changed-file data partial if GitHub's 3,000-file limit or another
