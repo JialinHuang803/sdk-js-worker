@@ -56,15 +56,35 @@ main { min-width: 0; padding: 30px; }
 }
 .page-heading__actions { display: flex; gap: 8px; }
 .dashboard-stack { display: grid; gap: 20px; }
-.summary-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
-.summary-card {
-  background: white; border: 1px solid #dde4ee; border-top: 3px solid #1686d9;
-  border-radius: 9px; padding: 17px 18px; box-shadow: 0 2px 7px #14233a0a;
+.delivery-report__header { margin-bottom: 14px; }
+.delivery-report__header h2 { margin: 0; font-size: 18px; }
+.delivery-report__header p,
+.delivery-report__note { margin: 6px 0 0; color: #647087; font-size: 13px; line-height: 1.5; }
+.delivery-report__planes {
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px;
 }
-.summary-card--danger { border-top-color: #c83b3b; }
-.summary-card--warning { border-top-color: #c97a13; }
-.summary-card span { display: block; color: #657087; font-size: 13px; }
-.summary-card strong { display: block; margin-top: 6px; font-size: 27px; }
+.plane-report {
+  min-width: 0; padding: 20px 22px; border: 1px solid #dce3ed;
+  border-top: 3px solid #1686d9; border-radius: 10px;
+  background: white; box-shadow: 0 3px 12px #14233a0a;
+}
+.plane-report--management { border-top-color: #bc7a1d; }
+.plane-report h3 { margin: 0; color: #5a6577; font-size: 14px; font-weight: 650; }
+.plane-report__open { margin: 8px 0 14px; font-size: 17px; line-height: 1.4; }
+.plane-report__open strong { color: #172033; font-size: 20px; }
+.plane-report__updates { display: grid; gap: 10px; }
+.plane-report__updates p { margin: 0; color: #48576d; font-size: 14px; line-height: 1.55; }
+.plane-report__updates strong { color: #243650; font-weight: 700; }
+.plane-report__conflicts { color: #805511; }
+.plane-report__updates .plane-report__merged,
+.plane-report__merged strong { color: #286443; }
+.plane-report__updates .plane-report__unavailable { color: #737e90; }
+.plane-report__note {
+  margin-top: 14px; padding-top: 10px; border-top: 1px solid #e5eaf1;
+  color: #647087; font-size: 13px; line-height: 1.5;
+}
+.plane-report__note p { margin: 0; }
+.plane-report__note p + p { margin-top: 6px; }
 .freshness-warning {
   padding: 12px 16px; color: #714c0c; background: #fff4d8;
   border: 1px solid #edcf86; border-radius: 8px;
@@ -241,7 +261,7 @@ tbody tr:hover { background: #fbfcfe; }
   }
   .sidebar small { display: none; }
   main { padding: 22px 18px; }
-  .summary-grid { grid-template-columns: repeat(2, 1fr); }
+  .delivery-report__planes { grid-template-columns: 1fr; }
   .inbox-list { grid-template-columns: 1fr; }
 }
 @media (max-width: 560px) {
@@ -249,8 +269,7 @@ tbody tr:hover { background: #fbfcfe; }
   .public-badge { display: none; }
   .page-heading { display: block; }
   .page-heading__actions { margin-top: 16px; }
-  .summary-grid { grid-template-columns: 1fr 1fr; gap: 9px; }
-  .summary-card { padding: 13px; }
+  .plane-report { padding: 16px; }
   .panel__body { padding: 0 12px 12px; }
   .filters label, .filters .button-secondary { flex: 1 1 130px; }
   .inbox-section__heading { display: block; }

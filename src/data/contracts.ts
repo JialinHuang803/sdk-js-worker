@@ -120,6 +120,10 @@ export interface DashboardSnapshot {
   inbox: ReviewInbox;
   pullRequests: PullRequestRecord[];
   mergedPullRequests?: MergedPullRequestRecord[];
+  mergeHistoryWindow?: {
+    from: string;
+    through: string;
+  };
 }
 
 export function isDashboardSnapshot(value: unknown): value is DashboardSnapshot {

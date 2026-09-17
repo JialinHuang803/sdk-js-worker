@@ -5,6 +5,7 @@ import { useSdkPrData } from "./useSdkPrData";
 import { useSdkPrFilters } from "./useSdkPrFilters";
 import { PrTable } from "./PrTable";
 import { ReviewInbox } from "./ReviewInbox";
+import { SdkPrReport } from "./SdkPrReport";
 
 export function SdkPrDashboard() {
   const { snapshot, error, loading } = useSdkPrData();
@@ -28,13 +29,6 @@ export function SdkPrDashboard() {
     return <DashboardState kind="empty" title="No dashboard snapshot found" />;
   }
 
-  const failing = snapshot.pullRequests.filter(
-    (pr) => (pr.checks.failedCount ?? 0) > 0,
-  ).length;
-  const conflicts = snapshot.pullRequests.filter(
-    (pr) => pr.conflicts === true,
-  ).length;
-  const drafts = snapshot.pullRequests.filter((pr) => pr.draft).length;
   const ageMinutes = Math.max(
     0,
     Math.floor((Date.now() - Date.parse(snapshot.generatedAt)) / 60_000),
@@ -50,12 +44,7 @@ export function SdkPrDashboard() {
         </div>
       )}
 
-      <section className="summary-grid" aria-label="Pull request summary">
-        <Summary label="Open AutoPRs" value={snapshot.pullRequests.length} />
-        <Summary label="With failures" value={failing} tone="danger" />
-        <Summary label="With conflicts" value={conflicts} tone="warning" />
-        <Summary label="Drafts" value={drafts} />
-      </section>
+      <SdkPrReport snapshot={snapshot} />
 
       <ReviewInbox snapshot={snapshot} />
 
@@ -121,23 +110,6 @@ export function SdkPrDashboard() {
           <PrTable rows={rows} now={new Date(snapshot.generatedAt)} />
         )}
       </Panel>
-    </div>
-  );
-}
-
-function Summary({
-  label,
-  value,
-  tone = "default",
-}: {
-  label: string;
-  value: number;
-  tone?: "default" | "danger" | "warning";
-}) {
-  return (
-    <div className={`summary-card summary-card--${tone}`}>
-      <span>{label}</span>
-      <strong>{value}</strong>
     </div>
   );
 }

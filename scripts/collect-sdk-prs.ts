@@ -25,7 +25,7 @@ import {
   type DashboardConfig,
   type PreviousSnapshot,
 } from "./inbox.ts";
-import { collectMergedPullRequests, type ClosedPull } from "./merged-prs.ts";
+import { collectMergedPullRequests, mergeHistoryStart, type ClosedPull } from "./merged-prs.ts";
 import { detectBreakingChanges } from "./changelog.ts";
 
 const repository = process.env.SOURCE_REPOSITORY ?? "Azure/azure-sdk-for-js";
@@ -659,9 +659,13 @@ async function main() {
     previous?.generatedAt ?? null,
     config,
   );
+  const mergeHistoryFrom = mergeHistoryStart(
+    previous?.generatedAt ?? null,
+    new Date().toISOString(),
+  );
   const mergedPullRequests = await collectMergedPullRequests(
     repository,
-    previous?.generatedAt ?? null,
+    mergeHistoryFrom,
     async (page) => (await request<ClosedPull[]>(
       `/repos/${repository}/pulls?state=closed&sort=updated&direction=desc&per_page=100&page=${page}`,
     )).data,
@@ -688,6 +692,7 @@ async function main() {
     }),
     pullRequests: openPullRequests,
     mergedPullRequests,
+    mergeHistoryWindow: { from: mergeHistoryFrom, through: fetchedAt },
   });
   console.log(`Collected ${openPullRequests.length} open AutoPRs and ${mergedPullRequests.length} recent merges from ${repository}.`);
 }

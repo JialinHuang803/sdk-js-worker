@@ -10,6 +10,16 @@ export interface ClosedPull {
   head: { sha: string };
 }
 
+export function mergeHistoryStart(previous: string | null, asOf: string): string {
+  const now = Date.parse(asOf);
+  const prior = previous === null ? now : Date.parse(previous);
+  if (!Number.isFinite(now) || !Number.isFinite(prior)) {
+    throw new Error("Invalid merge history timestamp");
+  }
+  // Preserve the whole activity window after outages, even when it exceeds a week.
+  return new Date(Math.min(prior, now - 7 * 24 * 60 * 60 * 1_000)).toISOString();
+}
+
 export async function collectMergedPullRequests(
   repository: string,
   comparisonFrom: string | null,

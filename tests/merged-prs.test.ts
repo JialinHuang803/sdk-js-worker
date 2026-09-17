@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { collectMergedPullRequests, type ClosedPull } from "../scripts/merged-prs";
+import { collectMergedPullRequests, mergeHistoryStart, type ClosedPull } from "../scripts/merged-prs";
 import { buildReviewInbox } from "../scripts/inbox";
 import { DASHBOARD_SCHEMA_VERSION, type DashboardSnapshot } from "../src/data/contracts";
 import { ReviewInbox } from "../src/features/sdk-prs/ReviewInbox";
@@ -25,6 +25,34 @@ function closed(number: number, overrides: Partial<ClosedPull> = {}): ClosedPull
 }
 
 describe("recent SDK merges", () => {
+  it("collects a full week even on the first run or after a recent refresh", () => {
+    expect(mergeHistoryStart(null, now)).toBe("2026-09-10T00:00:00.000Z");
+    expect(mergeHistoryStart(since, now)).toBe("2026-09-10T00:00:00.000Z");
+    expect(mergeHistoryStart("2026-09-01T00:00:00Z", now))
+      .toBe("2026-09-01T00:00:00.000Z");
+    expect(() => mergeHistoryStart("invalid", now)).toThrow("Invalid merge history timestamp");
+    expect(() => mergeHistoryStart(null, "invalid")).toThrow("Invalid merge history timestamp");
+  });
+
+  it("collects historical merges for the report without notifying them in the inbox", async () => {
+    const merged = await collectMergedPullRequests(
+      repository, mergeHistoryStart(null, now), async () => [
+        closed(1, { merged_at: "2026-09-12T00:00:00Z" }),
+        closed(2),
+        closed(3, { merged_at: "2026-09-09T00:00:00Z" }),
+      ],
+    );
+    expect(merged.map((pull) => pull.number)).toEqual([1, 2]);
+    const input = {
+      current: [], comments: new Map(), generatedAt: now,
+      defaultPlane: "management" as const, merged,
+    };
+    expect(buildReviewInbox({ ...input, previous: null }).items).toEqual([]);
+    expect(buildReviewInbox({
+      ...input, previous: { generatedAt: since, pullRequests: [] },
+    }).items.map((item) => item.pullRequestNumber)).toEqual([2]);
+  });
+
   it("only selects AutoPR merges after the previous refresh, not closures or old merges", async () => {
     const getPage = vi.fn().mockResolvedValue([
       closed(1),

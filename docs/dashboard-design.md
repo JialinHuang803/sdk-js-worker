@@ -9,10 +9,38 @@ privacy rules, or refresh behavior changes.
 Help the SDK team answer **“Where should I start?”** while retaining the full
 AutoPR status table for investigation.
 
-The page has two primary surfaces:
+The page has three primary surfaces:
 
-1. **SDK review inbox** — review-relevant work and activity.
-2. **All pull requests** — complete current status, filters, and package data.
+1. **SDK delivery report** — a plain-language overview for each plane.
+2. **SDK review inbox** — review-relevant work and activity.
+3. **All pull requests** — complete current status, filters, and package data.
+
+## Delivery report
+
+Two side-by-side blocks (stacked on narrow screens) report on management and
+data planes. Sentences describe the work rather than showing standalone
+counters. Each block includes:
+
+- all current open AutoPRs, including drafts and HoldOn;
+- PRs awaiting required approval (`REVIEW_REQUIRED`);
+- approved-but-open PRs (`APPROVED`) awaiting service-team action, including
+  conflicts and CI blockers, with a separate conflict count in the sentence;
+- AutoPRs merged during the seven days ending at `generatedAt`.
+
+The report ignores table/inbox filters. Review totals follow the authoritative
+GitHub decision independently of the table's prioritized next step; a failed
+check, HoldOn label, or conflict does not hide an approval or review requirement.
+Unknown or incomplete review decisions are excluded from confirmed totals and
+explicitly qualified. Requested changes and no approval requirement do not
+count as approval. Approval never implies merge readiness.
+
+The collector publishes an optional `mergeHistoryWindow` with `from` and
+`through` timestamps covering its lightweight merged-PR summaries. Weekly
+counts require coverage of the full seven-day window and are deduplicated by
+repository and number. Missing coverage in older snapshots is unavailable,
+not zero; the next data collection populates it without requiring a refresh
+on a UI push. Only GitHub-confirmed merges count, not closed-unmerged PRs.
+Counts are as of the snapshot, not the browser clock; stale warnings still apply.
 
 ## Review inbox
 
@@ -67,8 +95,9 @@ It indicates that the PR is paused for service-team action.
 ### Merge notifications
 
 The collector scans closed PRs ordered by latest update, paginating until it
-passes the previous snapshot timestamp. It selects only exact `[AutoPR` title
-prefixes with a `merged_at` timestamp inside the refresh window. Closing a PR
+passes the earlier of the previous snapshot timestamp and seven days ago.
+It selects only exact `[AutoPR` title prefixes with a `merged_at` timestamp
+inside that history window. Closing a PR
 without merging never creates a notification; an old merge with a recent
 comment does not either. This also catches PRs created and merged entirely
 between refreshes, without requiring them to appear in the prior open list.
@@ -78,8 +107,12 @@ from the open table and its counts. Notifications use the merge timestamp,
 the current plane label, and a GitHub PR link, with no obsolete review/CI
 reasons or guessed package metadata. `HoldOn` exclusion still applies.
 Merge notifications last one data refresh cycle and survive UI-only deploys.
-Without a previous snapshot, historical merges are not backfilled.
-The new summaries are optional so existing schema-v3 snapshots still render.
+Without a previous snapshot, seven-day history is collected for the report
+but historical merges do not create notifications. After an outage longer
+than a week, the full refresh window is collected so no merge notification
+is lost; only the last seven days contribute to the weekly total.
+Summaries and history coverage are optional so existing schema-v3 snapshots
+still render.
 
 ## Comment activity and privacy
 

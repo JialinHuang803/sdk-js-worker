@@ -15,6 +15,17 @@ The maintained product and decision contract is in
 
 ## What the dashboard shows
 
+Above the inbox, a two-part **SDK delivery report** summarizes management-plane
+and data-plane work in plain language: open AutoPRs, PRs awaiting required
+approval, approved-but-open PRs awaiting service-team action (including those
+with conflicts), and AutoPRs merged in the past seven days.
+
+These counts cover all AutoPRs, regardless of table filters, drafts, or HoldOn.
+Review/approval totals use GitHub's review decision, not the prioritized next
+step or the mere presence of a review. Unknown review states are qualified.
+The seven-day window ends at the snapshot timestamp; incomplete or missing
+merge history is shown as unavailable, never zero.
+
 Each AutoPR row includes:
 
 - PR number, title, draft status, creation date, and age
@@ -152,7 +163,10 @@ The inbox shows **Changes since** (the preceding data refresh) and **Last
 refreshed** (the current snapshot). Neither timestamp changes on UI-only pushes.
 New activity includes SDK AutoPR merges within that window, including PRs
 created and merged between refreshes. Closed-but-unmerged PRs do not notify.
-Merged PRs appear only in the inbox, not in the open-PR table or summary counts.
+Merged PRs stay out of the open-PR table and open counts. The collector separately
+records at least seven days of merge history for the delivery report, including
+on the first collection. Only merges since the preceding snapshot notify in
+the inbox; the seven-day report does not backfill inbox notifications.
 Release packages with new entries under their version's **Breaking Changes**
 changelog heading receive a **Breaking change** badge in the table and existing
 inbox notifications. Historical releases do not trigger it. This is a
