@@ -93,9 +93,11 @@ endpoints. Acknowledgements are scoped to the sequence actually displayed;
 concurrent or late-discovered events stay unread. Conditional ETag updates
 prevent the collector from overwriting concurrent read actions.
 
-Undo restores the specific acknowledgement batch. Recently read offers recovery
-for 30 days; acknowledged details are pruned on subsequent ingestion after that
-period. Unread history never expires automatically. The monotonic sequence and
+Recently read offers recovery for 3 days through Restore unread on each card,
+without a separate Undo button. When expanded, it appears between Unread
+activities and Needs attention. Acknowledged details expire after 72 hours and
+are pruned on the next API read, mutation or collection, not just the daily
+collection. Unread history never expires automatically. The monotonic sequence and
 collector baseline remain after pruning. History starts with the current
 published activities at migration; overwritten older activities are not
 reconstructed. Events are observed at scheduled collection, not a real-time

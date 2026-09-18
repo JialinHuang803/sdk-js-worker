@@ -41,8 +41,8 @@ treating this inbox as a trusted operational system.
 
 Requests have bounded body sizes, private routes require a key, and public
 mutations cannot supply arbitrary activity records or delete the store.
-Acknowledged details are kept for 30 days for recovery, then pruned during
-collection. Unread events never expire automatically. A single JSON blob suits
+Acknowledged details are kept for 3 days (72 hours) for recovery, then pruned on
+the next API read, mutation or collection. Unread events never expire automatically. A single JSON blob suits
 this prototype volume; it is not a scalable event database. There is no
 independent permanent audit archive or configured Application Insights ingestion.
 
@@ -96,7 +96,7 @@ an existing service baseline. Do not run the seed against a different repository
 - Invalid/unavailable storage is surfaced, never silently reset. A missing
   **state blob** initializes a new generation; a missing container or inaccessible
   account is an error. Do not delete the blob to troubleshoot a failure.
-- Old acknowledgement requests cannot hide later sequences. Undo targets an
+- Old acknowledgement requests cannot hide later sequences. Restore unread targets an
   acknowledgement ID, so it cannot undo a later independent read.
 - UI deployments download the existing Pages snapshot byte-for-byte and never
   ingest events. Polling the shared API updates read state only, not GitHub data.

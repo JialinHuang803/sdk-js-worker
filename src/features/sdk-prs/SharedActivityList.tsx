@@ -26,7 +26,7 @@ export function SharedActivityList({
     <section className="inbox-section">
       <div className="inbox-section__heading">
         <h3>{read ? "Recently read" : "Unread activities"}</h3>
-        <span>{groups.length} PRs · {read ? "Shared read history · Retained for 30 days after marking read" : "Oldest unread first · Unread activity never expires"}</span>
+        <span>{groups.length} PRs · {read ? "Shared read history · Retained for 3 days after marking read" : "Oldest unread first · Unread activity never expires"}</span>
       </div>
       {!groups.length ? (
         <p className="inbox-empty">

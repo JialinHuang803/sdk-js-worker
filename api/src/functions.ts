@@ -2,7 +2,7 @@ import { app, type HttpRequest, type HttpResponseInit, type InvocationContext } 
 import { DefaultAzureCredential } from "@azure/identity";
 import { BlobServiceClient } from "@azure/storage-blob";
 import {
-  ActivityError, acknowledge, ingest, parseAcknowledge, parseIngest, parseRestore, restore,
+  ActivityError, acknowledge, ingest, parseAcknowledge, parseIngest, parseRestore, pruneReadActivities, restore,
 } from "./engine";
 import { updateState, type StateBlob } from "./store";
 
@@ -88,12 +88,14 @@ function handler(
 
 app.http("activity", {
   methods: ["GET"], authLevel: "anonymous", route: "activity",
-  handler: handler(async () => (await updateState(blob(), () => undefined)).state.feed),
+  handler: handler(async () => (await updateState(
+    blob(), (state) => pruneReadActivities(state, new Date().toISOString()),
+  )).state.feed),
 });
 app.http("activity-baseline", {
   methods: ["GET"], authLevel: "function", route: "activity/baseline",
   handler: handler(async () => {
-    const { state } = await updateState(blob(), () => undefined);
+    const { state } = await updateState(blob(), (state) => pruneReadActivities(state, new Date().toISOString()));
     return { snapshot: state.snapshot, trackedPullRequests: state.feed.pullRequests };
   }),
 });

@@ -21,7 +21,7 @@ export interface ActivityState {
   rate: { minute: number; count: number };
 }
 
-const READ_RETENTION_MS = 30 * 24 * 60 * 60 * 1_000;
+const READ_RETENTION_MS = 3 * 24 * 60 * 60 * 1_000;
 const repoPattern = /^[\w.-]+\/[\w.-]+$/;
 const kinds = new Set(["new-pr", "new-commit", "new-comment", "merged"]);
 
@@ -192,9 +192,26 @@ function projectPull(p: SharedActivityPull): SharedActivityPull {
 }
 const pullKey = (repo: string, number: number) => `${repo}#${number}`;
 
+export function pruneReadActivities(state: ActivityState, now: string): void {
+  const events = state.feed.events.filter((event) =>
+    event.readAt === null || Date.parse(event.readAt) > Date.parse(now) - READ_RETENTION_MS);
+  const retained = new Set(events.map((event) => pullKey(event.repository, event.pullRequestNumber)));
+  const pulls = state.feed.pullRequests.filter(
+    (p) => p.state === "open" || retained.has(pullKey(p.repository, p.number)),
+  );
+  if (events.length !== state.feed.events.length || pulls.length !== state.feed.pullRequests.length) {
+    state.feed.events = events;
+    state.feed.pullRequests = pulls;
+    state.feed.revision++;
+  }
+}
+
 export function ingest(state: ActivityState, body: ActivityIngestRequest, now: string): void {
   const s = body.snapshot;
-  if (state.snapshot && Date.parse(s.generatedAt) <= Date.parse(state.snapshot.generatedAt)) return;
+  if (state.snapshot && Date.parse(s.generatedAt) <= Date.parse(state.snapshot.generatedAt)) {
+    pruneReadActivities(state, now);
+    return;
+  }
   if (state.snapshot && state.snapshot.source.repository !== s.source.repository) {
     throw new ActivityError(409, "Activity source repository cannot change.");
   }
@@ -242,10 +259,8 @@ export function ingest(state: ActivityState, body: ActivityIngestRequest, now: s
       append({ ...common, id: `${key}:merged:${merged.mergedAt}`, kind: "merged", occurredAt: merged.mergedAt });
     }
   }
-  state.feed.events = state.feed.events.filter((event) =>
-    event.readAt === null || Date.parse(event.readAt) > Date.parse(now) - READ_RETENTION_MS);
-  const retained = new Set(state.feed.events.map((event) => pullKey(event.repository, event.pullRequestNumber)));
-  state.feed.pullRequests = [...pulls.values()].filter((p) => p.state === "open" || retained.has(pullKey(p.repository, p.number)));
+  state.feed.pullRequests = [...pulls.values()];
+  pruneReadActivities(state, now);
   state.feed.collectedAt = s.generatedAt;
   state.feed.revision++;
   state.snapshot = s;
@@ -258,6 +273,7 @@ function mutation(state: ActivityState, generation: string, now: string): void {
   if (state.rate.count >= 120) throw new ActivityError(429, "Too many shared changes. Please wait a minute.");
   state.rate.count++;
   state.feed.revision++;
+  pruneReadActivities(state, now);
 }
 
 export function acknowledge(state: ActivityState, body: ActivityAcknowledgeRequest, now: string): string | null {

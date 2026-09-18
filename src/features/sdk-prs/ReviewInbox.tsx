@@ -140,18 +140,12 @@ export function ReviewInboxView({ snapshot, activity = null }: {
           <div className="shared-activity__toolbar">
             <span
               title="Anyone can mark activities as read for everyone. Opening a PR never marks it read."
-            >Read actions affect everyone</span>
+            >Read state is shared with everyone. Anyone can mark activities as read.</span>
             <span className="shared-activity__timing">{sharedTiming}</span>
             <button type="button" className="button-secondary" aria-expanded={showRead}
               onClick={() => setShowRead(!showRead)}>
               {showRead ? "Hide recently read" : "Recently read"} ({read.filter(({ pull }) => pull.plane === plane).length} PRs)
             </button>
-            {activity.lastAcknowledgement && <button type="button" className="button-secondary"
-              disabled={activity.loading || activity.pending || !!activity.error || !activity.feed?.collectedAt}
-              onClick={() => {
-                const last = activity.lastAcknowledgement;
-                if (last) activity.restore({ generation: last.generation, acknowledgementIds: [last.id] });
-              }}>Undo last mark read</button>}
           </div>
         </div>
       )}
@@ -167,6 +161,7 @@ export function ReviewInboxView({ snapshot, activity = null }: {
               entries={updated}
             />
           )}
+          {activity && showRead && <SharedActivityList groups={read.filter(({ pull }) => pull.plane === plane)} activity={activity} read />}
           {attention.length > 0 && (
             <InboxSection
               title="Needs attention"
@@ -174,7 +169,6 @@ export function ReviewInboxView({ snapshot, activity = null }: {
               entries={attention}
             />
           )}
-          {activity && showRead && <SharedActivityList groups={read.filter(({ pull }) => pull.plane === plane)} activity={activity} read />}
         </div>
       )}
     </Panel>

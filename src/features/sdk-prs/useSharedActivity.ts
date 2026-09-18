@@ -11,7 +11,6 @@ export interface SharedActivityState {
   loading: boolean;
   pending: boolean;
   error: string | null;
-  lastAcknowledgement: { generation: string; id: string } | null;
   retry: () => void;
   acknowledge: (request: ActivityAcknowledgeRequest) => void;
   restore: (request: ActivityRestoreRequest) => void;
@@ -22,7 +21,6 @@ export function useSharedActivity(baseUrl: string | undefined): SharedActivitySt
   const [loading, setLoading] = useState(Boolean(baseUrl));
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [lastAcknowledgement, setLastAcknowledgement] = useState<SharedActivityState["lastAcknowledgement"]>(null);
   const active = useRef(false);
   const version = useRef(0);
   const busy = useRef(false);
@@ -32,7 +30,6 @@ export function useSharedActivity(baseUrl: string | undefined): SharedActivitySt
   const endpoint = baseUrl?.replace(/\/+$/, "");
   const acceptFeed = useCallback((next: SharedActivityFeed) => {
     setFeed((current) => current?.generation === next.generation && current.revision > next.revision ? current : next);
-    setLastAcknowledgement((last) => last?.generation === next.generation ? last : null);
   }, []);
 
   const refresh = useCallback(async () => {
@@ -68,7 +65,6 @@ export function useSharedActivity(baseUrl: string | undefined): SharedActivitySt
     active.current = true;
     setFeed(null);
     setError(null);
-    setLastAcknowledgement(null);
     setPending(false);
     busy.current = false;
     available.current = false;
@@ -107,11 +103,6 @@ export function useSharedActivity(baseUrl: string | undefined): SharedActivitySt
       const result = parseActivityMutation(response);
       if (!active.current || controller.signal.aborted || requestVersion !== version.current) return;
       acceptFeed(result.feed);
-      if (action === "ack" && result.acknowledgementId) {
-        setLastAcknowledgement({ generation: result.feed.generation, id: result.acknowledgementId });
-      } else if ("acknowledgementIds" in request) {
-        setLastAcknowledgement((last) => last && request.acknowledgementIds.includes(last.id) ? null : last);
-      }
       available.current = result.feed.collectedAt !== null;
       setError(null);
     } catch (cause) {
@@ -127,7 +118,7 @@ export function useSharedActivity(baseUrl: string | undefined): SharedActivitySt
   }, [endpoint, acceptFeed]);
 
   return {
-    feed, loading, pending, error, lastAcknowledgement,
+    feed, loading, pending, error,
     retry: () => { void refresh(); },
     acknowledge: (request) => { void mutate("ack", request); },
     restore: (request) => { void mutate("restore", request); },

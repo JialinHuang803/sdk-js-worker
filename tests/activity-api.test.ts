@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   acknowledge, createState, ingest, parseAcknowledge, parseIngest, parseRestore,
-  restore, validateStoredState, type ActivityState,
+  restore, validateStoredState, pruneReadActivities, type ActivityState,
 } from "../api/src/engine";
 import { updateState, type StateBlob } from "../api/src/store";
 import { DASHBOARD_SCHEMA_VERSION, type DashboardSnapshot } from "../src/data/contracts";
@@ -109,6 +109,36 @@ describe("durable shared activity", () => {
     expect(state.feed.events.map((event) => event.sequence)).toEqual([2, 3]);
     expect(state.feed.events[0].id).toBe(oldUnreadId);
     expect(state.nextSequence).toBe(4);
+  });
+
+  it("expires read events at exactly three days without waiting for another collection", async () => {
+    const state = seed();
+    const id = acknowledge(state, ack(state), now)!;
+    const next = snapshot("2026-09-19T00:00:00Z", "head2");
+    ingest(state, { snapshot: next, inactivePullRequests: [] }, next.generatedAt);
+    const baseline = structuredClone(state.snapshot);
+    const revision = state.feed.revision;
+    pruneReadActivities(state, "2026-09-20T23:59:59.999Z");
+    expect(state.feed.events).toHaveLength(2);
+    expect(state.feed.revision).toBe(revision);
+    const blob = memoryStore(state);
+    const expired = await updateState(blob, (current) => pruneReadActivities(current, "2026-09-21T00:00:00Z"));
+    expect(expired.state.feed.events.map((event) => event.sequence)).toEqual([2]);
+    expect(expired.state.feed.events[0].readAt).toBeNull();
+    expect(expired.state.snapshot).toEqual(baseline);
+    expect(expired.state.nextSequence).toBe(3);
+    restore(expired.state, { generation: state.feed.generation, acknowledgementIds: [id] }, "2026-09-21T00:00:00Z");
+    expect(expired.state.feed.events.map((event) => event.sequence)).toEqual([2]);
+  });
+
+  it("cannot restore expired details and removes closed references only when no activities remain", () => {
+    const state = seed();
+    const id = acknowledge(state, ack(state), now)!;
+    state.feed.pullRequests[0].state = "closed";
+    restore(state, { generation: state.feed.generation, acknowledgementIds: [id] }, "2026-09-21T00:00:00Z");
+    expect(state.feed.events).toEqual([]);
+    expect(state.feed.pullRequests).toEqual([]);
+    expect(state.snapshot).not.toBeNull();
   });
 
   it("retains closed/merged cards without inventing closure events", () => {

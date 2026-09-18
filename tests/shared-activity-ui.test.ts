@@ -46,7 +46,7 @@ function snapshot(pulls: SharedActivityPull[] = [pull(1)]): DashboardSnapshot {
 }
 function state(data: SharedActivityFeed | null, overrides: Partial<SharedActivityState> = {}): SharedActivityState {
   return {
-    feed: data, loading: false, pending: false, error: null, lastAcknowledgement: null,
+    feed: data, loading: false, pending: false, error: null,
     retry: vi.fn(), acknowledge: vi.fn(), restore: vi.fn(), ...overrides,
   };
 }
@@ -126,7 +126,7 @@ describe("shared activity UI", () => {
     expect(html).toContain("First <time");
     expect(html).toContain("Latest <time");
     expect(html).toContain("Oldest unread first");
-    expect(html).toContain("Read actions affect everyone");
+    expect(html).toContain("Read state is shared with everyone. Anyone can mark activities as read.");
     expect(html).not.toContain("No sign-in is required.");
     expect(html).toContain(`aria-label="Mark activities as read for ${repository} #1"`);
     const attention = html.slice(html.indexOf("<h3>Needs attention</h3>"));
@@ -173,19 +173,19 @@ describe("shared activity UI", () => {
     expect(html.match(/1 unread event/g)).toHaveLength(2);
   });
 
-  it("renders read markers, restoration and undo affordances", () => {
+  it("retains recently read restoration without a separate undo button", () => {
     const data = feed({ events: [event(1, 1, { readAt: time, acknowledgementId: "ack" })] });
-    const activity = state(data, { lastAcknowledgement: { generation: data.generation, id: "ack" } });
+    const activity = state(data);
     const list = renderToStaticMarkup(createElement(SharedActivityList, {
       groups: groupActivities(data, true), activity, read: true,
     }));
     expect(list).toContain("1 read event");
     expect(list).toContain(`aria-label="Restore read activities for ${repository} #1"`);
     expect(list).toContain("Restore unread");
-    expect(list).toContain("Retained for 30 days after marking read");
+    expect(list).toContain("Retained for 3 days after marking read");
     const html = renderToStaticMarkup(createElement(ReviewInboxView, { snapshot: snapshot([]), activity }));
     expect(html).toContain("Recently read");
-    expect(html).toContain("Undo last mark read");
+    expect(html).not.toContain("Undo last mark read");
     expect(html).toContain("Management <span>0</span>");
   });
 

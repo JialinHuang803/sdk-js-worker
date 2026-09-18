@@ -172,8 +172,9 @@ deployment cannot overlap.
 
 The inbox shows **Unread activities**, aggregated per PR across collection
 cycles, and independent **Needs attention**. Mark read acknowledges only the
-displayed activities for everyone across devices. Undo and Recently read restore
-acknowledged events for 30 days; unread events do not expire. A PR can appear in
+displayed activities for everyone across devices. Recently read restores
+acknowledged events for 3 days; unread events do not expire. When opened, Recently
+read appears between Unread activities and Needs attention. A PR can appear in
 both blocks. Drafts are hidden from Needs attention but remain eligible for
 unread activity and stay in the full table/report. HoldOn hides activity without
 acknowledging it. Tab counts count unique visible PRs, not duplicated cards.
