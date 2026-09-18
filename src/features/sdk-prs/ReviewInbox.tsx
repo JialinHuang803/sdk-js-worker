@@ -12,7 +12,7 @@ import { Panel } from "../../shared/Panel";
 type InboxPull = Pick<
   PullRequestRecord,
   "repository" | "number" | "url" | "title" | "plane"
-> & Partial<Pick<PullRequestRecord, "packages" | "checks">>;
+> & Partial<Pick<PullRequestRecord, "packages" | "checks" | "draft">>;
 
 const reasonLabels: Record<InboxReason, string> = {
   merged: "Merged",
@@ -51,11 +51,16 @@ export function ReviewInbox({ snapshot }: { snapshot: DashboardSnapshot }) {
       ),
     [snapshot.pullRequests, snapshot.mergedPullRequests],
   );
-  const items = snapshot.inbox.items
-    .flatMap((item) => {
-      const pull = getPull(item, pulls);
-      return pull && pull.plane === plane ? [{ item, pull }] : [];
-    })
+  const visibleEntries = snapshot.inbox.items.flatMap((item) => {
+    const pull = getPull(item, pulls);
+    if (
+      !pull ||
+      (pull.draft && !item.reasons.some((reason) => activityReasons.has(reason)))
+    ) return [];
+    return [{ item, pull }];
+  });
+  const items = visibleEntries
+    .filter(({ pull }) => pull.plane === plane)
     .sort(compareInboxEntries);
   const updated = items.filter(({ item }) =>
     item.reasons.some((reason) => activityReasons.has(reason)),
@@ -64,11 +69,11 @@ export function ReviewInbox({ snapshot }: { snapshot: DashboardSnapshot }) {
     ({ item }) => !item.reasons.some((reason) => activityReasons.has(reason)),
   );
   const counts = {
-    management: snapshot.inbox.items.filter(
-      (item) => getPull(item, pulls)?.plane === "management",
+    management: visibleEntries.filter(
+      ({ pull }) => pull.plane === "management",
     ).length,
-    data: snapshot.inbox.items.filter(
-      (item) => getPull(item, pulls)?.plane === "data",
+    data: visibleEntries.filter(
+      ({ pull }) => pull.plane === "data",
     ).length,
   };
 
@@ -111,7 +116,7 @@ export function ReviewInbox({ snapshot }: { snapshot: DashboardSnapshot }) {
           {attention.length > 0 && (
             <InboxSection
               title="Needs attention"
-              description="Open review and CI work without a new update"
+              description="Non-draft review and CI work without a new update"
               entries={attention}
             />
           )}

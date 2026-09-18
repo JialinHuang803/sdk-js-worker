@@ -66,6 +66,12 @@ Priority is new commit, new PR, new comment, merged, review needed, then CI help
 Items with activity are shown under **Updated since last refresh**. Persistent
 review/CI items with no new activity are shown under **Still needs attention**.
 
+Draft PRs are excluded from **Needs attention**, even when they require approval
+or have failed CI. They can still appear in **New activity** for new PRs, commits,
+or comments. Inbox tab counts reflect only visible entries; the full table and
+delivery report still include drafts. This presentation rule also applies to
+already-published snapshots, without a data refresh.
+
 The inbox uses a compact, two-column notification feed on wider screens and a
 single column on smaller screens. The PR number, primary activity, verb-first
 headline, and relative timestamp share one scan line. Labels use readable title

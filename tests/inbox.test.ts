@@ -109,6 +109,72 @@ describe("comment author exclusion", () => {
   });
 });
 
+describe("draft inbox visibility", () => {
+  function snapshot(current: PullRequestRecord[]): DashboardSnapshot {
+    const now = "2026-09-18T00:00:00Z";
+    return {
+      schemaVersion: DASHBOARD_SCHEMA_VERSION, generatedAt: now, stale: false,
+      source: { repository: current[0].repository, fetchedAt: now, query: "" },
+      pullRequests: current,
+      inbox: buildReviewInbox({
+        current, previous: null, comments: new Map(),
+        generatedAt: now, defaultPlane: current[0].plane,
+      }),
+    };
+  }
+
+  it.each(["management", "data"] as const)(
+    "hides draft review/CI attention and excludes it from the %s tab count",
+    (plane) => {
+      const current = [
+        pull(39501, {
+          plane, draft: true, reviewDecision: "review-required",
+          checks: { failedCount: 2, qualification: "complete", observedCount: 3 },
+        }),
+        pull(2, { plane, reviewDecision: "review-required" }),
+        pull(3, {
+          plane: plane === "management" ? "data" : "management",
+          draft: true, reviewDecision: "review-required",
+        }),
+      ];
+      const data = snapshot(current);
+      const html = renderToStaticMarkup(createElement(ReviewInbox, { snapshot: data }));
+      expect(html).not.toContain("#39501");
+      expect(html).not.toContain("#3");
+      expect(html).toContain("#2");
+      expect(html).toContain("Needs attention");
+      expect(html).toContain(`${plane === "management" ? "Management" : "Data plane"} <span>1</span>`);
+      expect(html).toContain(`${plane === "management" ? "Data plane" : "Management"} <span>0</span>`);
+      expect(data.inbox.items).toHaveLength(3);
+      expect(renderToStaticMarkup(createElement(PrTable, {
+        rows: current, now: new Date(data.generatedAt),
+      }))).toContain("#39501");
+    },
+  );
+
+  it.each(["new-pr", "new-commit", "new-comment"] as const)(
+    "retains %s activity for drafts without duplicating attention",
+    (reason) => {
+      const data = snapshot([pull(39501, { draft: true, reviewDecision: "review-required" })]);
+      data.inbox.items[0].reasons.unshift(reason);
+      const html = renderToStaticMarkup(createElement(ReviewInbox, { snapshot: data }));
+      expect(html).toContain("New activity");
+      expect(html).toContain("#39501");
+      expect(html).toContain("Management <span>1</span>");
+      expect(html).not.toContain("Needs attention");
+    },
+  );
+
+  it("shows the empty state when only draft attention remains", () => {
+    const data = snapshot([pull(39501, { draft: true, reviewDecision: "review-required" })]);
+    const html = renderToStaticMarkup(createElement(ReviewInbox, { snapshot: data }));
+    expect(html).toContain("No SDK-team attention is needed");
+    expect(html).toContain("Management <span>0</span>");
+    expect(html).not.toContain("Needs attention");
+    expect(html).not.toContain("New activity");
+  });
+});
+
 describe("buildReviewInbox", () => {
   it("excludes only new-commit activity while keeping other reasons and the new baseline SHA", async () => {
     const current = [pull(1, {

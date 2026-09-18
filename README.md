@@ -161,6 +161,8 @@ deployment cannot overlap.
 
 The inbox shows **Changes since** (the preceding data refresh) and **Last
 refreshed** (the current snapshot). Neither timestamp changes on UI-only pushes.
+Drafts are hidden from **Needs attention**, but remain eligible for **New activity**
+and stay in the full table and delivery report. Inbox tab counts exclude hidden entries.
 `activity.excludedCommitAuthorPatterns` in `.github/dashboard-config.json`
 defaults to `["kazrael2119"]`. A changed head does not create a **New commit**
 notification when every added commit since the previous snapshot is authored
