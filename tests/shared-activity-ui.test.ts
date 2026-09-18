@@ -126,7 +126,8 @@ describe("shared activity UI", () => {
     expect(html).toContain("First <time");
     expect(html).toContain("Latest <time");
     expect(html).toContain("Oldest unread first");
-    expect(html).toContain("Read state is shared with everyone. Anyone can mark activities as read.");
+    expect(html).toContain("Read actions affect everyone");
+    expect(html).not.toContain("No sign-in is required.");
     expect(html).toContain(`aria-label="Mark activities as read for ${repository} #1"`);
     const attention = html.slice(html.indexOf("<h3>Needs attention</h3>"));
     expect(attention).toContain("waiting for approval");
@@ -238,8 +239,18 @@ describe("shared activity UI", () => {
     const html = renderToStaticMarkup(createElement(ReviewInboxView, {
       snapshot: snapshot(), activity: state(feed({ collectedAt: activityTime })),
     }));
-    expect(html).toContain(`Attention snapshot last refreshed ${new Date(time).toLocaleString()}`);
-    expect(html).toContain(`Shared activity last collected ${new Date(activityTime).toLocaleString()}`);
+    expect(html).toContain(`Attention: ${new Date(time).toLocaleString()}`);
+    expect(html).toContain(`Activities: ${new Date(activityTime).toLocaleString()}`);
+  });
+
+  it("combines matching collection times into one compact toolbar label", () => {
+    const html = renderToStaticMarkup(createElement(ReviewInboxView, {
+      snapshot: snapshot(), activity: state(feed({ collectedAt: time })),
+    }));
+    expect(html).toContain(`Updated ${new Date(time).toLocaleString()}`);
+    expect(html).not.toContain("Attention:");
+    expect(html).not.toContain("Activities:");
+    expect(html).not.toContain("No sign-in is required.");
   });
 
   it("honestly falls back to refresh-cycle activity without an API URL", () => {

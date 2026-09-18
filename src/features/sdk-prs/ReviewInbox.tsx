@@ -97,6 +97,11 @@ export function ReviewInboxView({ snapshot, activity = null }: {
   const snapshotTiming = snapshot.inbox.comparisonFrom
     ? `Changes since ${new Date(snapshot.inbox.comparisonFrom).toLocaleString()} · Last refreshed ${new Date(snapshot.generatedAt).toLocaleString()}`
     : `Baseline established; showing current review and CI work · Last refreshed ${new Date(snapshot.generatedAt).toLocaleString()}`;
+  const activityTime = activity?.feed?.collectedAt;
+  const sharedTiming = activityTime && Date.parse(activityTime) === Date.parse(snapshot.generatedAt)
+    ? `Updated ${new Date(snapshot.generatedAt).toLocaleString()}`
+    : `Attention: ${new Date(snapshot.generatedAt).toLocaleString()}${activityTime
+      ? ` · Activities: ${new Date(activityTime).toLocaleString()}` : ""}`;
 
   return (
     <Panel
@@ -125,10 +130,6 @@ export function ReviewInboxView({ snapshot, activity = null }: {
       </div>
       {activity && (
         <div className="shared-activity__status">
-          <p>Read state is shared with everyone. Anyone can mark activities as read.</p>
-          <p>No sign-in is required. Opening a PR never marks it read.</p>
-          <p>Attention snapshot last refreshed {new Date(snapshot.generatedAt).toLocaleString()}</p>
-          {activity.feed?.collectedAt && <p>Shared activity last collected {new Date(activity.feed.collectedAt).toLocaleString()}</p>}
           {activity.feed?.collectedAt === null && <p role="status">Awaiting first collection. Shared activity has not been initialized; snapshot attention is shown independently.</p>}
           {activity.error && <div role="alert" className="freshness-warning">
             {activity.error} {activity.feed ? "Showing stale activities from the last successful load. Writes are disabled." : "Shared activities could not be loaded. Writes are disabled."}
@@ -137,6 +138,10 @@ export function ReviewInboxView({ snapshot, activity = null }: {
           {activity.loading && <p role="status">{activity.feed ? "Refreshing shared activities; writes are paused…" : "Loading shared activities…"}</p>}
           {activity.pending && <p role="status">Saving shared read state…</p>}
           <div className="shared-activity__toolbar">
+            <span
+              title="Anyone can mark activities as read for everyone. Opening a PR never marks it read."
+            >Read actions affect everyone</span>
+            <span className="shared-activity__timing">{sharedTiming}</span>
             <button type="button" className="button-secondary" aria-expanded={showRead}
               onClick={() => setShowRead(!showRead)}>
               {showRead ? "Hide recently read" : "Recently read"} ({read.filter(({ pull }) => pull.plane === plane).length} PRs)

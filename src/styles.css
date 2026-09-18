@@ -187,7 +187,8 @@ main { min-width: 0; padding: 30px; }
 }
 .shared-activity__status { margin-top: 14px; color: #647087; font-size: 13px; }
 .shared-activity__status p { margin: 5px 0; line-height: 1.5; }
-.shared-activity__toolbar { margin-top: 10px; }
+.shared-activity__toolbar { margin-top: 0; align-items: center; }
+.shared-activity__timing { margin-right: auto; }
 .shared-activity__status .freshness-warning { margin-top: 10px; line-height: 1.6; }
 .shared-activity__status .freshness-warning button { margin-left: 10px; }
 button:disabled { cursor: not-allowed; opacity: 0.55; }
