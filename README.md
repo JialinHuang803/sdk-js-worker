@@ -163,8 +163,11 @@ query behavior without requiring a plugin runtime or placeholder tabs.
 The **JS emitter** tab monitors open issues and pull requests in
 `Azure/typespec-azure` with the `emitter:typescript` label. Open counts include
 draft PRs and all labeled issues (including tracking reports), not just items
-requiring action. Issues and PRs are listed separately with search and draft
-filtering. The package overview shows the public npm **latest dist-tag** for
+requiring action. The shared work pane has issue/PR tabs, a compact **Needs
+attention** inbox, and **All open** tables with search and draft filtering.
+The inbox combines unread activity with current unassigned issues or explicitly
+requested PR reviews; it does not infer that an issue needs triage.
+The package overview shows the public npm **latest dist-tag** for
 `@azure-tools/typespec-ts`, not the repository's development version or `next`
 prerelease tag.
 
@@ -188,12 +191,31 @@ at **20:17 UTC** or by manual dispatch, independently of the SDK collector.
 The emitter tab's **Refresh data** link opens that workflow.
 This workflow uses only `GITHUB_TOKEN` for public repository reads; no Azure
 organization installation or new token secret is required.
+For team-shared read state, it also uses the existing `ACTIVITY_API_URL` variable
+and `ACTIVITY_INGEST_KEY` secret against an isolated emitter feed in the same
+Azure service. Deploy the updated API before running the collector.
+
+**Mark read** is shared with everyone, not browser-local. It acknowledges only
+the displayed activity; it does not resolve unassigned work or a review request.
+**Recently read** retains recoverable acknowledgements for three days. The first
+collection establishes a baseline without labeling the backlog as new. Subsequent
+collections record newly created work, observed PR head changes, and relevant new
+comments. Unread events survive later refreshes; closed or label-removed work
+leaves the inbox. Opening GitHub links never marks activity read.
+
+`.github/emitter-config.json` controls excluded tracking issue numbers (initially
+Spector #5313, still visible in the overview and full table).
+Comment author exclusions and conversation/review-comment/review-summary switches
+reuse `.github/dashboard-config.json`. Comment edits and approval-only reviews
+do not generate new-comment notifications. No comment or review body is published.
 
 The emitter collector publishes an allowlist of issue/PR metadata: title, link,
 number, timestamps, author login, assignee logins, label names, comment count,
-and PR draft state. It does not publish bodies, comments, email addresses, or
-raw API responses. It paginates the repository issues endpoint (which includes
-PRs), avoiding GitHub Search's result cap. A failed GitHub or npm lookup stops
+and PR draft state, head SHA, and requested reviewer/team names. Activity publishes
+only stable IDs, kinds, timestamps, source links, and author logins. It does not
+publish bodies, comment text, email addresses, or raw API responses. It paginates
+the repository issues endpoint (which includes PRs) and each comment/review source,
+avoiding GitHub Search's result cap. A failed GitHub or npm lookup stops
 publication and leaves the previous deployment intact; timestamps and the
 26-hour freshness warning show when results are old.
 

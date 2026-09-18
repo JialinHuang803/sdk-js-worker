@@ -279,6 +279,45 @@ tbody tr:hover { background: #fbfcfe; }
 .emitter-dashboard { font-size: 13px; line-height: 1.5; }
 .emitter-work-tabs { flex-wrap: wrap; }
 .emitter-work-tabs button, .emitter-work-tabs span { font-size: 13px; }
+.emitter-view-toggle { display: flex; gap: 4px; padding: 14px 0 4px; }
+.emitter-view-toggle button {
+  border: 1px solid #cbd5e2; border-radius: 6px; padding: 7px 12px;
+  background: white; color: #42536b; cursor: pointer; font-size: 13px;
+}
+.emitter-view-toggle button[aria-pressed="true"] {
+  color: #075eaf; background: #eaf4fc; border-color: #8ebde0; font-weight: 650;
+}
+.emitter-inbox-notice { font-size: 13px; line-height: 1.5; color: #54637a; }
+.emitter-inbox-notice p { margin: 8px 0; }
+.emitter-inbox { display: grid; gap: 16px; padding-top: 6px; }
+.emitter-inbox h3 { font-size: 14px; margin: 10px 0; }
+.emitter-inbox h3 span { margin-left: 6px; font-size: 13px; font-weight: 400; color: #647087; }
+.emitter-inbox-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; }
+.emitter-notification {
+  min-width: 0; padding: 12px 14px; border: 1px solid #dbe4ef; border-radius: 8px;
+  background: #f6faff; font-size: 13px; line-height: 1.5; overflow-wrap: anywhere;
+}
+.emitter-notification--read { background: #fafbfd; }
+.emitter-notification__heading, .emitter-notification__actions {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px;
+}
+.emitter-notification__heading > a { font-weight: 650; }
+.emitter-notification h4 { margin: 7px 0 3px; font-size: 13px; font-weight: 650; }
+.emitter-notification h4 a { color: #172b45; }
+.emitter-notification p { margin: 4px 0; }
+.emitter-notification__actions { margin-top: 8px; }
+.emitter-notification__actions:empty { display: none; }
+.emitter-notification__actions button { font-size: 13px; padding: 5px 9px; }
+.emitter-notification button:disabled, .emitter-inbox-notice button:disabled { opacity: .55; cursor: not-allowed; }
+.emitter-signal, .emitter-activity-label {
+  font-size: 13px; padding: 1px 6px; border-radius: 4px; color: #75511c; background: #fff0d9;
+}
+.emitter-activity-label { color: #225d94; background: #e8f1fc; }
+.emitter-inbox-empty { color: #647087; padding: 12px 0; margin: 0; }
+.emitter-dashboard button:focus-visible { outline: 2px solid #0876bd; outline-offset: 3px; }
+@media (max-width: 900px) {
+  .emitter-inbox-grid { grid-template-columns: 1fr; }
+}
 .emitter-work-tabs button:focus-visible,
 .emitter-dashboard [role="tabpanel"]:focus-visible { outline: 2px solid #0876bd; outline-offset: 3px; }
 .emitter-dashboard .filters label,

@@ -21,6 +21,17 @@ The state lives in private Blob Storage at `activity/state.json`, not GitHub
 Pages or browser storage. Public callers get only the projected activity feed;
 the collector baseline is accessible only with the ingestion key.
 
+The emitter inbox uses the same Function App but a separate
+`activity/emitter-state.json` blob. Its routes are `/api/emitter-activity`,
+`/api/emitter-activity/ack`, `/api/emitter-activity/restore`,
+`/api/emitter-activity/baseline`, and `/api/emitter-activity/ingest`, with the same
+public/protected split as the SDK routes below. Emitter acknowledgements,
+generation, sequences, rate limiting and baseline are independent of SDK state.
+Deploy the updated API before enabling emitter shared collection. The first
+**Collect JS emitter** run initializes its baseline; do not use the SDK seed
+command for emitter activity. The existing repository API URL and ingestion key
+are reused by the independently scheduled emitter workflow.
+
 ## Routes and permissions
 
 | Route | Access | Purpose |

@@ -5,10 +5,16 @@ import {
   ActivityError, acknowledge, ingest, parseAcknowledge, parseIngest, parseRestore, pruneReadActivities, restore,
 } from "./engine";
 import { updateState, type StateBlob } from "./store";
+import {
+  acknowledgeEmitter, ingestEmitter, parseEmitterAcknowledge, parseEmitterIngest,
+  parseEmitterRestore, pruneEmitterReadActivities, restoreEmitter,
+} from "./emitter-engine";
+import { updateEmitterState } from "./emitter-store";
 
-let cachedBlob: StateBlob | undefined;
-function blob(): StateBlob {
-  if (cachedBlob) return cachedBlob;
+const cachedBlobs = new Map<string, StateBlob>();
+function blob(name = "state.json"): StateBlob {
+  const cached = cachedBlobs.get(name);
+  if (cached) return cached;
   const account = process.env.ACTIVITY_STORAGE_ACCOUNT;
   if (!account || !/^[a-z0-9]{3,24}$/.test(account)) {
     throw new Error("ACTIVITY_STORAGE_ACCOUNT is not configured.");
@@ -21,8 +27,8 @@ function blob(): StateBlob {
     `https://${account}.blob.core.windows.net`,
     new DefaultAzureCredential(),
     { retryOptions: { maxTries: 3, tryTimeoutInMs: 10_000 } },
-  ).getContainerClient(container).getBlockBlobClient("state.json");
-  cachedBlob = {
+  ).getContainerClient(container).getBlockBlobClient(name);
+  const result: StateBlob = {
     async read() {
       try {
         const response = await client.download();
@@ -43,7 +49,8 @@ function blob(): StateBlob {
       });
     },
   };
-  return cachedBlob;
+  cachedBlobs.set(name, result);
+  return result;
 }
 
 async function body(request: HttpRequest, limit: number): Promise<unknown> {
@@ -120,6 +127,52 @@ app.http("activity-restore", {
   handler: handler(async (request) => {
     const input = parseRestore(await body(request, 16 * 1024));
     const { state } = await updateState(blob(), (state) => restore(state, input, new Date().toISOString()));
+    return { feed: state.feed, acknowledgementId: null };
+  }),
+});
+
+app.http("emitter-activity", {
+  methods: ["GET"], authLevel: "anonymous", route: "emitter-activity",
+  handler: handler(async () => (await updateEmitterState(
+    blob("emitter-state.json"), (state) => pruneEmitterReadActivities(state, new Date().toISOString()),
+  )).state.feed),
+});
+app.http("emitter-activity-baseline", {
+  methods: ["GET"], authLevel: "function", route: "emitter-activity/baseline",
+  handler: handler(async () => {
+    const { state } = await updateEmitterState(
+      blob("emitter-state.json"), (state) => pruneEmitterReadActivities(state, new Date().toISOString()),
+    );
+    return { snapshot: state.snapshot?.activity ? state.snapshot : null };
+  }),
+});
+app.http("emitter-activity-ingest", {
+  methods: ["POST"], authLevel: "function", route: "emitter-activity/ingest",
+  handler: handler(async (request) => {
+    const input = parseEmitterIngest(await body(request, 4 * 1024 * 1024));
+    const { state } = await updateEmitterState(
+      blob("emitter-state.json"), (state) => ingestEmitter(state, input, new Date().toISOString()),
+    );
+    return { collectedAt: state.feed.collectedAt, revision: state.feed.revision };
+  }),
+});
+app.http("emitter-activity-ack", {
+  methods: ["POST"], authLevel: "anonymous", route: "emitter-activity/ack",
+  handler: handler(async (request) => {
+    const input = parseEmitterAcknowledge(await body(request, 16 * 1024));
+    const { state, result } = await updateEmitterState(
+      blob("emitter-state.json"), (state) => acknowledgeEmitter(state, input, new Date().toISOString()),
+    );
+    return { feed: state.feed, acknowledgementId: result };
+  }),
+});
+app.http("emitter-activity-restore", {
+  methods: ["POST"], authLevel: "anonymous", route: "emitter-activity/restore",
+  handler: handler(async (request) => {
+    const input = parseEmitterRestore(await body(request, 16 * 1024));
+    const { state } = await updateEmitterState(
+      blob("emitter-state.json"), (state) => restoreEmitter(state, input, new Date().toISOString()),
+    );
     return { feed: state.feed, acknowledgementId: null };
   }),
 });

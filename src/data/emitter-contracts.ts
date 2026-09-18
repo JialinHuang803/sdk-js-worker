@@ -12,6 +12,24 @@ export interface EmitterIssue {
 
 export interface EmitterPullRequest extends EmitterIssue {
   draft: boolean;
+  headSha?: string;
+  requestedReviewers?: string[];
+  requestedTeams?: string[];
+}
+
+export interface EmitterActivity {
+  id: string;
+  number: number;
+  kind: "new-issue" | "new-pr" | "new-commit" | "new-comment";
+  occurredAt: string;
+  url: string;
+  author?: string;
+}
+
+export interface EmitterActivityWindow {
+  comparisonFrom: string | null;
+  events: EmitterActivity[];
+  excludedIssueNumbers: number[];
 }
 
 export interface SpectorSuite {
@@ -39,6 +57,7 @@ export interface EmitterSnapshot {
   issues: EmitterIssue[];
   pullRequests: EmitterPullRequest[];
   coverage?: SpectorCoverage;
+  activity?: EmitterActivityWindow;
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -96,18 +115,58 @@ export function isSpectorCoverage(value: unknown): value is SpectorCoverage {
   });
 }
 
+export function isEmitterActivity(value: unknown): value is EmitterActivity {
+  return isRecord(value) && isText(value.id) &&
+    Number.isSafeInteger(value.number) && Number(value.number) > 0 &&
+    ["new-issue", "new-pr", "new-commit", "new-comment"].includes(String(value.kind)) &&
+    isTimestamp(value.occurredAt) && isWebUrl(value.url) &&
+    (value.author === undefined || isText(value.author));
+}
+
+function isActivityWindow(value: unknown): value is EmitterActivityWindow {
+  return isRecord(value) &&
+    (value.comparisonFrom === null || isTimestamp(value.comparisonFrom)) &&
+    Array.isArray(value.events) && value.events.every(isEmitterActivity) &&
+    Array.isArray(value.excludedIssueNumbers) &&
+    value.excludedIssueNumbers.every((number) => Number.isSafeInteger(number) && Number(number) > 0);
+}
+
 export function isEmitterSnapshot(value: unknown): value is EmitterSnapshot {
   if (!isRecord(value) || value.schemaVersion !== 1 ||
     !isTimestamp(value.generatedAt) || !isRecord(value.source) ||
     !isRecord(value.package)) return false;
-  return isText(value.source.repository) && isText(value.source.label) &&
+  const activity = value.activity;
+  if (activity !== undefined && (!isActivityWindow(activity) ||
+    (activity.comparisonFrom !== null &&
+      Date.parse(activity.comparisonFrom) > Date.parse(value.generatedAt)))) return false;
+  const issues = value.issues;
+  const pullRequests = value.pullRequests;
+  if (!Array.isArray(issues) || !issues.every(isIssue) ||
+    !Array.isArray(pullRequests) || !pullRequests.every(isIssue)) return false;
+  const valid = isText(value.source.repository) && isText(value.source.label) &&
     isTimestamp(value.source.fetchedAt) &&
     isText(value.package.name) && isText(value.package.version) &&
     (value.package.publishedAt === null || isTimestamp(value.package.publishedAt)) &&
     isWebUrl(value.package.url) &&
     (value.coverage === undefined || isSpectorCoverage(value.coverage)) &&
-    Array.isArray(value.issues) && value.issues.every(isIssue) &&
-    Array.isArray(value.pullRequests) && value.pullRequests.every(
-      (pr: unknown) => isIssue(pr) && "draft" in pr && typeof pr.draft === "boolean",
+    pullRequests.every(
+      (pr: unknown) => isIssue(pr) && "draft" in pr && typeof pr.draft === "boolean" &&
+        (!("headSha" in pr) || isText(pr.headSha)) &&
+        (!("requestedReviewers" in pr) || isStringArray(pr.requestedReviewers)) &&
+        (!("requestedTeams" in pr) || isStringArray(pr.requestedTeams)),
     );
+  if (!valid) return false;
+  const numbers = [...issues, ...pullRequests].map((item) => item.number);
+  if (new Set(numbers).size !== numbers.length) return false;
+  if (!activity) return true;
+  const generatedAt = value.generatedAt;
+  const issueNumbers = new Set(issues.map((issue) => issue.number));
+  const pullNumbers = new Set(pullRequests.map((pull) => pull.number));
+  return new Set(activity.events.map((event) => event.id)).size === activity.events.length &&
+    activity.events.every((event) => numbers.includes(event.number) &&
+      activity.comparisonFrom !== null &&
+      Date.parse(event.occurredAt) > Date.parse(activity.comparisonFrom) &&
+      Date.parse(event.occurredAt) <= Date.parse(generatedAt) &&
+      (event.kind !== "new-issue" || issueNumbers.has(event.number)) &&
+      (!["new-pr", "new-commit"].includes(event.kind) || pullNumbers.has(event.number)));
 }

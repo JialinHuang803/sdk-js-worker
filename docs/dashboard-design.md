@@ -13,7 +13,8 @@ draft PRs. These are inventory counts, not inferred triage priorities.
 The lists share one **Emitter work** pane with **Open issues** and **Open pull
 requests** tabs and item counts. Issues are selected initially; each tab keeps
 its own search and filters when switching. Arrow keys, Home and End navigate
-the tabs. The lists provide links, ownership, timestamps and draft state without
+the tabs. Each work tab defaults to **Needs attention**, with **All open** retaining
+the complete searchable inventory. The lists provide links, ownership, timestamps and draft state without
 publishing bodies. The overview's **Spector Coverage** section extracts per-suite pass rates
 and counts from the Summary table in Azure/typespec-azure#5313, with the report
 date and a direct link. Coverage means passed / total, including unimplemented
@@ -28,6 +29,51 @@ No separate Spector view or combined team inbox is needed for this initial scope
 publisher preserves the other feature's snapshot byte-for-byte under a shared
 deployment concurrency group; UI-only publishing advances neither source's
 timestamp. The registry owns each feature's repository and refresh links.
+
+### Emitter inbox
+
+There is no **Needs triage** signal: the repository currently has no authoritative
+triage marker. Compact notification cards group signals by issue/PR, rather than
+displaying one card for every comment. Current work and activity are distinct:
+
+| Signal | Source and meaning |
+|---|---|
+| New issue / New PR | Creation time within the successful collection window; adding a label to old work is not creation |
+| New commits | Current PR head differs from the prior collected head; includes rebases/force pushes, not a commit count |
+| New comment | New conversation comment, inline review comment, or nonempty comment/changes-requested review summary |
+| Unassigned | An issue has no assignee; this is an ownership cue, not proof that it is untriaged |
+| Review requested | A non-draft PR has explicit outstanding requested reviewers or teams; no approval/merge readiness is inferred |
+
+Draft PRs do not dominate review attention; relevant discussion may still surface
+them. Spector issue 5313 is excluded from the inbox by
+`.github/emitter-config.json`, but remains in the overview, counts and all-open
+inventory. The shared dashboard configuration supplies case-insensitive comment
+author patterns and comment-source switches. Edited old comments, approval-only
+reviews and pending review drafts do not count as new discussion. Comment text
+and review bodies are used only transiently and never published.
+
+The first activity-enabled collection establishes a baseline, showing current
+ownership/review work without inventing historical activity. Collection windows
+start at the previous durable snapshot and end at this run's start time.
+Comment timestamps must fall inside that window; a head change is dated when
+observed, not inferred from the PR's unrelated last-update time. GitHub collection
+is not transactional, so very short-lived work between collections is not a
+complete audit trail.
+
+Read acknowledgements are **team-shared**, using the existing Azure service with
+an isolated emitter state blob and routes. Anyone can mark activity read for
+everyone. Mark read acknowledges only displayed sequences, leaving later arrivals
+unread; it does not resolve persistent ownership/review work. Recently read is
+recoverable for three days. Opening a link does not acknowledge anything. API
+failure is explicit and disables writes rather than falling back to local read
+state. Closed/merged or no-longer-labeled work leaves this open-work inbox.
+
+The protected service baseline is authoritative. Ingestion precedes Pages
+publication so a failed deployment does not discard recorded events. The emitter
+feed can therefore be newer than the published snapshot. Work counts and tables
+use the fresher inventory; package and coverage remain from the published snapshot,
+with collection times displayed separately. No emitter operation rewrites SDK activity.
+There is no emitter CI signal, automatic triage inference, or AI prioritization.
 
 ## Product goal
 

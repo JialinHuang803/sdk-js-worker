@@ -1,14 +1,25 @@
 import { useId, useState, type KeyboardEvent } from "react";
-import type { EmitterIssue, EmitterPullRequest } from "../../data/emitter-contracts";
+import type { EmitterActivityWindow, EmitterIssue, EmitterPullRequest } from "../../data/emitter-contracts";
 import { Panel } from "../../shared/Panel";
+import { EmitterActivityNotice, EmitterInboxView } from "./EmitterInbox";
 import { EmitterTable } from "./EmitterTable";
+import { unavailableEmitterActivity, type EmitterActivityActions, type EmitterActivityState } from "./useEmitterActivity";
 
-export function EmitterWorkPane({ issues, pullRequests }: {
+export function EmitterWorkPane({
+  issues, pullRequests, activity = unavailableEmitterActivity, actions, baseline, now = Date.now(),
+}: {
   issues: EmitterIssue[];
   pullRequests: EmitterPullRequest[];
+  activity?: EmitterActivityState;
+  actions?: EmitterActivityActions;
+  baseline?: EmitterActivityWindow;
+  now?: number;
 }) {
   const id = useId();
   const [active, setActive] = useState(0);
+  const [mode, setMode] = useState<"attention" | "all">("attention");
+  const excluded = activity.feed?.collectedAt ? activity.feed.excludedIssueNumbers
+    : baseline?.excludedIssueNumbers ?? [5313];
   const tabs = [
     { title: "Open issues", kind: "issues" as const, rows: issues },
     { title: "Open pull requests", kind: "pull requests" as const, rows: pullRequests },
@@ -37,10 +48,19 @@ export function EmitterWorkPane({ issues, pullRequests }: {
         {tab.title} <span>{tab.rows.length}</span>
       </button>)}
     </div>
+    <div className="emitter-view-toggle" role="group" aria-label="Emitter work view">
+      <button type="button" aria-pressed={mode === "attention"}
+        onClick={() => setMode("attention")}>Needs attention</button>
+      <button type="button" aria-pressed={mode === "all"}
+        onClick={() => setMode("all")}>All open</button>
+    </div>
+    <EmitterActivityNotice activity={activity} baseline={baseline} retry={actions?.retry} now={now} />
     {tabs.map((tab, index) => <div key={tab.kind} role="tabpanel"
       id={`${id}-panel-${index}`} aria-labelledby={`${id}-tab-${index}`}
       hidden={active !== index} tabIndex={0}>
-      <EmitterTable rows={tab.rows} kind={tab.kind} />
+      {mode === "attention" ? <EmitterInboxView items={tab.rows} kind={tab.kind}
+        activity={activity} actions={actions} excludedIssueNumbers={excluded} now={now} />
+        : <EmitterTable rows={tab.rows} kind={tab.kind} />}
     </div>)}
   </Panel>;
 }

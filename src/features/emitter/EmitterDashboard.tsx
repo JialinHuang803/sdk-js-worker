@@ -2,14 +2,19 @@ import { DashboardState } from "../../shared/DashboardState";
 import { Panel } from "../../shared/Panel";
 import { EmitterTime } from "./EmitterTable";
 import { EmitterWorkPane } from "./EmitterWorkPane";
+import { unavailableEmitterActivity, useEmitterActivity, type EmitterActivityActions, type EmitterActivityState } from "./useEmitterActivity";
 import { useEmitterData, type EmitterDataState } from "./useEmitterData";
 
 export function EmitterDashboard() {
-  return <EmitterDashboardView state={useEmitterData()} />;
+  const state = useEmitterData();
+  const activity = useEmitterActivity(import.meta.env.VITE_ACTIVITY_API_URL);
+  return <EmitterDashboardView state={state} activity={activity} actions={activity} />;
 }
 
-export function EmitterDashboardView({ state, now = Date.now() }: {
+export function EmitterDashboardView({ state, activity = unavailableEmitterActivity, actions, now = Date.now() }: {
   state: EmitterDataState;
+  activity?: EmitterActivityState;
+  actions?: EmitterActivityActions;
   now?: number;
 }) {
   const { snapshot, loading, error } = state;
@@ -17,6 +22,10 @@ export function EmitterDashboardView({ state, now = Date.now() }: {
   if (error) return <DashboardState kind="error" title="Emitter data is unavailable" detail={error} />;
   if (!snapshot) return <DashboardState kind="empty" title="No emitter snapshot found" />;
 
+  const liveWork = activity.feed?.collectedAt &&
+    Date.parse(activity.feed.collectedAt) >= Date.parse(snapshot.source.fetchedAt) ? activity.feed : null;
+  const issues = liveWork?.issues ?? snapshot.issues;
+  const pullRequests = liveWork?.pullRequests ?? snapshot.pullRequests;
   const stale = now - Math.min(Date.parse(snapshot.generatedAt), Date.parse(snapshot.source.fetchedAt)) > 26 * 60 * 60_000;
   return (
     <div className="dashboard-stack emitter-dashboard">
@@ -39,13 +48,13 @@ export function EmitterDashboardView({ state, now = Date.now() }: {
           </div>
           <div>
             <h3>Open issues</h3>
-            <strong className="emitter-overview__value">{snapshot.issues.length}</strong>
+            <strong className="emitter-overview__value">{issues.length}</strong>
             <p>Matching the emitter label</p>
           </div>
           <div>
             <h3>Open pull requests</h3>
-            <strong className="emitter-overview__value">{snapshot.pullRequests.length}</strong>
-            <p>{snapshot.pullRequests.filter((pr) => pr.draft).length} draft</p>
+            <strong className="emitter-overview__value">{pullRequests.length}</strong>
+            <p>{pullRequests.filter((pr) => pr.draft).length} draft</p>
           </div>
         </div>
         <section className="emitter-coverage" aria-label="Spector coverage">
@@ -77,11 +86,19 @@ export function EmitterDashboardView({ state, now = Date.now() }: {
           </p>}
         </section>
         <p className="emitter-freshness">
-          Last fetched <EmitterTime value={snapshot.source.fetchedAt} />
+          Published data last fetched <EmitterTime value={snapshot.source.fetchedAt} />
           {" · "}Snapshot generated <EmitterTime value={snapshot.generatedAt} />
         </p>
+        {liveWork?.collectedAt && <p className="emitter-muted">
+          Open work and counts use the shared feed collected <EmitterTime value={liveWork.collectedAt} />.
+          {" "}Package and coverage use the published snapshot above.
+        </p>}
+        {activity.feed?.collectedAt && !liveWork && <p className="emitter-muted">
+          Open work uses the newer published snapshot. Shared activity is from an earlier collection.
+        </p>}
       </Panel>
-      <EmitterWorkPane issues={snapshot.issues} pullRequests={snapshot.pullRequests} />
+      <EmitterWorkPane issues={issues} pullRequests={pullRequests} activity={activity} actions={actions}
+        baseline={snapshot.activity} now={now} />
     </div>
   );
 }

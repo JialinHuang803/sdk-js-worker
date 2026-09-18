@@ -20,8 +20,48 @@ const npm = {
 };
 const json = (value: unknown, headers?: HeadersInit) =>
   new Response(JSON.stringify(value), { headers });
+const activityOptions = {
+  previous: null, excludedIssueNumbers: [5313],
+  comments: { excludedCommentAuthorPatterns: [], includeConversationComments: true,
+    includeReviewComments: true, includeReviewSummaries: true, publishCommentBody: false as const },
+};
+const pullDetail = {
+  state: "open", draft: false, head: { sha: "current-head" },
+  requested_reviewers: [{ login: "reviewer" }], requested_teams: [{ slug: "js-team" }],
+};
 
 describe("emitter collection", () => {
+  it("collects explicit review requests and head SHA, not an inferred review decision", async () => {
+    const fetcher = vi.fn<typeof fetch>()
+      .mockResolvedValueOnce(json([{ ...issue, draft: true, pull_request: { url: "unused" } }]))
+      .mockResolvedValueOnce(json(pullDetail))
+      .mockResolvedValueOnce(json(npm))
+      .mockResolvedValueOnce(json(spectorReport));
+    const snapshot = await collectEmitter(undefined, fetcher, () => new Date(timestamp), undefined, activityOptions);
+    expect(snapshot.pullRequests[0]).toMatchObject({
+      draft: false, headSha: "current-head", requestedReviewers: ["reviewer"], requestedTeams: ["js-team"],
+    });
+    expect(snapshot.activity).toEqual({ comparisonFrom: null, events: [], excludedIssueNumbers: [5313] });
+  });
+
+  it("reconciles a PR closed while collecting", async () => {
+    const fetcher = vi.fn<typeof fetch>()
+      .mockResolvedValueOnce(json([{ ...issue, draft: false, pull_request: { url: "unused" } }]))
+      .mockResolvedValueOnce(json({ state: "closed" }))
+      .mockResolvedValueOnce(json(npm))
+      .mockResolvedValueOnce(json(spectorReport));
+    const snapshot = await collectEmitter(undefined, fetcher, () => new Date(timestamp), undefined, activityOptions);
+    expect(snapshot.pullRequests).toEqual([]);
+  });
+
+  it("fails on incomplete review data rather than publishing no requests", async () => {
+    const fetcher = vi.fn<typeof fetch>()
+      .mockResolvedValueOnce(json([{ ...issue, draft: false, pull_request: { url: "unused" } }]))
+      .mockResolvedValueOnce(json({ ...pullDetail, requested_reviewers: null }));
+    await expect(collectEmitter(undefined, fetcher, () => new Date(timestamp), undefined, activityOptions))
+      .rejects.toThrow("Incomplete emitter review state");
+  });
+
   it("paginates, separates PRs from issues and allowlists public fields", async () => {
     const fetcher = vi.fn<typeof fetch>()
       .mockResolvedValueOnce(json([issue], { link: '<https://api.github.com/next>; rel="next"' }))
@@ -122,7 +162,7 @@ describe("independent emitter preservation", () => {
     }
     expect(emitter).toContain("run: npm run data:restore\n");
     expect(emitter).toContain("run: npm run collect:emitter");
-    expect(emitter).not.toContain("ACTIVITY_INGEST_KEY");
+    expect(emitter).toContain("ACTIVITY_INGEST_KEY: ${{ secrets.ACTIVITY_INGEST_KEY }}");
     expect(sdk).toContain("run: npm run data:restore-emitter");
     expect(ui).toContain("run: npm run data:restore-emitter");
     expect(ui).not.toContain("run: npm run collect");

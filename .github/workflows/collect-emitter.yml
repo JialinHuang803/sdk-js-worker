@@ -30,10 +30,12 @@ jobs:
       - run: npm ci --userconfig .npmrc.example
       - name: Preserve SDK snapshot and activity comparison window
         run: npm run data:restore
-      - name: Collect public JS emitter issues, PRs and published version
+      - name: Collect public JS emitter work and shared activity
         run: npm run collect:emitter
         env:
           GITHUB_TOKEN: ${{ github.token }}
+          ACTIVITY_API_URL: ${{ vars.ACTIVITY_API_URL }}
+          ACTIVITY_INGEST_KEY: ${{ secrets.ACTIVITY_INGEST_KEY }}
       - run: npm test
       - run: npm run build
         env:

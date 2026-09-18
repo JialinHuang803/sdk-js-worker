@@ -3,7 +3,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { isEmitterSnapshot, type EmitterSnapshot } from "../src/data/emitter-contracts";
 import { EmitterDashboardView } from "../src/features/emitter/EmitterDashboard";
-import { filterEmitterRows } from "../src/features/emitter/EmitterTable";
+import { EmitterTable, filterEmitterRows } from "../src/features/emitter/EmitterTable";
 import { fetchEmitterSnapshot, type EmitterDataState } from "../src/features/emitter/useEmitterData";
 
 const timestamp = "2026-09-18T00:00:00Z";
@@ -116,21 +116,18 @@ describe("emitter snapshot fetch", () => {
 });
 
 describe("emitter dashboard", () => {
-  it("shows npm latest, tabbed work, GitHub links, dates, and draft badges", () => {
+  it("shows npm latest, coverage and tabbed work defaulting to needs attention", () => {
     const html = render();
     expect(html).toContain("@azure-tools/typespec-ts");
     expect(html).toContain("0.57.0");
     expect(html).toContain("npm latest dist-tag");
     expect(html).toContain('href="https://www.npmjs.com/package/@azure-tools/typespec-ts"');
-    expect(html).toContain('aria-label="Open emitter issues"');
-    expect(html).toContain('aria-label="Open emitter pull requests"');
-    expect(html).toContain('href="https://github.com/Azure/typespec-azure/issues/42"');
-    expect(html).toContain('href="https://github.com/Azure/typespec-azure/pull/43"');
-    expect(html).toContain(">Draft</span>");
     expect(html).toContain(`dateTime="${timestamp}"`);
-    expect(html).toContain("Assigned: owner");
-    expect(html).toContain("Search issues");
-    expect(html).toContain("Search pull requests");
+    expect(html).toContain('aria-pressed="true">Needs attention');
+    expect(html).toContain('aria-pressed="false">All open');
+    expect(html).not.toContain("Search issues");
+    expect(html).not.toContain("Search pull requests");
+    expect(html).toContain("Read state is shared across the team");
     expect(html).not.toContain("more than 26 hours old");
     expect(html).toContain("Spector Coverage");
     expect(html).not.toContain("Spector pass rate");
@@ -167,8 +164,8 @@ describe("emitter dashboard", () => {
     data.pullRequests = [];
     data.package.publishedAt = null;
     const html = render({ snapshot: data });
-    expect(html).toContain("No open issues");
-    expect(html).toContain("No open pull requests");
+    expect(html).toContain("No current attention signals");
+    expect(html).toContain("Unread activity is not yet confirmed");
     expect(html).toContain("Publication date unavailable");
   });
 
@@ -183,6 +180,19 @@ describe("emitter dashboard", () => {
 
 describe("emitter table filtering", () => {
   const filters = { search: "", label: "", draft: "all" as const };
+  it("retains complete all-open tables with links, assignees, search and drafts", () => {
+    const data = snapshot();
+    const issues = renderToStaticMarkup(createElement(EmitterTable, { rows: data.issues, kind: "issues" }));
+    const pulls = renderToStaticMarkup(createElement(EmitterTable, { rows: data.pullRequests, kind: "pull requests" }));
+    expect(issues).toContain('aria-label="Open emitter issues"');
+    expect(pulls).toContain('aria-label="Open emitter pull requests"');
+    expect(issues).toContain('href="https://github.com/Azure/typespec-azure/issues/42"');
+    expect(pulls).toContain('href="https://github.com/Azure/typespec-azure/pull/43"');
+    expect(pulls).toContain(">Draft</span>");
+    expect(issues).toContain("Assigned: owner");
+    expect(issues).toContain("Search issues");
+    expect(pulls).toContain("Search pull requests");
+  });
   it.each(["SUPPORT", "#42", "contributor", "owner", "bug"])("searches %s", (search) => {
     expect(filterEmitterRows(snapshot().issues, { ...filters, search })).toHaveLength(1);
   });
