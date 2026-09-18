@@ -277,6 +277,10 @@ tbody tr:hover { background: #fbfcfe; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
 .emitter-dashboard { font-size: 13px; line-height: 1.5; }
+.emitter-work-tabs { flex-wrap: wrap; }
+.emitter-work-tabs button, .emitter-work-tabs span { font-size: 13px; }
+.emitter-work-tabs button:focus-visible,
+.emitter-dashboard [role="tabpanel"]:focus-visible { outline: 2px solid #0876bd; outline-offset: 3px; }
 .emitter-dashboard .filters label,
 .emitter-dashboard th,
 .emitter-dashboard .badge { font-size: 13px; letter-spacing: normal; }

@@ -1,6 +1,7 @@
 import { DashboardState } from "../../shared/DashboardState";
 import { Panel } from "../../shared/Panel";
-import { EmitterTable, EmitterTime } from "./EmitterTable";
+import { EmitterTime } from "./EmitterTable";
+import { EmitterWorkPane } from "./EmitterWorkPane";
 import { useEmitterData, type EmitterDataState } from "./useEmitterData";
 
 export function EmitterDashboard() {
@@ -49,7 +50,7 @@ export function EmitterDashboardView({ state, now = Date.now() }: {
         </div>
         <section className="emitter-coverage" aria-label="Spector coverage">
           <div className="emitter-coverage__heading">
-            <h3>Spector pass rate</h3>
+            <h3>Spector Coverage</h3>
             <a href="https://github.com/Azure/typespec-azure/issues/5313" target="_blank" rel="noreferrer">
               View report #5313
             </a>
@@ -80,8 +81,7 @@ export function EmitterDashboardView({ state, now = Date.now() }: {
           {" · "}Snapshot generated <EmitterTime value={snapshot.generatedAt} />
         </p>
       </Panel>
-      <EmitterTable rows={snapshot.issues} kind="issues" />
-      <EmitterTable rows={snapshot.pullRequests} kind="pull requests" />
+      <EmitterWorkPane issues={snapshot.issues} pullRequests={snapshot.pullRequests} />
     </div>
   );
 }

@@ -1,7 +1,6 @@
 import { useState } from "react";
 import type { EmitterIssue, EmitterPullRequest } from "../../data/emitter-contracts";
 import { DashboardState } from "../../shared/DashboardState";
-import { Panel } from "../../shared/Panel";
 
 type EmitterRow = EmitterIssue | EmitterPullRequest;
 export interface EmitterFilters {
@@ -37,8 +36,10 @@ export function EmitterTable({ rows, kind }: {
   const labels = [...new Set(rows.flatMap((row) => row.labels))].sort();
   const isPr = kind === "pull requests";
   return (
-    <Panel title={isPr ? "Open pull requests" : "Open issues"}
-      subtitle={`${visible.length} of ${rows.length} open ${kind} · Most recently updated first`}>
+    <>
+      <p className="emitter-muted">
+        {visible.length} of {rows.length} open {kind} · Most recently updated first
+      </p>
       <div className="filters">
         <label className="search-field">
           <span>Search {kind}</span>
@@ -98,6 +99,6 @@ export function EmitterTable({ rows, kind }: {
             </tr>)}</tbody>
           </table>
         </div>}
-    </Panel>
+    </>
   );
 }

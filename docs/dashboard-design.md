@@ -10,8 +10,11 @@ The independent `/emitter` feature tracks open `emitter:typescript` issues and
 PRs in `Azure/typespec-azure`. Its overview shows the latest published npm
 `@azure-tools/typespec-ts` version and separate open issue/PR counts, including
 draft PRs. These are inventory counts, not inferred triage priorities.
-The full lists provide links, ownership, timestamps and draft state without
-publishing bodies. The overview also extracts Spector's per-suite pass rates
+The lists share one **Emitter work** pane with **Open issues** and **Open pull
+requests** tabs and item counts. Issues are selected initially; each tab keeps
+its own search and filters when switching. Arrow keys, Home and End navigate
+the tabs. The lists provide links, ownership, timestamps and draft state without
+publishing bodies. The overview's **Spector Coverage** section extracts per-suite pass rates
 and counts from the Summary table in Azure/typespec-azure#5313, with the report
 date and a direct link. Coverage means passed / total, including unimplemented
 scenarios in the denominator; it is not pass / executed scenarios. Report age

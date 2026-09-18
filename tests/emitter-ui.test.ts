@@ -116,7 +116,7 @@ describe("emitter snapshot fetch", () => {
 });
 
 describe("emitter dashboard", () => {
-  it("shows npm latest, separate readable tables, GitHub links, dates, and draft badges", () => {
+  it("shows npm latest, tabbed work, GitHub links, dates, and draft badges", () => {
     const html = render();
     expect(html).toContain("@azure-tools/typespec-ts");
     expect(html).toContain("0.57.0");
@@ -132,6 +132,14 @@ describe("emitter dashboard", () => {
     expect(html).toContain("Search issues");
     expect(html).toContain("Search pull requests");
     expect(html).not.toContain("more than 26 hours old");
+    expect(html).toContain("Spector Coverage");
+    expect(html).not.toContain("Spector pass rate");
+    expect(html).toContain('role="tablist" aria-label="Emitter work"');
+    expect(html.match(/role="tab"/g)).toHaveLength(2);
+    expect(html.match(/role="tabpanel"/g)).toHaveLength(2);
+    expect(html).toMatch(/aria-selected="true"[^>]*>Open issues/);
+    expect(html).toMatch(/aria-selected="false"[^>]*>Open pull requests/);
+    expect(html).toMatch(/role="tabpanel"[^>]*hidden=""/);
   });
 
   it("warns only after 26 hours and uses collection time even when generation is fresh", () => {
