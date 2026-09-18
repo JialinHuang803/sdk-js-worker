@@ -1,5 +1,6 @@
 node_modules/
 dist/
+public/data/emitter.json
 .env
 .env.local
 .npmrc

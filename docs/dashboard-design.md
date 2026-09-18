@@ -4,6 +4,22 @@ This document is the maintained product contract for the Azure SDK for
 JavaScript dashboard. Update it whenever collection semantics, prioritization,
 privacy rules, or refresh behavior changes.
 
+## JS emitter view
+
+The independent `/emitter` feature tracks open `emitter:typescript` issues and
+PRs in `Azure/typespec-azure`. Its overview shows the latest published npm
+`@azure-tools/typespec-ts` version and separate open issue/PR counts, including
+draft PRs. These are inventory counts, not inferred triage priorities.
+The full lists provide links, ownership, timestamps and draft state without
+publishing bodies. Coverage parsing and a combined team inbox are not part of
+this initial emitter view.
+
+`Collect JS emitter` refreshes its versioned `data/emitter.json` daily at
+20:17 UTC or manually. SDK collection remains independent. Every Pages
+publisher preserves the other feature's snapshot byte-for-byte under a shared
+deployment concurrency group; UI-only publishing advances neither source's
+timestamp. The registry owns each feature's repository and refresh links.
+
 ## Product goal
 
 Help the SDK team answer **“Where should I start?”** while retaining the full

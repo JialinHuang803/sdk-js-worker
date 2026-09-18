@@ -1,8 +1,8 @@
-name: Collect and deploy dashboard
+name: Collect JS emitter
 
 on:
   schedule:
-    - cron: "0 20 * * *"
+    - cron: "17 20 * * *"
   workflow_dispatch:
 
 permissions:
@@ -10,6 +10,7 @@ permissions:
   pages: write
   id-token: write
 
+# Pages replaces the entire site. Serialize restoration, collection and publish.
 concurrency:
   group: pages
   cancel-in-progress: false
@@ -27,14 +28,12 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci --userconfig .npmrc.example
-      - name: Preserve independently collected emitter data
-        run: npm run data:restore-emitter
-      - name: Collect public Azure SDK pull request data
-        run: npm run collect
+      - name: Preserve SDK snapshot and activity comparison window
+        run: npm run data:restore
+      - name: Collect public JS emitter issues, PRs and published version
+        run: npm run collect:emitter
         env:
-          GITHUB_TOKEN: ${{ secrets.AZURE_SDK_READ_TOKEN || github.token }}
-          ACTIVITY_API_URL: ${{ vars.ACTIVITY_API_URL }}
-          ACTIVITY_INGEST_KEY: ${{ secrets.ACTIVITY_INGEST_KEY }}
+          GITHUB_TOKEN: ${{ github.token }}
       - run: npm test
       - run: npm run build
         env:

@@ -149,12 +149,52 @@ responses, secrets, or the contents behind release-plan links.
    shell automatically adds its navigation tab and hash route.
 3. Define a separate versioned data contract in `src/data/` and write a
    collector that emits only the public fields the feature needs.
-4. Add the collector to `collect-and-deploy.yml` and add contract/parser tests.
+4. Add a collector workflow and contract/parser tests. All Pages publishers must
+   restore other features' published snapshots and share the `pages` concurrency
+   group, because each deployment replaces the whole site.
 
 This registry is intentionally lightweight. Features own their display and
 query behavior without requiring a plugin runtime or placeholder tabs.
 
 ## Collection and deployment
+
+### JS emitter
+
+The **JS emitter** tab monitors open issues and pull requests in
+`Azure/typespec-azure` with the `emitter:typescript` label. Open counts include
+draft PRs and all labeled issues (including tracking reports), not just items
+requiring action. Issues and PRs are listed separately with search and draft
+filtering. The package overview shows the public npm **latest dist-tag** for
+`@azure-tools/typespec-ts`, not the repository's development version or `next`
+prerelease tag.
+
+Run `npm run collect:emitter` locally with `GITHUB_TOKEN` or `GH_TOKEN` set to
+write `public/data/emitter.json` (generated and ignored by git).
+If your network blocks npmjs.org, set `EMITTER_NPM_REGISTRY` to the public Azure
+SDK feed URL from `.npmrc.example` for local collection. This explicitly uses
+that registry's `latest` tag, which may lag npm; the scheduled workflow always
+uses npmjs.org. No GitHub credentials are sent to either package registry.
+`.github/workflows/collect-emitter.yml` (**Collect JS emitter**) collects daily
+at **20:17 UTC** or by manual dispatch, independently of the SDK collector.
+The emitter tab's **Refresh data** link opens that workflow.
+This workflow uses only `GITHUB_TOKEN` for public repository reads; no Azure
+organization installation or new token secret is required.
+
+The emitter collector publishes an allowlist of issue/PR metadata: title, link,
+number, timestamps, author login, assignee logins, label names, comment count,
+and PR draft state. It does not publish bodies, comments, email addresses, or
+raw API responses. It paginates the repository issues endpoint (which includes
+PRs), avoiding GitHub Search's result cap. A failed GitHub or npm lookup stops
+publication and leaves the previous deployment intact; timestamps and the
+26-hour freshness warning show when results are old.
+
+All three publishing workflows use the same `pages` concurrency group. The
+emitter workflow restores the SDK snapshot unchanged and never ingests SDK
+activity. SDK and UI deployments restore the emitter snapshot unchanged. A
+404 before the first emitter collection leaves the emitter view explicitly
+unavailable, not zero-filled; other restoration errors stop deployment.
+
+### SDK PRs and shared UI
 
 `.github/workflows/collect-and-deploy.yml` runs on manual dispatch and daily at
 approximately **20:00 UTC**. GitHub does not guarantee
@@ -167,7 +207,7 @@ discrepancy is detected.
 latest published snapshot with `npm run data:restore` and deploys the new UI
 with that JSON unchanged. It never collects data or advances the activity
 window, and never falls back to the older checked-in snapshot. Both deployment
-workflows share a concurrency group so snapshot download/collection and
+workflows (including the emitter publisher) share a concurrency group so snapshot download/collection and
 deployment cannot overlap.
 
 The inbox shows **Unread activities**, aggregated per PR across collection

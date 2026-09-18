@@ -29,6 +29,8 @@ jobs:
       - run: npm ci --userconfig .npmrc.example
       - name: Preserve the latest published data without collecting
         run: npm run data:restore
+      - name: Preserve independently collected emitter data
+        run: npm run data:restore-emitter
       - run: npm test
       - run: npm run build
         env:

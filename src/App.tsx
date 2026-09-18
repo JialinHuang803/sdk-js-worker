@@ -45,14 +45,14 @@ export default function App() {
         <main>
           <div className="page-heading">
             <div>
-              <p className="eyebrow">Azure SDK for JavaScript</p>
+              <p className="eyebrow">{feature.headingContext}</p>
               <h1>{feature.label}</h1>
               <p>{feature.description}</p>
             </div>
             <div className="page-heading__actions">
               <a
                 className="button-primary"
-                href="https://github.com/JialinHuang803/sdk-js-worker/actions/workflows/collect-and-deploy.yml"
+                href={feature.refreshWorkflowUrl}
                 target="_blank"
                 rel="noreferrer"
                 title="Open GitHub Actions, then choose Run workflow"
@@ -61,7 +61,7 @@ export default function App() {
               </a>
               <a
                 className="button-secondary"
-                href="https://github.com/Azure/azure-sdk-for-js/pulls"
+                href={feature.repositoryUrl}
                 target="_blank"
                 rel="noreferrer"
               >
