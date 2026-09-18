@@ -9,7 +9,8 @@
     "typecheck": "tsc -b",
     "test": "vitest run",
     "collect": "tsx scripts/collect-sdk-prs.ts",
-    "data:restore": "tsx scripts/restore-published-snapshot.ts"
+    "data:restore": "tsx scripts/restore-published-snapshot.ts",
+    "activity:seed": "tsx scripts/seed-activity.ts"
   },
   "dependencies": {
     "@vitejs/plugin-react": "^5.0.2",

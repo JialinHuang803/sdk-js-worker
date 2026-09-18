@@ -28,6 +28,8 @@ import {
 import { collectMergedPullRequests, mergeHistoryStart, type ClosedPull } from "./merged-prs.ts";
 import { detectBreakingChanges } from "./changelog.ts";
 import { collectCommitExclusions, type CommitComparison } from "./commit-activity.ts";
+import { sharedActivityClient } from "./shared-activity-client.ts";
+import type { SharedActivityPull } from "../src/data/activity-contracts.ts";
 
 const repository = process.env.SOURCE_REPOSITORY ?? "Azure/azure-sdk-for-js";
 const outputPath = resolve(
@@ -61,6 +63,8 @@ interface PullDetails extends PullListItem {
   updated_at: string;
   changed_files: number;
   mergeable: boolean | null;
+  state: "open" | "closed";
+  merged_at: string | null;
   labels: Array<{ name: string }>;
   head: {
     sha: string;
@@ -642,7 +646,16 @@ async function preserveStaleSnapshot(error: unknown) {
 
 async function main() {
   const config = await loadDashboardConfig();
-  const previous = await loadPreviousSnapshot();
+  const activity = sharedActivityClient(
+    process.env.ACTIVITY_API_URL,
+    process.env.ACTIVITY_INGEST_KEY,
+  );
+  const activityBaseline = activity ? await activity.baseline() : null;
+  const previous = activityBaseline?.snapshot ?? await loadPreviousSnapshot();
+  if (activityBaseline?.snapshot &&
+      activityBaseline.snapshot.source.repository !== repository) {
+    throw new Error("Shared activity baseline belongs to a different repository.");
+  }
   const pulls = await paginate<PullListItem>(
     `/repos/${repository}/pulls?state=open&sort=updated&direction=desc`,
   );
@@ -689,8 +702,31 @@ async function main() {
       console.warn(`PR #${pull.number}: ${warning}`);
     }
   }
+  const presentNumbers = new Set([
+    ...openPullRequests.map((pull) => pull.number),
+    ...mergedPullRequests.map((pull) => pull.number),
+  ]);
+  const absentTracked = (activityBaseline?.trackedPullRequests ?? []).filter(
+    (pull) => pull.repository === repository && pull.state === "open" &&
+      !presentNumbers.has(pull.number),
+  );
+  const inactivePullRequests = await mapLimit(absentTracked, 3, async (tracked): Promise<SharedActivityPull> => {
+    const { data: pull } = await request<PullDetails>(
+      `/repos/${repository}/pulls/${tracked.number}`,
+    );
+    return {
+      ...tracked,
+      title: pull.title,
+      url: pull.html_url,
+      plane: pull.labels.some((label) => label.name.toLowerCase() === "mgmt")
+        ? "management" : "data",
+      draft: pull.draft,
+      holdOn: pull.labels.some((label) => label.name.toLowerCase() === "holdon"),
+      state: pull.merged_at ? "merged" : pull.state === "closed" ? "closed" : "open",
+    };
+  });
   const fetchedAt = new Date().toISOString();
-  await writeSnapshot({
+  const snapshot: DashboardSnapshot = {
     schemaVersion: DASHBOARD_SCHEMA_VERSION,
     generatedAt: fetchedAt,
     stale: false,
@@ -711,7 +747,11 @@ async function main() {
     pullRequests: openPullRequests,
     mergedPullRequests,
     mergeHistoryWindow: { from: mergeHistoryFrom, through: fetchedAt },
-  });
+  };
+  if (activity) {
+    await activity.ingest({ snapshot, inactivePullRequests });
+  }
+  await writeSnapshot(snapshot);
   console.log(`Collected ${openPullRequests.length} open AutoPRs and ${mergedPullRequests.length} recent merges from ${repository}.`);
 }
 

@@ -31,6 +31,8 @@ jobs:
         run: npm run data:restore
       - run: npm test
       - run: npm run build
+        env:
+          VITE_ACTIVITY_API_URL: ${{ vars.ACTIVITY_API_URL }}
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

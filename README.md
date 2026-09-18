@@ -5,10 +5,12 @@ A public, read-only engineering dashboard for
 feature tracks open pull requests whose titles start exactly with `[AutoPR`,
 including drafts.
 
-The site is a static React application deployed to GitHub Pages. A scheduled
+The UI is a static React application deployed to GitHub Pages. A scheduled
 GitHub Actions workflow collects a deliberately small, sanitized snapshot from
-GitHub's public APIs. There is no backend service, user sign-in, database, or
-client-side GitHub credential.
+GitHub's public APIs. A small Azure Functions service with private Blob Storage
+maintains shared unread activities and acknowledgements. Viewing and acknowledging
+activities require no sign-in; **any visitor can mark activities read for everyone**.
+Source GitHub PRs remain read-only, and there is no client-side GitHub credential.
 
 The maintained product and decision contract is in
 [`docs/dashboard-design.md`](docs/dashboard-design.md).
@@ -75,6 +77,10 @@ npm run collect
 npm run dev
 ```
 
+Copy `.env.example` to `.env.local` to connect the UI to the shared public
+activity service. Read actions against that URL affect the real team inbox;
+leave it unset for local refresh-cycle-only previews.
+
 Dependencies are resolved through the Azure SDK public npm feed. The local
 `.npmrc` is ignored because the credential provider may add authentication
 material; never commit it. The committed `.npmrc.example` contains only the
@@ -105,6 +111,11 @@ npm run build
 | SDK PR feature | `src/features/sdk-prs/` | Query state, filters, table, and rendering |
 | Shared UI | `src/shared/` | Reusable panel and loading/error/empty states |
 | Static snapshot | `public/data/sdk-prs.json` | Only data copied into the public site |
+| Shared activity service | `api/` | Durable unread history, anonymous read/undo, protected ingestion |
+| Azure infrastructure | `infra/main.bicep` | Private storage and managed-identity Functions |
+
+Provisioning, deployment, access risks and recovery are documented in
+[`docs/shared-activity-operations.md`](docs/shared-activity-operations.md).
 
 The collector enumerates changed files (including rename origins) to discover
 candidate package roots, then compares each package version at the PR base and
@@ -159,19 +170,28 @@ window, and never falls back to the older checked-in snapshot. Both deployment
 workflows share a concurrency group so snapshot download/collection and
 deployment cannot overlap.
 
-The inbox shows **Changes since** (the preceding data refresh) and **Last
-refreshed** (the current snapshot). Neither timestamp changes on UI-only pushes.
-Drafts are hidden from **Needs attention**, but remain eligible for **New activity**
-and stay in the full table and delivery report. Inbox tab counts exclude hidden entries.
+The inbox shows **Unread activities**, aggregated per PR across collection
+cycles, and independent **Needs attention**. Mark read acknowledges only the
+displayed activities for everyone across devices. Undo and Recently read restore
+acknowledged events for 30 days; unread events do not expire. A PR can appear in
+both blocks. Drafts are hidden from Needs attention but remain eligible for
+unread activity and stay in the full table/report. HoldOn hides activity without
+acknowledging it. Tab counts count unique visible PRs, not duplicated cards.
+
+The shared API is polled every minute and on browser focus; this updates read
+state without running the GitHub collector. When no API URL is configured,
+the UI explicitly falls back to the prior refresh-cycle-only New activity view.
+Snapshot timestamps do not change on UI-only pushes.
 `activity.excludedCommitAuthorPatterns` in `.github/dashboard-config.json`
 defaults to `["kazrael2119"]`. A changed head does not create a **New commit**
-notification when every added commit since the previous snapshot is authored
+event when every added commit since the previous snapshot is authored
 by an excluded GitHub login. Mixed/unknown authors still notify. Patterns are
 case-insensitive and support `*`; use `[]` to disable. This does not hide the PR,
 its other activity, or its current status, and is separate from comment exclusions.
 New activity includes SDK AutoPR merges within that window, including PRs
 created and merged between refreshes. Closed-but-unmerged PRs do not notify.
-Merged PRs stay out of the open-PR table and open counts. The collector separately
+Unread merged/closed cards remain until acknowledged; closure alone creates no
+event. Merged PRs stay out of the open-PR table and open counts. The collector separately
 records at least seven days of merge history for the delivery report, including
 on the first collection. Only merges since the preceding snapshot notify in
 the inbox; the seven-day report does not backfill inbox notifications.
@@ -215,6 +235,6 @@ elevated credentials.
 
 ## Not implemented
 
-Durable historical trends, authenticated/private data, write actions, and AI
-summaries are future additions. They are intentionally outside this public
-static prototype.
+Historical trend analytics, authenticated/private source data, GitHub write
+actions, identity-based acknowledgement permissions, and AI summaries are future
+additions. Shared activity acknowledgements are the only current write feature.

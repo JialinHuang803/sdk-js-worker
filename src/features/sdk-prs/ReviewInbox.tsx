@@ -8,11 +8,15 @@ import type {
   ReviewInboxItem,
 } from "../../data/contracts";
 import { Panel } from "../../shared/Panel";
+import { attentionEntries, groupActivities, pullKey } from "./sharedActivity";
+import { SharedActivityList } from "./SharedActivityList";
+import { useSharedActivity } from "./useSharedActivity";
+import type { SharedActivityState } from "./useSharedActivity";
 
 type InboxPull = Pick<
   PullRequestRecord,
   "repository" | "number" | "url" | "title" | "plane"
-> & Partial<Pick<PullRequestRecord, "packages" | "checks" | "draft">>;
+> & Partial<Pick<PullRequestRecord, "packages" | "checks" | "draft" | "holdOn">>;
 
 const reasonLabels: Record<InboxReason, string> = {
   merged: "Merged",
@@ -40,7 +44,17 @@ const reasonPriority: InboxReason[] = [
 ];
 
 export function ReviewInbox({ snapshot }: { snapshot: DashboardSnapshot }) {
+  const apiUrl = import.meta.env.VITE_ACTIVITY_API_URL?.trim();
+  const activity = useSharedActivity(apiUrl);
+  return <ReviewInboxView snapshot={snapshot} activity={apiUrl ? activity : null} />;
+}
+
+export function ReviewInboxView({ snapshot, activity = null }: {
+  snapshot: DashboardSnapshot;
+  activity?: SharedActivityState | null;
+}) {
   const [plane, setPlane] = useState<Plane>(snapshot.inbox.defaultPlane);
+  const [showRead, setShowRead] = useState(false);
   const pulls = useMemo(
     () =>
       new Map<string, InboxPull>(
@@ -55,6 +69,7 @@ export function ReviewInbox({ snapshot }: { snapshot: DashboardSnapshot }) {
     const pull = getPull(item, pulls);
     if (
       !pull ||
+      pull.holdOn ||
       (pull.draft && !item.reasons.some((reason) => activityReasons.has(reason)))
     ) return [];
     return [{ item, pull }];
@@ -65,25 +80,31 @@ export function ReviewInbox({ snapshot }: { snapshot: DashboardSnapshot }) {
   const updated = items.filter(({ item }) =>
     item.reasons.some((reason) => activityReasons.has(reason)),
   );
-  const attention = items.filter(
-    ({ item }) => !item.reasons.some((reason) => activityReasons.has(reason)),
-  );
+  const allAttention = attentionEntries(snapshot);
+  const attention = allAttention.filter(({ pull }) => pull.plane === plane).sort(compareInboxEntries);
+  const unread = activity?.feed ? groupActivities(activity.feed, false) : [];
+  const read = activity?.feed ? groupActivities(activity.feed, true) : [];
+  const countPulls = [
+    ...(activity ? unread.map(({ pull }) => pull) : visibleEntries.map(({ pull }) => pull)),
+    ...allAttention.map(({ pull }) => pull),
+  ];
   const counts = {
-    management: visibleEntries.filter(
-      ({ pull }) => pull.plane === "management",
-    ).length,
-    data: visibleEntries.filter(
-      ({ pull }) => pull.plane === "data",
-    ).length,
+    management: new Set(countPulls.filter((pull) => pull.plane === "management")
+      .map((pull) => pullKey(pull.repository, pull.number))).size,
+    data: new Set(countPulls.filter((pull) => pull.plane === "data")
+      .map((pull) => pullKey(pull.repository, pull.number))).size,
   };
+  const snapshotTiming = snapshot.inbox.comparisonFrom
+    ? `Changes since ${new Date(snapshot.inbox.comparisonFrom).toLocaleString()} · Last refreshed ${new Date(snapshot.generatedAt).toLocaleString()}`
+    : `Baseline established; showing current review and CI work · Last refreshed ${new Date(snapshot.generatedAt).toLocaleString()}`;
 
   return (
     <Panel
       title="SDK review inbox"
       subtitle={
-        snapshot.inbox.comparisonFrom
-          ? `Changes since ${new Date(snapshot.inbox.comparisonFrom).toLocaleString()} · Last refreshed ${new Date(snapshot.generatedAt).toLocaleString()}`
-          : `Baseline established; showing current review and CI work · Last refreshed ${new Date(snapshot.generatedAt).toLocaleString()}`
+        activity
+          ? "Tab counts are unique PRs with unread activity or current review/CI work; a PR may appear in both sections."
+          : `${snapshotTiming} · Shared read state is not configured; activity covers the last refresh only. Tab counts are unique PRs with activity or review/CI work.`
       }
     >
       <div className="inbox-tabs" role="tablist" aria-label="SDK plane">
@@ -102,11 +123,39 @@ export function ReviewInbox({ snapshot }: { snapshot: DashboardSnapshot }) {
           onSelect={setPlane}
         />
       </div>
-      {items.length === 0 ? (
+      {activity && (
+        <div className="shared-activity__status">
+          <p>Read state is shared with everyone. Anyone can mark activities as read.</p>
+          <p>No sign-in is required. Opening a PR never marks it read.</p>
+          <p>Attention snapshot last refreshed {new Date(snapshot.generatedAt).toLocaleString()}</p>
+          {activity.feed?.collectedAt && <p>Shared activity last collected {new Date(activity.feed.collectedAt).toLocaleString()}</p>}
+          {activity.feed?.collectedAt === null && <p role="status">Awaiting first collection. Shared activity has not been initialized; snapshot attention is shown independently.</p>}
+          {activity.error && <div role="alert" className="freshness-warning">
+            {activity.error} {activity.feed ? "Showing stale activities from the last successful load. Writes are disabled." : "Shared activities could not be loaded. Writes are disabled."}
+            <button type="button" className="button-secondary" disabled={activity.loading || activity.pending} onClick={activity.retry}>Retry loading</button>
+          </div>}
+          {activity.loading && <p role="status">{activity.feed ? "Refreshing shared activities; writes are paused…" : "Loading shared activities…"}</p>}
+          {activity.pending && <p role="status">Saving shared read state…</p>}
+          <div className="shared-activity__toolbar">
+            <button type="button" className="button-secondary" aria-expanded={showRead}
+              onClick={() => setShowRead(!showRead)}>
+              {showRead ? "Hide recently read" : "Recently read"} ({read.filter(({ pull }) => pull.plane === plane).length} PRs)
+            </button>
+            {activity.lastAcknowledgement && <button type="button" className="button-secondary"
+              disabled={activity.loading || activity.pending || !!activity.error || !activity.feed?.collectedAt}
+              onClick={() => {
+                const last = activity.lastAcknowledgement;
+                if (last) activity.restore({ generation: last.generation, acknowledgementIds: [last.id] });
+              }}>Undo last mark read</button>}
+          </div>
+        </div>
+      )}
+      {!activity && updated.length === 0 && attention.length === 0 ? (
         <div className="inbox-empty">No SDK-team attention is needed in this plane.</div>
       ) : (
         <div className="inbox-sections">
-          {updated.length > 0 && (
+          {activity && <SharedActivityList groups={unread.filter(({ pull }) => pull.plane === plane)} activity={activity} />}
+          {!activity && updated.length > 0 && (
             <InboxSection
               title="New activity"
               description="What changed since the last refresh"
@@ -116,10 +165,11 @@ export function ReviewInbox({ snapshot }: { snapshot: DashboardSnapshot }) {
           {attention.length > 0 && (
             <InboxSection
               title="Needs attention"
-              description="Non-draft review and CI work without a new update"
+              description="Current non-draft review and CI work · Independent of read state"
               entries={attention}
             />
           )}
+          {activity && showRead && <SharedActivityList groups={read.filter(({ pull }) => pull.plane === plane)} activity={activity} read />}
         </div>
       )}
     </Panel>

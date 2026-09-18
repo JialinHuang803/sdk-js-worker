@@ -49,25 +49,28 @@ The inbox is split into tabs with counts:
 - **Management**
 - **Data plane**
 
-A PR appears once per tab and can carry multiple reasons.
+A PR appears once per block and can carry multiple reasons. The same PR can
+appear in both Unread activities and Needs attention; read state and required
+work are independent.
 
 ### Included reasons
 
 | Reason | Persistence | Meaning |
 |---|---|---|
-| `new-pr` | Current refresh cycle | PR did not exist in the preceding successful snapshot |
-| `new-commit` | Current refresh cycle | Current head SHA differs, unless all added commits match excluded authors |
-| `new-comment` | Current refresh cycle | A non-excluded comment was created after the preceding snapshot |
-| `merged` | Current refresh cycle | GitHub reports an AutoPR merge after the preceding snapshot |
+| `new-pr` | Until acknowledged | PR did not exist in the preceding successful snapshot |
+| `new-commit` | Until acknowledged | Current head SHA differs, unless all added commits match excluded authors |
+| `new-comment` | Until acknowledged | A non-excluded comment was created after the preceding snapshot |
+| `merged` | Until acknowledged | GitHub reports an AutoPR merge after the preceding snapshot |
 | `review-needed` | Until resolved | GitHub reports `REVIEW_REQUIRED` |
 | `ci-failure` | Until resolved | Current failed check/status count is above zero |
 
-Priority is new commit, new PR, new comment, merged, review needed, then CI help.
-Items with activity are shown under **Updated since last refresh**. Persistent
-review/CI items with no new activity are shown under **Still needs attention**.
+Transient reasons append durable events to the Azure-backed **Unread activities**
+feed, grouped by repository/PR across days and ordered oldest-unread first.
+The independent **Needs attention** block derives required-review and failed-CI
+work from the current status snapshot, regardless of whether activity is unread.
 
 Draft PRs are excluded from **Needs attention**, even when they require approval
-or have failed CI. They can still appear in **New activity** for new PRs, commits,
+or have failed CI. They can still appear in **Unread activities** for new PRs, commits,
 or comments. Inbox tab counts reflect only visible entries; the full table and
 delivery report still include drafts. This presentation rule also applies to
 already-published snapshots, without a data refresh.
@@ -77,7 +80,38 @@ single column on smaller screens. The PR number, primary activity, verb-first
 headline, and relative timestamp share one scan line. Labels use readable title
 case rather than all-capital text. Additional reasons remain visible as
 secondary badges so reviewers can understand the full state without opening
-the PR.
+the PR. Shared cards provide Mark read, first/latest event times and event-type
+badges. An anonymous acknowledgement affects everyone; opening a PR link does
+not acknowledge it.
+
+### Shared read state
+
+The private `activity/state.json` blob contains a sanitized public feed,
+acknowledgements and the canonical collector baseline. Azure Functions exposes
+public read/acknowledge/restore endpoints and key-protected baseline/ingestion
+endpoints. Acknowledgements are scoped to the sequence actually displayed;
+concurrent or late-discovered events stay unread. Conditional ETag updates
+prevent the collector from overwriting concurrent read actions.
+
+Undo restores the specific acknowledgement batch. Recently read offers recovery
+for 30 days; acknowledged details are pruned on subsequent ingestion after that
+period. Unread history never expires automatically. The monotonic sequence and
+collector baseline remain after pruning. History starts with the current
+published activities at migration; overwritten older activities are not
+reconstructed. Events are observed at scheduled collection, not a real-time
+GitHub event stream.
+
+Shared reads require no sign-in by explicit prototype choice. Any visitor can
+mark read or restore for the whole team; rate limits are not authorization.
+The UI explains this. HoldOn hides a card without acknowledging it. Merged and
+closed PR references persist while their activities remain, but closure itself
+does not notify. Read state is not stored in localStorage.
+
+The UI polls the service every minute and on focus. Errors show stale/unavailable
+feed state and disable writes, while the table and Needs attention remain usable.
+With no API configured, a clearly labelled legacy New activity view covers only
+the previous refresh window. Tab counts deduplicate PRs across the visible
+unread and attention blocks; Recently read is not included.
 
 ### Deliberately excluded
 
@@ -112,7 +146,8 @@ Merged PRs are stored as lightweight `mergedPullRequests` summaries, separate
 from the open table and its counts. Notifications use the merge timestamp,
 the current plane label, and a GitHub PR link, with no obsolete review/CI
 reasons or guessed package metadata. `HoldOn` exclusion still applies.
-Merge notifications last one data refresh cycle and survive UI-only deploys.
+Merge events remain unread across refresh cycles until acknowledged and survive
+UI-only deploys.
 Without a previous snapshot, seven-day history is collected for the report
 but historical merges do not create notifications. After an outage longer
 than a week, the full refresh window is collected so no merge notification
@@ -166,7 +201,9 @@ The scheduled refresh target is **20:00 UTC daily**. GitHub Actions schedules
 are best effort and may start late. A manual refresh is available through
 workflow dispatch.
 
-Each scheduled or manual collection loads the preceding deployed snapshot.
+Each scheduled or manual collection loads the preceding shared-service snapshot
+when configured, otherwise the deployed snapshot. The service baseline is
+canonical so a failed Pages deployment cannot lose events already ingested.
 The comparison window is:
 
 ```text
@@ -177,12 +214,13 @@ When no valid previous snapshot is available, the run establishes a baseline.
 It still shows persistent review and CI work but does not label all existing
 PRs as new.
 
-The inbox displays **Changes since** for the start of this window and **Last
-refreshed** for the current snapshot's collection time.
+The legacy inbox displays **Changes since** for this window and **Last refreshed**
+for the snapshot. The shared inbox displays activity and attention collection
+times separately; read-state changes never advance either collection timestamp.
 
 Code pushes run a separate UI deployment workflow. They download and preserve
 the published JSON exactly, including its activity items, timestamps and stale
-state. They do not run the collector, apply changed collector configuration, or
+state. They do not run the collector, ingest events, apply changed collector configuration, or
 advance the comparison window. Missing or incompatible published data fails the
 UI deployment instead of restoring older checked-in data; initial publication
 and schema migrations require an explicit collection. The UI and collection

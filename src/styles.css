@@ -170,6 +170,28 @@ main { min-width: 0; padding: 30px; }
 .activity-badge--new-commit,
 .activity-badge--new-comment { color: #64500c; background: #fff0cb; }
 .inbox-empty { padding: 32px; color: #687488; text-align: center; }
+.shared-activity { grid-template-columns: minmax(0, 1fr); }
+.shared-activity .inbox-notification__headline h4 { flex: 1; }
+.shared-activity__meta, .shared-activity__times, .shared-activity__actions,
+.shared-activity__toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 7px 12px; }
+.shared-activity__meta, .shared-activity__times {
+  margin-top: 7px; color: #68758a; font-size: 12px;
+}
+.shared-activity__meta > span:first-child { overflow-wrap: anywhere; }
+.shared-activity__actions { margin-top: 8px; font-size: 12px; justify-content: flex-end; }
+.shared-activity__actions a { margin-right: auto; }
+.shared-activity__actions .button-secondary,
+.shared-activity__toolbar .button-secondary,
+.shared-activity__status .freshness-warning .button-secondary {
+  height: 30px; padding: 0 9px; font-size: 12px;
+}
+.shared-activity__status { margin-top: 14px; color: #647087; font-size: 13px; }
+.shared-activity__status p { margin: 5px 0; line-height: 1.5; }
+.shared-activity__toolbar { margin-top: 10px; }
+.shared-activity__status .freshness-warning { margin-top: 10px; line-height: 1.6; }
+.shared-activity__status .freshness-warning button { margin-left: 10px; }
+button:disabled { cursor: not-allowed; opacity: 0.55; }
+button:focus-visible, a:focus-visible { outline: 2px solid #0876bd; outline-offset: 3px; }
 .panel {
   background: white; border: 1px solid #dce3ed; border-radius: 10px;
   box-shadow: 0 3px 12px #14233a0a; overflow: hidden;
@@ -275,6 +297,7 @@ tbody tr:hover { background: #fbfcfe; }
   .inbox-section__heading { display: block; }
   .inbox-section__heading span { display: block; margin-top: 3px; }
   .inbox-notification { grid-template-columns: 34px minmax(0, 1fr); padding: 10px; }
+  .shared-activity { grid-template-columns: minmax(0, 1fr); }
   .inbox-notification__icon { width: 32px; height: 32px; border-radius: 8px; }
   .inbox-notification__icon svg { width: 18px; height: 18px; }
   .inbox-notification__headline { flex-wrap: wrap; gap: 5px; }

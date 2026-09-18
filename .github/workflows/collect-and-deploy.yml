@@ -31,8 +31,12 @@ jobs:
         run: npm run collect
         env:
           GITHUB_TOKEN: ${{ secrets.AZURE_SDK_READ_TOKEN || github.token }}
+          ACTIVITY_API_URL: ${{ vars.ACTIVITY_API_URL }}
+          ACTIVITY_INGEST_KEY: ${{ secrets.ACTIVITY_INGEST_KEY }}
       - run: npm test
       - run: npm run build
+        env:
+          VITE_ACTIVITY_API_URL: ${{ vars.ACTIVITY_API_URL }}
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
