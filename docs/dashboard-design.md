@@ -11,8 +11,14 @@ PRs in `Azure/typespec-azure`. Its overview shows the latest published npm
 `@azure-tools/typespec-ts` version and separate open issue/PR counts, including
 draft PRs. These are inventory counts, not inferred triage priorities.
 The full lists provide links, ownership, timestamps and draft state without
-publishing bodies. Coverage parsing and a combined team inbox are not part of
-this initial emitter view.
+publishing bodies. The overview also extracts Spector's per-suite pass rates
+and counts from the Summary table in Azure/typespec-azure#5313, with the report
+date and a direct link. Coverage means passed / total, including unimplemented
+scenarios in the denominator; it is not pass / executed scenarios. Report age
+is independent of snapshot freshness and warns after eight days. Missing or
+inconsistent report data blocks collection rather than publishing invented
+rates. Older snapshots without coverage show an explicit unavailable message.
+No separate Spector view or combined team inbox is needed for this initial scope.
 
 `Collect JS emitter` refreshes its versioned `data/emitter.json` daily at
 20:17 UTC or manually. SDK collection remains independent. Every Pages

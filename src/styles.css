@@ -290,6 +290,15 @@ tbody tr:hover { background: #fbfcfe; }
 .emitter-overview__value { display: block; margin-top: 8px; font-size: 24px; color: #172033; }
 .emitter-freshness { margin: 0; padding-top: 12px; border-top: 1px solid #e3e8f0; color: #647087; }
 .emitter-muted { margin-top: 5px; color: #647087; }
+.emitter-coverage { border-top: 1px solid #e3e8f0; padding: 16px 0; }
+.emitter-coverage__heading { display: flex; flex-wrap: wrap; align-items: baseline; gap: 12px; }
+.emitter-coverage__heading h3 { margin: 0; font-size: 14px; }
+.emitter-coverage__suites { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+.emitter-coverage__suites h4 { margin: 8px 0 0; font-size: 13px; overflow-wrap: anywhere; }
+.emitter-coverage__suites p { margin: 5px 0 0; }
+@media (max-width: 560px) {
+  .emitter-coverage__suites { grid-template-columns: 1fr; }
+}
 .emitter-table__title { min-width: 260px; max-width: 520px; overflow-wrap: anywhere; }
 .emitter-table__title > a { font-weight: 650; }
 .emitter-table__dates { min-width: 200px; }

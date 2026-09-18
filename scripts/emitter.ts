@@ -3,6 +3,7 @@ import type {
   EmitterPullRequest,
   EmitterSnapshot,
 } from "../src/data/emitter-contracts.ts";
+import { parseSpectorReport } from "./spector.ts";
 
 export const EMITTER_REPOSITORY = "Azure/typespec-azure";
 export const EMITTER_LABEL = "emitter:typescript";
@@ -100,6 +101,15 @@ export async function collectEmitter(
     throw new Error("Emitter npm latest tag does not resolve to a published package version");
   }
   const publishedAt = metadata.time?.[version] ?? null;
+  const reportResponse = await fetcher(
+    `https://api.github.com/repos/${EMITTER_REPOSITORY}/issues/5313`,
+    { headers, signal: AbortSignal.timeout(30_000) },
+  );
+  if (!reportResponse.ok) {
+    throw new Error(`Spector report lookup failed: HTTP ${reportResponse.status}`);
+  }
+  const report: { body: string; updated_at: string } = await reportResponse.json();
+  const coverage = parseSpectorReport(report.body, report.updated_at);
   const generatedAt = now().toISOString();
   return {
     schemaVersion: 1,
@@ -113,5 +123,6 @@ export async function collectEmitter(
     },
     issues,
     pullRequests,
+    coverage,
   };
 }

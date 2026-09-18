@@ -168,6 +168,15 @@ filtering. The package overview shows the public npm **latest dist-tag** for
 `@azure-tools/typespec-ts`, not the repository's development version or `next`
 prerelease tag.
 
+The same overview shows Spector coverage from
+[Azure/typespec-azure#5313](https://github.com/Azure/typespec-azure/issues/5313):
+per-suite pass percentages, passed/total counts, failures, unimplemented counts,
+spec versions, and the report date. These rates include unimplemented scenarios
+in the denominator. The weekly report is read by the emitter collector, not
+rerun by it. A warning appears when the report is older than eight days.
+Only summary fields are published, not the report body. An unreadable or
+inconsistent summary stops collection, preserving the last deployment.
+
 Run `npm run collect:emitter` locally with `GITHUB_TOKEN` or `GH_TOKEN` set to
 write `public/data/emitter.json` (generated and ignored by git).
 If your network blocks npmjs.org, set `EMITTER_NPM_REGISTRY` to the public Azure

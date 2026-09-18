@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import { readFileSync } from "node:fs";
 import { collectEmitter, EMITTER_PACKAGE } from "../scripts/emitter";
 import { fetchPublishedEmitter } from "../scripts/published-emitter";
+import { spectorReport } from "./fixtures/spector";
 
 const timestamp = "2026-09-18T00:00:00Z";
 const issue = {
@@ -28,12 +29,14 @@ describe("emitter collection", () => {
         issue,
         { ...issue, number: 2, draft: true, pull_request: { url: "unused" }, user: null },
       ]))
-      .mockResolvedValueOnce(json(npm));
+      .mockResolvedValueOnce(json(npm))
+      .mockResolvedValueOnce(json(spectorReport));
     const snapshot = await collectEmitter("test-token", fetcher, () => new Date(timestamp));
     expect(snapshot.issues).toHaveLength(1);
     expect(snapshot.pullRequests).toHaveLength(1);
     expect(snapshot.pullRequests[0]).toMatchObject({ number: 2, draft: true, author: null });
     expect(snapshot.package.version).toBe("0.57.0");
+    expect(snapshot.coverage?.suites.map((suite) => suite.coverage)).toEqual([96.8, 94.2]);
     expect(snapshot.source.repository).toBe("Azure/typespec-azure");
     expect(String(fetcher.mock.calls[1][0])).toContain("page=2");
     expect(fetcher.mock.calls[2][1]?.headers).toBeUndefined();
@@ -52,7 +55,8 @@ describe("emitter collection", () => {
         ...issue, number: number + 1,
       }))))
       .mockResolvedValueOnce(json([{ ...issue, number: 101 }]))
-      .mockResolvedValueOnce(json(npm));
+      .mockResolvedValueOnce(json(npm))
+      .mockResolvedValueOnce(json(spectorReport));
     const snapshot = await collectEmitter(undefined, fetcher);
     expect(snapshot.issues).toHaveLength(101);
     expect(snapshot.issues.at(-1)?.number).toBe(101);
@@ -75,7 +79,8 @@ describe("emitter collection", () => {
   it("allows a configured registry without sending GitHub authorization", async () => {
     const fetcher = vi.fn<typeof fetch>()
       .mockResolvedValueOnce(json([]))
-      .mockResolvedValueOnce(json(npm));
+      .mockResolvedValueOnce(json(npm))
+      .mockResolvedValueOnce(json(spectorReport));
     await collectEmitter("test-token", fetcher, () => new Date(timestamp), "https://feed.example.test/registry/");
     expect(String(fetcher.mock.calls[1][0])).toBe(
       "https://feed.example.test/registry/%40azure-tools%2Ftypespec-ts",
@@ -86,10 +91,19 @@ describe("emitter collection", () => {
   it("allows a genuinely empty open work list", async () => {
     const fetcher = vi.fn<typeof fetch>()
       .mockResolvedValueOnce(json([]))
-      .mockResolvedValueOnce(json(npm));
+      .mockResolvedValueOnce(json(npm))
+      .mockResolvedValueOnce(json(spectorReport));
     const snapshot = await collectEmitter(undefined, fetcher);
     expect(snapshot.issues).toEqual([]);
     expect(snapshot.pullRequests).toEqual([]);
+  });
+
+  it("fails collection if the coverage report cannot be read", async () => {
+    const fetcher = vi.fn<typeof fetch>()
+      .mockResolvedValueOnce(json([]))
+      .mockResolvedValueOnce(json(npm))
+      .mockResolvedValueOnce(new Response(null, { status: 503 }));
+    await expect(collectEmitter(undefined, fetcher)).rejects.toThrow("Spector report lookup failed");
   });
 });
 
@@ -117,7 +131,8 @@ describe("independent emitter preservation", () => {
   it("preserves the snapshot byte-for-byte and handles only initial 404 as absent", async () => {
     const collector = vi.fn<typeof fetch>()
       .mockResolvedValueOnce(json([]))
-      .mockResolvedValueOnce(json(npm));
+      .mockResolvedValueOnce(json(npm))
+      .mockResolvedValueOnce(json(spectorReport));
     const text = JSON.stringify(await collectEmitter(undefined, collector), null, 2) + "\n";
     const fetcher = vi.fn<typeof fetch>()
       .mockResolvedValueOnce(new Response(text))

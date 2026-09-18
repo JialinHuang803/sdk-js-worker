@@ -47,6 +47,34 @@ export function EmitterDashboardView({ state, now = Date.now() }: {
             <p>{snapshot.pullRequests.filter((pr) => pr.draft).length} draft</p>
           </div>
         </div>
+        <section className="emitter-coverage" aria-label="Spector coverage">
+          <div className="emitter-coverage__heading">
+            <h3>Spector pass rate</h3>
+            <a href="https://github.com/Azure/typespec-azure/issues/5313" target="_blank" rel="noreferrer">
+              View report #5313
+            </a>
+          </div>
+          {snapshot.coverage ? <>
+            <p className="emitter-muted">
+              Report dated {snapshot.coverage.reportDate} · Passed / total scenarios, including unimplemented scenarios.
+            </p>
+            {now - Date.parse(snapshot.coverage.reportDate) > 8 * 86_400_000 && (
+              <p className="freshness-warning" role="status">
+                The weekly coverage report is more than 8 days old.
+              </p>
+            )}
+            <div className="emitter-coverage__suites">
+              {snapshot.coverage.suites.map((suite) => <div key={suite.name}>
+                <h4>{suite.name}</h4>
+                <strong className="emitter-overview__value">{suite.coverage.toFixed(1)}%</strong>
+                <p>{suite.passed} / {suite.total} passed · {suite.failed} failed · {suite.notImplemented} not implemented</p>
+                <p className="emitter-muted">Spec version {suite.version}</p>
+              </div>)}
+            </div>
+          </> : <p className="emitter-muted">
+            Coverage has not been collected yet. Use Refresh data to run the emitter collector.
+          </p>}
+        </section>
         <p className="emitter-freshness">
           Last fetched <EmitterTime value={snapshot.source.fetchedAt} />
           {" · "}Snapshot generated <EmitterTime value={snapshot.generatedAt} />
