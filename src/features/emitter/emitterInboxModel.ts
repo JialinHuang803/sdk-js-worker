@@ -17,6 +17,14 @@ export const emitterActivityLabels = {
   "new-comment": "New comment",
 };
 
+export function emitterRelativeTime(timestamp: string, now: number): string {
+  const seconds = (Date.parse(timestamp) - now) / 1_000;
+  if (Math.abs(seconds) < 60) return "Just now";
+  const unit = Math.abs(seconds) < 3_600 ? "minute" : Math.abs(seconds) < 86_400 ? "hour" : "day";
+  const divisor = unit === "minute" ? 60 : unit === "hour" ? 3_600 : 86_400;
+  return new Intl.RelativeTimeFormat("en", { numeric: "auto" }).format(Math.trunc(seconds / divisor), unit);
+}
+
 export function emitterInboxEntries(
   items: EmitterWorkItem[],
   events: EmitterInboxEvent[],

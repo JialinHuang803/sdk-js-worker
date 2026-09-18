@@ -34,7 +34,8 @@ timestamp. The registry owns each feature's repository and refresh links.
 
 There is no **Needs triage** signal: the repository currently has no authoritative
 triage marker. Compact notification cards group signals by issue/PR, rather than
-displaying one card for every comment. Current work and activity are distinct:
+displaying one card for every comment. Cards show relative activity/update times
+with exact timestamps available on hover. Current work and activity are distinct:
 
 | Signal | Source and meaning |
 |---|---|

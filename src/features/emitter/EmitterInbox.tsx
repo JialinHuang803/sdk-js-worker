@@ -1,6 +1,6 @@
 import type { EmitterActivityWindow } from "../../data/emitter-contracts";
 import {
-  emitterAcknowledgementIds, emitterActivityLabels, emitterInboxEntries,
+  emitterAcknowledgementIds, emitterActivityLabels, emitterInboxEntries, emitterRelativeTime,
   type EmitterInboxEntry, type EmitterWorkItem,
 } from "./emitterInboxModel";
 import { EmitterTime } from "./EmitterTable";
@@ -48,10 +48,11 @@ export function EmitterActivityNotice({ activity, baseline, retry, now = Date.no
   </div>;
 }
 
-function EmitterNotification({ entry, activity, actions, read = false }: {
+function EmitterNotification({ entry, activity, actions, now, read = false }: {
   entry: EmitterInboxEntry;
   activity: EmitterActivityState;
   actions?: EmitterActivityActions;
+  now: number;
   read?: boolean;
 }) {
   const events = read ? entry.recentlyRead : entry.unread;
@@ -76,10 +77,14 @@ function EmitterNotification({ entry, activity, actions, read = false }: {
       {entry.item.author ?? "Unknown author"}
       {entry.signals.includes("Review requested") && <> · Requested: {reviewers.join(", ")}</>}
     </p>
-    {latest && <p className="emitter-muted">
-      {read ? "Activity" : "Latest activity"} <EmitterTime value={latest.occurredAt} />
+    <p className="emitter-muted">
+      {latest ? (read ? "Activity" : "Latest activity") : "Updated"}{" "}
+      <time dateTime={latest?.occurredAt ?? entry.item.updatedAt}
+        title={new Date(latest?.occurredAt ?? entry.item.updatedAt).toLocaleString()}>
+        {emitterRelativeTime(latest?.occurredAt ?? entry.item.updatedAt, now)}
+      </time>
       {latestComment && <> · <a href={latestComment.url} target="_blank" rel="noreferrer">View comment</a></>}
-    </p>}
+    </p>
     <div className="emitter-notification__actions">
       {entry.unread.length > 0 && <button type="button" className="button-secondary"
         disabled={!writable} aria-label={`Mark activity read for #${entry.item.number}`}
@@ -117,7 +122,7 @@ export function EmitterInboxView({ items, activity, excludedIssueNumbers, action
       <h3>Needs attention <span>{grouped.attention.length}</span></h3>
       {grouped.attention.length ? <div className="emitter-inbox-grid">
         {grouped.attention.map((entry) => <EmitterNotification key={entry.item.number}
-          entry={entry} activity={activity} actions={actions} />)}
+          entry={entry} activity={activity} actions={actions} now={now} />)}
       </div> : <p className="emitter-inbox-empty">
         {uncertain ? "No current attention signals in the available work. Unread activity is not yet confirmed."
           : `No ${kind} need attention.`}
@@ -127,7 +132,7 @@ export function EmitterInboxView({ items, activity, excludedIssueNumbers, action
       <h3>Recently read <span>Last 3 days · shared across the team</span></h3>
       <div className="emitter-inbox-grid">
         {grouped.recentlyRead.map((entry) => <EmitterNotification key={entry.item.number}
-          entry={entry} activity={activity} actions={actions} read />)}
+          entry={entry} activity={activity} actions={actions} now={now} read />)}
       </div>
     </section>}
     <p className="emitter-muted">

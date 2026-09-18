@@ -6,7 +6,7 @@ import type { EmitterIssue, EmitterPullRequest, EmitterSnapshot } from "../src/d
 import { EmitterActivityNotice, EmitterInboxView } from "../src/features/emitter/EmitterInbox";
 import { EmitterDashboardView } from "../src/features/emitter/EmitterDashboard";
 import { EmitterTable } from "../src/features/emitter/EmitterTable";
-import { emitterAcknowledgementIds, emitterInboxEntries, type EmitterInboxEvent } from "../src/features/emitter/emitterInboxModel";
+import { emitterAcknowledgementIds, emitterInboxEntries, emitterRelativeTime, type EmitterInboxEvent } from "../src/features/emitter/emitterInboxModel";
 import {
   createEmitterActivityClient, parseEmitterFeed, parseEmitterMutation,
   unavailableEmitterActivity, type EmitterActivityState,
@@ -46,6 +46,17 @@ function renderInbox(activity = state(), items: Array<EmitterIssue | EmitterPull
 afterEach(() => { vi.unstubAllGlobals(); vi.useRealTimers(); });
 
 describe("emitter attention grouping", () => {
+  it("uses readable relative times without losing the exact timestamp", () => {
+    expect(emitterRelativeTime(timestamp, now)).toBe("Just now");
+    expect(emitterRelativeTime(timestamp, now + 5 * 60_000)).toBe("5 minutes ago");
+    expect(emitterRelativeTime(timestamp, now + 2 * 3_600_000)).toBe("2 hours ago");
+    expect(emitterRelativeTime(timestamp, now + 86_400_000)).toBe("yesterday");
+    const html = renderInbox();
+    expect(html).toContain(`dateTime="${timestamp}"`);
+    expect(html).toContain("Just now");
+    expect(renderInbox(state({ feed: feed({ events: [] }) }))).toContain("Updated");
+  });
+
   it("combines current state and distinct activities into one row per work item", () => {
     const events = [event(), event({ id: "new-42", sequence: 2, kind: "new-issue" })];
     const grouped = emitterInboxEntries([issue], events, [], now);
