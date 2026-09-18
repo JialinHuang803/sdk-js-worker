@@ -26,7 +26,7 @@ export default function App() {
             <small>Engineering dashboard</small>
           </span>
         </a>
-        <span className="public-badge">Public · read only</span>
+        <span className="public-badge">Public dashboard</span>
       </header>
       <div className="app-layout">
         <nav className="sidebar" aria-label="Dashboard sections">
