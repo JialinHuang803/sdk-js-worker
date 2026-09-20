@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import { dashboardFeatures, resolveFeature } from "./features/registry";
-import { ActivityAuthControls } from "./shared/ActivityAuth";
+import { ActivityAuthControls, useActivityAuth } from "./shared/ActivityAuth";
 
 function routeFromHash() {
   return location.hash.slice(1).split("?")[0] || dashboardFeatures[0].route;
 }
 
 export default function App() {
+  const auth = useActivityAuth();
   const [route, setRoute] = useState(routeFromHash);
   useEffect(() => {
     if (!location.hash) location.replace(`#${dashboardFeatures[0].route}`);
@@ -27,7 +28,9 @@ export default function App() {
             <small>Engineering dashboard</small>
           </span>
         </a>
-        <span className="public-badge">Public dashboard</span>
+        {auth.enabled && auth.provider === "entra"
+          ? <ActivityAuthControls placement="header" />
+          : <span className="public-badge">Public dashboard</span>}
       </header>
       <div className="app-layout">
         <nav className="sidebar" aria-label="Dashboard sections">

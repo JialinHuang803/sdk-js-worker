@@ -1,7 +1,7 @@
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { ActivityAuthControls, ActivityAuthProvider, canChangeActivity, createActivityAuthClient, type ActivityAuthState } from "../src/shared/ActivityAuth";
+import { ActivityAuthContext, ActivityAuthControls, ActivityAuthProvider, canChangeActivity, createActivityAuthClient, publicActivityTransport, type ActivityAuthState } from "../src/shared/ActivityAuth";
 import { fetchEmitterSnapshot } from "../src/features/emitter/useEmitterData";
 import viteConfig from "../vite.config";
 
@@ -51,15 +51,43 @@ describe("opt-in Entra UI", () => {
     external.dispose();
   });
 
-  it("renders Entra-only labels and BFF login instead of anonymous access promises", () => {
+  it("removes the Entra sign-in panel from the dashboard content", () => {
     const html = renderToStaticMarkup(createElement(ActivityAuthProvider, {
       enabled: true, provider: "entra", baseUrl: "/api", children: createElement(ActivityAuthControls),
     }));
-    expect(html).toContain("Only assigned Microsoft Entra users");
-    expect(html).toContain("Checking Microsoft Entra sign-in");
-    expect(html).toContain('/api/auth/login');
-    expect(html).not.toContain("Anyone can view");
-    expect(html).not.toContain("GitHub");
+    expect(html).toBe("");
+  });
+
+  function header(state: ActivityAuthState, enabled = true, provider: "entra" | "github" = "entra") {
+    return renderToStaticMarkup(createElement(ActivityAuthContext.Provider, {
+      value: { enabled, provider, state, transport: publicActivityTransport,
+        loginUrl: "/api/auth/login", refresh: vi.fn(), logout: vi.fn() },
+      children: createElement(ActivityAuthControls, { placement: "header" }),
+    }));
+  }
+
+  it("shows only a compact account name and sign-out control when signed in", () => {
+    const html = header({ session, loading: false, error: null });
+    expect(html).toContain('aria-label="Account"');
+    expect(html).toContain("Entra reviewer");
+    expect(html).toContain("Sign out");
+    for (const text of ["activity-auth", "Shared read changes", "Only assigned", "Retry", "/api/auth/login",
+      "random-session-csrf"]) expect(html).not.toContain(text);
+  });
+
+  it("keeps loading, expired-session recovery and sign-in controls without a panel", () => {
+    expect(header({ session: null, loading: true, error: null })).toContain("Checking sign-in...");
+    const failed = header({ session: null, loading: false, error: "Session expired." });
+    expect(failed).toContain('role="alert"');
+    expect(failed).toContain("Session expired.");
+    expect(failed).toContain('href="/api/auth/login"');
+    expect(failed).toContain("Retry");
+    expect(failed).not.toContain("Sign out");
+    const signedOut = header({ session: null, loading: false, error: null });
+    expect(signedOut).toContain("Signed out");
+    expect(signedOut).toContain("Sign in");
+    expect(header({ session, loading: false, error: null }, false)).toBe("");
+    expect(header({ session, loading: false, error: null }, true, "github")).toBe("");
   });
 
   it("sends BFF cookies for protected published emitter snapshots only when opted in", async () => {

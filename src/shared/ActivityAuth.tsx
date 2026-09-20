@@ -167,19 +167,34 @@ export function ActivityAuthProvider({ children, enabled = authEnabled, baseUrl 
   }}>{children}</ActivityAuthContext.Provider>;
 }
 
-export function ActivityAuthControls() {
+export function ActivityAuthControls({ placement = "content" }: { placement?: "content" | "header" }) {
   const auth = useActivityAuth();
   if (!auth.enabled) return null;
-  const label = auth.provider === "entra" ? "Microsoft Entra" : "GitHub";
+  if (auth.provider === "entra") {
+    if (placement !== "header") return null;
+    const signedIn = canChangeActivity(auth.state);
+    return <div className="account-controls" role="group" aria-label="Account">
+      {auth.state.loading && <span role="status">Checking sign-in...</span>}
+      {auth.state.error && <span className="account-controls__error" role="alert">{auth.state.error}</span>}
+      {!auth.state.loading && !auth.state.error && <span className="account-controls__identity"
+        title={signedIn ? `Signed in as ${auth.state.session!.login}` : undefined}>
+        {signedIn ? auth.state.session!.login : "Signed out"}
+      </span>}
+      {signedIn
+        ? <button type="button" onClick={auth.logout}>Sign out</button>
+        : !auth.state.loading && auth.loginUrl && <a href={auth.loginUrl}>Sign in</a>}
+      {auth.state.error && <button type="button" disabled={auth.state.loading} onClick={auth.refresh}>Retry</button>}
+    </div>;
+  }
+  if (placement === "header") return null;
+  const label = "GitHub";
   return <section className="activity-auth" aria-label="Shared inbox sign-in">
-    <p>{auth.provider === "entra"
-      ? "Only assigned Microsoft Entra users can view this dashboard and change shared read state."
-      : "Anyone can view both inboxes. Sign in with GitHub to mark or restore shared read state for everyone."}
+    <p>Anyone can view both inboxes. Sign in with GitHub to mark or restore shared read state for everyone.
       {" "}Attention signals are independent of read state.</p>
     {auth.state.loading && <p role="status">Checking {label} sign-in… Shared read changes are disabled.</p>}
     {auth.state.error && <p role="alert">{auth.state.error} Shared read changes are disabled.</p>}
     {!auth.state.loading && !auth.state.error && <p role="status">{canChangeActivity(auth.state)
-      ? `Signed in as ${auth.state.session!.login}. Shared read changes are enabled when the activity service is ready.`
+      ? `Signed in as ${auth.state.session!.login}.`
       : "Not signed in. Shared read changes are disabled."}</p>}
     <div className="activity-auth__actions">
       {auth.loginUrl && <a className="button-secondary" href={auth.loginUrl}>Sign in with {label}</a>}
