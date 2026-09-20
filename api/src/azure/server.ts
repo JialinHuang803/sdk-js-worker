@@ -93,13 +93,13 @@ export function createAzureActivityServer(deps: Dependencies) {
           throw new ActivityError(503, "Hosted collector integration is disabled. This deployment does not collect activity.");
         }
         if (method !== (action ? "POST" : "GET")) throw new ActivityError(405, "Method not allowed.");
-        if (action) deps.auth.requireMutation(request.headers);
+        const actor = action ? deps.auth.requireMutation(request.headers) : undefined;
         const input = action ? await readBody(request) : null;
         const now = new Date().toISOString();
         if (feature === "activity") {
           if (action === "ack") {
             const parsed = parseAcknowledge(input);
-            const { state, result } = await updateState(sdk, (state) => acknowledge(state, parsed, now));
+            const { state, result } = await updateState(sdk, (state) => acknowledge(state, parsed, now, actor!.displayName));
             return json({ feed: state.feed, acknowledgementId: result });
           }
           if (action === "restore") {
@@ -111,7 +111,7 @@ export function createAzureActivityServer(deps: Dependencies) {
         }
         if (action === "ack") {
           const parsed = parseEmitterAcknowledge(input);
-          const { state, result } = await updateEmitterState(emitter, (state) => acknowledgeEmitter(state, parsed, now));
+          const { state, result } = await updateEmitterState(emitter, (state) => acknowledgeEmitter(state, parsed, now, actor!.displayName));
           return json({ feed: state.feed, acknowledgementId: result });
         }
         if (action === "restore") {

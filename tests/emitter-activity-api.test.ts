@@ -5,6 +5,8 @@ import {
 } from "../api/src/emitter-engine";
 import { updateEmitterState } from "../api/src/emitter-store";
 import type { StateBlob } from "../api/src/store";
+import { publicActivityFeed } from "../api/src/public-feed";
+import { readerName } from "../src/data/read-attribution";
 import type { EmitterSnapshot } from "../src/data/emitter-contracts";
 import {
   isEmitterActivityFeed, isEmitterActivityMutationResponse,
@@ -58,6 +60,51 @@ function memoryStore(initial: EmitterActivityState | null = null): StateBlob {
 }
 
 describe("emitter shared activity state", () => {
+  it("persists readers per acknowledgement without overwriting old readers, and clears attribution on restore", () => {
+    const state = seed();
+    const first = acknowledgeEmitter(state, ack(state), now, "Alice")!;
+    expect(acknowledgeEmitter(state, ack(state), now, "Bob")).toBeNull();
+    expect(readerName(state.feed.events[0])).toBe("Alice");
+    ingestEmitter(state, { snapshot: snapshot(later, now) }, later);
+    expect(state.feed.events[1]).not.toHaveProperty("readBy");
+    acknowledgeEmitter(state, ack(state, 2), later, "Bob");
+    expect(validateEmitterState(JSON.parse(JSON.stringify(state))).feed.events.map(readerName))
+      .toEqual(["Alice", "Bob"]);
+    expect(readerName(parseEmitterActivityFeed(state.feed).events[0])).toBe("Alice");
+    const anonymous = publicActivityFeed(state.feed);
+    expect(anonymous.events.every((event) => !("readBy" in event))).toBe(true);
+    expect(parseEmitterActivityFeed(anonymous).events).toHaveLength(2);
+    expect(readerName(state.feed.events[0])).toBe("Alice");
+    restoreEmitter(state, { generation: state.feed.generation, acknowledgementIds: [first] }, later);
+    expect(state.feed.events[0]).not.toHaveProperty("readBy");
+    expect(readerName(state.feed.events[1])).toBe("Bob");
+    acknowledgeEmitter(state, ack(state), later, "Carol");
+    restoreEmitter(state, { generation: state.feed.generation, acknowledgementIds: [first] }, later);
+    expect(readerName(state.feed.events[0])).toBe("Carol");
+    expect(JSON.stringify(state.snapshot)).not.toContain("readBy");
+  });
+
+  it.each([null, "", " ", 12, {}, { name: "x".repeat(501), acknowledgementId: "a" },
+    { name: "Alice", acknowledgementId: "" }])("rejects malformed reader attribution: %j", (readBy) => {
+    const state = seed();
+    acknowledgeEmitter(state, ack(state), now);
+    expect(() => validateEmitterState(state)).not.toThrow();
+    Object.assign(state.feed.events[0], { readBy });
+    expect(() => validateEmitterState(state)).toThrow("invalid");
+    expect(() => parseEmitterActivityFeed(state.feed)).toThrow("Invalid emitter");
+  });
+
+  it("does not misattribute events restored or re-acknowledged by an older writer", () => {
+    const state = seed();
+    acknowledgeEmitter(state, ack(state), now, "Alice");
+    Object.assign(state.feed.events[0], { readAt: null, acknowledgementId: null });
+    expect(() => validateEmitterState(state)).not.toThrow();
+    expect(validateEmitterState(state).feed.events[0]).not.toHaveProperty("readBy");
+    expect(readerName(state.feed.events[0])).toBeUndefined();
+    Object.assign(state.feed.events[0], { readAt: now, acknowledgementId: "older-writer-new-batch" });
+    expect(readerName(parseEmitterActivityFeed(state.feed).events[0])).toBeUndefined();
+  });
+
   it("starts with inventory only, without marking persistent attention as an event", () => {
     const state = createEmitterState();
     ingestEmitter(state, { snapshot: snapshot() }, baselineTime);
@@ -275,10 +322,22 @@ describe("independent emitter CAS storage", () => {
     const blob = memoryStore(initial);
     await Promise.all([
       updateEmitterState(blob, (state) => ingestEmitter(state, { snapshot: snapshot(later, now) }, later)),
-      updateEmitterState(blob, (state) => acknowledgeEmitter(state, ack(initial), now)),
+      updateEmitterState(blob, (state) => acknowledgeEmitter(state, ack(initial), now, "Alice")),
     ]);
     const result = await updateEmitterState(blob, () => undefined);
     expect(result.state.feed.events.map((event) => event.readAt !== null)).toEqual([true, false]);
+    expect(result.state.feed.events.map(readerName)).toEqual(["Alice", undefined]);
+  });
+
+  it("keeps the winning reader when concurrent readers acknowledge the same card", async () => {
+    const initial = seed();
+    const blob = memoryStore(initial);
+    const outcomes = await Promise.all(["Alice", "Bob"].map((name) =>
+      updateEmitterState(blob, (state) => acknowledgeEmitter(state, ack(initial), now, name))));
+    const winner = outcomes.find((outcome) => outcome.result !== null)!;
+    const result = await updateEmitterState(blob, () => undefined);
+    expect(outcomes.filter((outcome) => outcome.result !== null)).toHaveLength(1);
+    expect(result.state.feed.events[0].readBy).toEqual(winner.state.feed.events[0].readBy);
   });
 
   it("does not reset corrupt, incompatible SDK, or inaccessible state", async () => {

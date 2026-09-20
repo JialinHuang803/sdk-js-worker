@@ -6,6 +6,7 @@ import {
 import { EmitterTime } from "./EmitterTable";
 import type { EmitterActivityActions, EmitterActivityState } from "./useEmitterActivity";
 import { canChangeActivity, useActivityAuth } from "../../shared/ActivityAuth";
+import { ReadHistory } from "../../shared/ReadHistory";
 
 export function EmitterActivityNotice({ activity, baseline, retry, now = Date.now() }: {
   activity: EmitterActivityState;
@@ -92,6 +93,7 @@ function EmitterNotification({ entry, activity, actions, now, read = false }: {
       </time>
       {latestComment && <> · <a href={latestComment.url} target="_blank" rel="noreferrer">View comment</a></>}
     </p>
+    <ReadHistory events={entry.recentlyRead} />
     <div className="emitter-notification__actions">
       {entry.unread.length > 0 && <button type="button" className="button-secondary"
         disabled={!writable} aria-label={`Mark activity read for #${entry.item.number}`}

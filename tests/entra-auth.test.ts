@@ -95,6 +95,15 @@ describe("Entra authorization-code PKCE BFF", () => {
     await expect(auth.callback(login.url, login.browser)).rejects.toMatchObject({ status: 403 });
   });
 
+  it("does not substitute a directory object ID when no display name is available for attribution", async () => {
+    const { auth, start } = setup({ name: undefined });
+    const login = await start();
+    const result = await auth.callback(login.url, login.browser);
+    const actor = auth.requireSession(result.cookies[0].split(";")[0]);
+    expect(actor.login).toBe(config.allowedObjectIds[0]);
+    expect(actor.displayName).toBeUndefined();
+  });
+
   it.each([0, "0"])("allows a tenant member outside the former allowlist with acct=%j", async (acct) => {
     const { auth, start } = setup({ oid: "11111111-1111-4111-8111-111111111111", acct },
       { ...config, accessPolicy: "tenant-members", allowedObjectIds: [] });

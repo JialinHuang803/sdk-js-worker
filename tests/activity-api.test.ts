@@ -5,6 +5,9 @@ import {
 } from "../api/src/engine";
 import { updateState, type StateBlob } from "../api/src/store";
 import { DASHBOARD_SCHEMA_VERSION, type DashboardSnapshot } from "../src/data/contracts";
+import { publicActivityFeed } from "../api/src/public-feed";
+import { parseActivityFeed } from "../src/features/sdk-prs/sharedActivity";
+import { readerName } from "../src/data/read-attribution";
 
 const repository = "Azure/azure-sdk-for-js";
 const now = "2026-09-18T00:00:00Z";
@@ -53,6 +56,52 @@ function memoryStore(initial: ActivityState | null = null): StateBlob {
 }
 
 describe("durable shared activity", () => {
+  it("persists readers per batch, preserves the first reader on retries and clears only restored attribution", () => {
+    const state = seed();
+    const first = acknowledge(state, ack(state), now, "Alice")!;
+    expect(acknowledge(state, ack(state), now, "Bob")).toBeNull();
+    expect(readerName(state.feed.events[0])).toBe("Alice");
+    const next = snapshot("2026-09-19T00:00:00Z", "head2");
+    ingest(state, { snapshot: next, inactivePullRequests: [] }, next.generatedAt);
+    expect(state.feed.events[1]).not.toHaveProperty("readBy");
+    acknowledge(state, ack(state, 2), next.generatedAt, "Bob");
+    expect(validateStoredState(JSON.parse(JSON.stringify(state))).feed.events.map(readerName))
+      .toEqual(["Alice", "Bob"]);
+    expect(readerName(parseActivityFeed(state.feed).events[0])).toBe("Alice");
+    const anonymous = publicActivityFeed(state.feed);
+    expect(anonymous.events.every((event) => !("readBy" in event))).toBe(true);
+    expect(parseActivityFeed(anonymous).events).toHaveLength(2);
+    expect(readerName(state.feed.events[0])).toBe("Alice");
+    restore(state, { generation: state.feed.generation, acknowledgementIds: [first] }, next.generatedAt);
+    expect(state.feed.events[0]).not.toHaveProperty("readBy");
+    expect(readerName(state.feed.events[1])).toBe("Bob");
+    acknowledge(state, ack(state), next.generatedAt, "Carol");
+    restore(state, { generation: state.feed.generation, acknowledgementIds: [first] }, next.generatedAt);
+    expect(readerName(state.feed.events[0])).toBe("Carol");
+    expect(JSON.stringify(state.snapshot)).not.toContain("readBy");
+  });
+
+  it.each([null, "", " ", 12, {}, { name: "x".repeat(501), acknowledgementId: "a" },
+    { name: "Alice", acknowledgementId: "" }])("rejects malformed stored reader attribution: %j", (readBy) => {
+    const state = seed();
+    acknowledge(state, ack(state), now);
+    expect(() => validateStoredState(state)).not.toThrow();
+    Object.assign(state.feed.events[0], { readBy });
+    expect(() => validateStoredState(state)).toThrow("invalid");
+    expect(() => parseActivityFeed(state.feed)).toThrow("Invalid activity");
+  });
+
+  it("does not misattribute reads when an older writer leaves attribution behind", () => {
+    const state = seed();
+    acknowledge(state, ack(state), now, "Alice");
+    Object.assign(state.feed.events[0], { readAt: null, acknowledgementId: null });
+    expect(() => validateStoredState(state)).not.toThrow();
+    expect(validateStoredState(state).feed.events[0]).not.toHaveProperty("readBy");
+    expect(readerName(parseActivityFeed(state.feed).events[0])).toBeUndefined();
+    Object.assign(state.feed.events[0], { readAt: now, acknowledgementId: "older-writer-new-batch" });
+    expect(readerName(parseActivityFeed(state.feed).events[0])).toBeUndefined();
+  });
+
   it("only turns transient reasons into events and persists snapshots separately", () => {
     const state = seed();
     expect(state.feed.events).toHaveLength(1);
@@ -213,10 +262,22 @@ describe("conditional storage writes", () => {
     const later = snapshot("2026-09-19T00:00:00Z", "head2");
     await Promise.all([
       updateState(blob, (state) => ingest(state, { snapshot: later, inactivePullRequests: [] }, later.generatedAt)),
-      updateState(blob, (state) => acknowledge(state, ack(initial), now)),
+      updateState(blob, (state) => acknowledge(state, ack(initial), now, "Alice")),
     ]);
     const result = await updateState(blob, () => undefined);
     expect(result.state.feed.events.map((event) => event.readAt !== null)).toEqual([true, false]);
+    expect(result.state.feed.events.map(readerName)).toEqual(["Alice", undefined]);
+  });
+
+  it("keeps the winning reader when two readers race on the same card", async () => {
+    const initial = seed();
+    const blob = memoryStore(initial);
+    const outcomes = await Promise.all(["Alice", "Bob"].map((name) =>
+      updateState(blob, (state) => acknowledge(state, ack(initial), now, name))));
+    const winner = outcomes.find((outcome) => outcome.result !== null)!;
+    const result = await updateState(blob, () => undefined);
+    expect(outcomes.filter((outcome) => outcome.result !== null)).toHaveLength(1);
+    expect(result.state.feed.events[0].readBy).toEqual(winner.state.feed.events[0].readBy);
   });
 
   it("fails on corrupt or inaccessible storage rather than resetting unread history", async () => {

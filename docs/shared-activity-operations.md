@@ -116,6 +116,27 @@ storage is an error, not an empty inbox. The same `state.json` and
 Normal feed reads can prune already-read entries beyond the existing 72-hour
 recovery window; unread activity is retained.
 
+Marking an activity read records the authenticated session's display name
+(`readBy`) alongside its existing acknowledgement ID and read time. The name
+comes from the server's Entra session, never from the request body. Recently
+read cards show the reader and time for each acknowledgement batch on both
+tabs; older entries without attribution show "Reader not recorded." Names
+are snapshots at the time of marking, not a live directory lookup.
+Concurrent or repeated acknowledgements do not overwrite an existing reader.
+Restore clears that batch's attribution; a later mark records its new reader.
+Names share the existing three-day read retention and are not a permanent
+audit log. No email address, token or directory object ID is added to the feed.
+Attribution is bound to its acknowledgement ID, so an older writer retaining
+unknown fields cannot incorrectly credit a previous reader for a new read.
+Stale attribution is ignored by the UI and removed when state is loaded.
+
+The optional local GitHub service records the authenticated GitHub login.
+Its anonymous responses omit reader names, as do the legacy Functions handlers
+in this source tree. Names are not added to collector snapshots or Pages assets.
+The blocked, previously deployed Function has not been upgraded: do not reopen
+its anonymous endpoints against these blobs without deploying the updated
+name-stripping handlers or replacing its authentication first.
+
 **Refresh limitation:** Azure collector baseline/ingest routes deliberately
 return an explicit unavailable response in this evaluation. Existing GitHub
 Actions still target the restricted Function. Consequently the deployed

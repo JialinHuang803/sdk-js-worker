@@ -1,4 +1,5 @@
 import { randomUUID } from "node:crypto";
+import { discardStaleReader, validReadAttribution, validReaderName } from "../../src/data/read-attribution";
 import { isDashboardSnapshot, type DashboardSnapshot, type PackageMetadata } from "../../src/data/contracts";
 import type {
   ActivityAcknowledgeRequest,
@@ -83,6 +84,7 @@ function eventValid(value: unknown): value is SharedActivityEvent {
       !kinds.has(String(value.kind)) || !date(value.occurredAt) ||
       !(value.readAt === null || date(value.readAt)) ||
       !(value.acknowledgementId === null || text(value.acknowledgementId)) ||
+      !validReadAttribution(value.readBy) ||
       ((value.readAt === null) !== (value.acknowledgementId === null))) return false;
   return value.comment === undefined || (record(value.comment) &&
     text(value.comment.id) && ["conversation", "review-comment", "review-summary"].includes(String(value.comment.kind)) &&
@@ -122,7 +124,7 @@ export function validateStoredState(value: unknown): ActivityState {
       generation: feed.generation,
       revision: feed.revision,
       collectedAt: feed.collectedAt,
-      events: feed.events,
+      events: feed.events.map(discardStaleReader),
       pullRequests: feed.pullRequests,
     },
     snapshot: value.snapshot,
@@ -276,7 +278,8 @@ function mutation(state: ActivityState, generation: string, now: string): void {
   pruneReadActivities(state, now);
 }
 
-export function acknowledge(state: ActivityState, body: ActivityAcknowledgeRequest, now: string): string | null {
+export function acknowledge(state: ActivityState, body: ActivityAcknowledgeRequest, now: string, readBy?: string): string | null {
+  if (readBy !== undefined && !validReaderName(readBy)) throw new ActivityError(500, "Reader identity is invalid.");
   if (!state.feed.events.some((event) => event.repository === body.repository &&
       event.pullRequestNumber === body.pullRequestNumber && event.sequence === body.throughSequence)) {
     throw new ActivityError(409, "This activity card changed. Reload before trying again.");
@@ -287,7 +290,12 @@ export function acknowledge(state: ActivityState, body: ActivityAcknowledgeReque
     event.readAt === null);
   if (events.length === 0) return null;
   const id = randomUUID();
-  for (const event of events) { event.readAt = now; event.acknowledgementId = id; }
+  for (const event of events) {
+    event.readAt = now;
+    event.acknowledgementId = id;
+    if (readBy !== undefined) event.readBy = { name: readBy, acknowledgementId: id };
+    else delete event.readBy;
+  }
   return id;
 }
 
@@ -298,6 +306,7 @@ export function restore(state: ActivityState, body: ActivityRestoreRequest, now:
     if (event.acknowledgementId && ids.has(event.acknowledgementId)) {
       event.readAt = null;
       event.acknowledgementId = null;
+      delete event.readBy;
     }
   }
 }

@@ -4,6 +4,7 @@ import type {
   PackageMetadata,
   Plane,
 } from "./contracts";
+import type { ReadAttribution } from "./read-attribution";
 
 export type SharedActivityKind = "new-pr" | "new-commit" | "new-comment" | "merged";
 
@@ -19,7 +20,7 @@ export interface SharedActivityPull {
   packages: PackageMetadata[];
 }
 
-export interface SharedActivityEvent {
+export interface SharedActivityEvent extends ReadAttribution {
   id: string;
   sequence: number;
   repository: string;
@@ -27,8 +28,6 @@ export interface SharedActivityEvent {
   kind: SharedActivityKind;
   occurredAt: string;
   comment?: InboxCommentActivity;
-  readAt: string | null;
-  acknowledgementId: string | null;
 }
 
 export interface SharedActivityFeed {

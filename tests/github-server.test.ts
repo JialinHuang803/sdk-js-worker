@@ -156,19 +156,26 @@ describe("local GitHub activity HTTP integration", () => {
     const { send, login, sdk, emitter } = await setup();
     const headers = await login();
     const ack = await send("activity/ack", { method: "POST", headers,
-      body: JSON.stringify({ generation: sdk.feed.generation, repository, pullRequestNumber: 1, throughSequence: 1 }) });
+      body: JSON.stringify({ generation: sdk.feed.generation, repository, pullRequestNumber: 1, throughSequence: 1, readBy: "Forged reader" }) });
     expect(ack.status).toBe(200);
     const result = await ack.json();
     expect(result.feed.events[0].readAt).not.toBeNull();
+    expect(result.feed.events[0].readBy).toEqual({ name: "reviewer", acknowledgementId: result.acknowledgementId });
     const anotherBrowser = await (await send("activity")).json();
     expect(anotherBrowser.events[0].readAt).toBe(result.feed.events[0].readAt);
+    expect(anotherBrowser.events[0]).not.toHaveProperty("readBy");
+    const authenticated = await (await send("activity", { headers })).json();
+    expect(authenticated.events[0].readBy.name).toBe("reviewer");
     const restored = await send("activity/restore", { method: "POST", headers,
       body: JSON.stringify({ generation: sdk.feed.generation, acknowledgementIds: [result.acknowledgementId] }) });
     expect((await restored.json()).feed.events[0].readAt).toBeNull();
     const emitterAck = await send("emitter-activity/ack", { method: "POST", headers,
       body: JSON.stringify({ generation: emitter.feed.generation, number: 2, throughSequence: 1 }) });
     expect(emitterAck.status).toBe(200);
-    expect((await emitterAck.json()).feed.events[0].readAt).not.toBeNull();
+    const emitterResult = await emitterAck.json();
+    expect(emitterResult.feed.events[0].readAt).not.toBeNull();
+    expect(emitterResult.feed.events[0].readBy).toEqual({ name: "reviewer", acknowledgementId: emitterResult.acknowledgementId });
+    expect((await (await send("emitter-activity")).json()).events[0]).not.toHaveProperty("readBy");
     expect((await send("auth/logout", { method: "POST", headers })).status).toBe(200);
     expect((await (await send("auth/session", { headers })).json()).authenticated).toBe(false);
     expect((await send("activity/restore", { method: "POST", headers, body: "{}" })).status).toBe(401);

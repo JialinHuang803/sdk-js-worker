@@ -116,6 +116,29 @@ describe("shared activity grouping", () => {
 });
 
 describe("shared activity UI", () => {
+  it("shows each reader once per acknowledgement batch and leaves legacy readers unattributed", () => {
+    const data = feed({ events: [
+      event(1, 1, { readAt: time, acknowledgementId: "alice", readBy: { name: "Alice", acknowledgementId: "alice" } }),
+      event(2, 1, { readAt: time, acknowledgementId: "alice", readBy: { name: "Alice", acknowledgementId: "alice" } }),
+      event(3, 1, { readAt: "2026-09-18T01:00:00Z", acknowledgementId: "bob", readBy: { name: "<Bob>", acknowledgementId: "bob" } }),
+      event(4, 1, { readAt: time, acknowledgementId: "legacy" }),
+      event(5, 1, { readAt: time, acknowledgementId: "legacy-retry", readBy: { name: "Do not show", acknowledgementId: "old-batch" } }),
+    ] });
+    const html = renderToStaticMarkup(createElement(SharedActivityList, {
+      groups: groupActivities(data, true), activity: state(data), read: true,
+    }));
+    expect(html.match(/Read by <strong>Alice<\/strong>/g)).toHaveLength(1);
+    expect(html).toContain("Read by <strong>&lt;Bob&gt;</strong>");
+    expect(html).toContain("Reader not recorded");
+    expect(html).not.toContain("Do not show");
+    expect(html).toContain('dateTime="2026-09-18T01:00:00Z"');
+    expect(html.indexOf("&lt;Bob&gt;")).toBeLessThan(html.indexOf(">Alice<"));
+    const unread = renderToStaticMarkup(createElement(SharedActivityList, {
+      groups: groupActivities(feed(), false), activity: state(feed()),
+    }));
+    expect(unread).not.toContain('aria-label="Read history"');
+  });
+
   it("renders the same PR in unread and attention, counts it once, and keeps attention headlines persistent", () => {
     const html = renderToStaticMarkup(createElement(ReviewInboxView, {
       snapshot: snapshot(), activity: state(feed()),

@@ -6,6 +6,7 @@ import type {
   SharedActivityPull,
 } from "../../data/activity-contracts";
 import type { DashboardSnapshot, InboxReason, ReviewInboxItem } from "../../data/contracts";
+import { validReadAttribution } from "../../data/read-attribution";
 
 export const pullKey = (repository: string, number: number) => `${repository}:${number}`;
 
@@ -115,6 +116,7 @@ function validEvent(value: unknown): value is SharedActivityEvent {
     timestamp(value.occurredAt) &&
     ((value.readAt === null && value.acknowledgementId === null) ||
       (timestamp(value.readAt) && nonempty(value.acknowledgementId))) &&
+    validReadAttribution(value.readBy) &&
     (comment === undefined || (record(comment) && nonempty(comment.id) && text(comment.author) &&
       ["conversation", "review-comment", "review-summary"].includes(String(comment.kind)) &&
       timestamp(comment.createdAt) && webUrl(comment.url)));

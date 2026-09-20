@@ -1,11 +1,12 @@
 import { isEmitterActivity, type EmitterActivity, type EmitterIssue, type EmitterPullRequest, type EmitterSnapshot } from "./emitter-contracts";
+import { validReadAttribution, type ReadAttribution } from "./read-attribution";
 
 export interface EmitterActivityFeed {
   schemaVersion: 1;
   generation: string;
   revision: number;
   collectedAt: string | null;
-  events: Array<EmitterActivity & { sequence: number; readAt: string | null; acknowledgementId: string | null }>;
+  events: Array<EmitterActivity & ReadAttribution & { sequence: number }>;
   issues: EmitterIssue[];
   pullRequests: EmitterPullRequest[];
   excludedIssueNumbers: number[];
@@ -64,6 +65,7 @@ export function isEmitterActivityFeed(value: unknown): value is EmitterActivityF
       !(event.readAt === null || timestamp(event.readAt)) ||
       !(event.acknowledgementId === null || text(event.acknowledgementId, 100)) ||
       ((event.readAt === null) !== (event.acknowledgementId === null)) ||
+      !validReadAttribution(event.readBy) ||
       !timestamp(value.collectedAt) || Date.parse(event.occurredAt) > Date.parse(value.collectedAt) ||
       (!issues.has(event.number) && !pulls.has(event.number)) ||
       (issues.has(event.number) && excluded.has(event.number))) return false;

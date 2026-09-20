@@ -9,6 +9,7 @@ import {
 } from "../emitter-engine";
 import { updateState, type StateBlob } from "../store";
 import { updateEmitterState } from "../emitter-store";
+import { publicActivityFeed } from "../public-feed";
 import type { createAuth } from "./auth";
 
 interface Dependencies {
@@ -102,18 +103,19 @@ export function createActivityServer(deps: Dependencies) {
       if ((action === undefined || action === "baseline") ? method !== "GET" : method !== "POST") {
         throw new ActivityError(405, "Method not allowed.");
       }
+      let reader: string | undefined;
       if (action === "baseline" || action === "ingest") {
         const key = request.headers["x-functions-key"];
         if (typeof key !== "string" || !matches(key, deps.ingestKey)) {
           throw new ActivityError(401, "Collector authentication is required.");
         }
-      } else if (action) authorizeWrite();
+      } else if (action) reader = authorizeWrite();
       const now = new Date().toISOString();
       const input = method === "POST" ? await readBody(request, action === "ingest" ? 4 * 1024 * 1024 : 16 * 1024) : null;
       if (feature === "activity") {
         if (action === "ack") {
           const parsed = parseAcknowledge(input);
-          const { state, result } = await updateState(deps.sdk, (state) => acknowledge(state, parsed, now));
+          const { state, result } = await updateState(deps.sdk, (state) => acknowledge(state, parsed, now, reader));
           return json({ feed: state.feed, acknowledgementId: result });
         }
         if (action === "restore") {
@@ -128,11 +130,12 @@ export function createActivityServer(deps: Dependencies) {
         }
         const { state } = await updateState(deps.sdk, (state) => pruneReadActivities(state, now));
         return json(action === "baseline" ?
-          { snapshot: state.snapshot, trackedPullRequests: state.feed.pullRequests } : state.feed);
+          { snapshot: state.snapshot, trackedPullRequests: state.feed.pullRequests } :
+          deps.auth.session(cookie).authenticated ? state.feed : publicActivityFeed(state.feed));
       }
       if (action === "ack") {
         const parsed = parseEmitterAcknowledge(input);
-        const { state, result } = await updateEmitterState(deps.emitter, (state) => acknowledgeEmitter(state, parsed, now));
+        const { state, result } = await updateEmitterState(deps.emitter, (state) => acknowledgeEmitter(state, parsed, now, reader));
         return json({ feed: state.feed, acknowledgementId: result });
       }
       if (action === "restore") {
@@ -146,7 +149,8 @@ export function createActivityServer(deps: Dependencies) {
         return json({ collectedAt: state.feed.collectedAt, revision: state.feed.revision });
       }
       const { state } = await updateEmitterState(deps.emitter, (state) => pruneEmitterReadActivities(state, now));
-      return json(action === "baseline" ? { snapshot: state.snapshot?.activity ? state.snapshot : null } : state.feed);
+      return json(action === "baseline" ? { snapshot: state.snapshot?.activity ? state.snapshot : null } :
+        deps.auth.session(cookie).authenticated ? state.feed : publicActivityFeed(state.feed));
     } catch (error) {
       if (error instanceof ActivityError) {
         if (error.status === 429) response.setHeader("Retry-After", "60");

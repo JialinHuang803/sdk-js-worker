@@ -46,6 +46,26 @@ function renderInbox(activity = state(), items: Array<EmitterIssue | EmitterPull
 afterEach(() => { vi.unstubAllGlobals(); vi.useRealTimers(); });
 
 describe("emitter attention grouping", () => {
+  it("shows reader names and times in recently read, with an honest legacy fallback", () => {
+    const assigned = { ...issue, assignees: ["owner"] };
+    const events = [
+      event({ readAt: timestamp, acknowledgementId: "alice", readBy: { name: "Alice", acknowledgementId: "alice" } }),
+      event({ id: "second", sequence: 2, readAt: timestamp, acknowledgementId: "alice", readBy: { name: "Alice", acknowledgementId: "alice" } }),
+      event({ id: "third", sequence: 3, readAt: timestamp, acknowledgementId: "bob", readBy: { name: "<Bob>", acknowledgementId: "bob" } }),
+      event({ id: "legacy", sequence: 4, readAt: timestamp, acknowledgementId: "legacy" }),
+      event({ id: "stale", sequence: 5, readAt: timestamp, acknowledgementId: "legacy-retry", readBy: { name: "Do not show", acknowledgementId: "old-batch" } }),
+    ];
+    const html = renderInbox(state({ feed: feed({ issues: [assigned], events }) }), [assigned]);
+    expect(html).toContain('aria-label="Recently read issues"');
+    expect(html.match(/Read by <strong>Alice<\/strong>/g)).toHaveLength(1);
+    expect(html).toContain("Read by <strong>&lt;Bob&gt;</strong>");
+    expect(html).toContain("Reader not recorded");
+    expect(html).not.toContain("Do not show");
+    expect(html).toContain(`dateTime="${timestamp}"`);
+    expect(renderInbox()).not.toContain('aria-label="Read history"');
+    expect(renderInbox(state({ feed: feed({ events }) }))).toContain("Read by <strong>Alice</strong>");
+  });
+
   it("uses readable relative times without losing the exact timestamp", () => {
     expect(emitterRelativeTime(timestamp, now)).toBe("Just now");
     expect(emitterRelativeTime(timestamp, now + 5 * 60_000)).toBe("5 minutes ago");

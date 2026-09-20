@@ -10,6 +10,7 @@ import {
   parseEmitterRestore, pruneEmitterReadActivities, restoreEmitter,
 } from "./emitter-engine";
 import { updateEmitterState } from "./emitter-store";
+import { publicActivityFeed } from "./public-feed";
 
 const cachedBlobs = new Map<string, StateBlob>();
 function blob(name = "state.json"): StateBlob {
@@ -95,9 +96,9 @@ function handler(
 
 app.http("activity", {
   methods: ["GET"], authLevel: "anonymous", route: "activity",
-  handler: handler(async () => (await updateState(
+  handler: handler(async () => publicActivityFeed((await updateState(
     blob(), (state) => pruneReadActivities(state, new Date().toISOString()),
-  )).state.feed),
+  )).state.feed)),
 });
 app.http("activity-baseline", {
   methods: ["GET"], authLevel: "function", route: "activity/baseline",
@@ -119,7 +120,7 @@ app.http("activity-ack", {
   handler: handler(async (request) => {
     const input = parseAcknowledge(await body(request, 16 * 1024));
     const { state, result } = await updateState(blob(), (state) => acknowledge(state, input, new Date().toISOString()));
-    return { feed: state.feed, acknowledgementId: result };
+    return { feed: publicActivityFeed(state.feed), acknowledgementId: result };
   }),
 });
 app.http("activity-restore", {
@@ -127,15 +128,15 @@ app.http("activity-restore", {
   handler: handler(async (request) => {
     const input = parseRestore(await body(request, 16 * 1024));
     const { state } = await updateState(blob(), (state) => restore(state, input, new Date().toISOString()));
-    return { feed: state.feed, acknowledgementId: null };
+    return { feed: publicActivityFeed(state.feed), acknowledgementId: null };
   }),
 });
 
 app.http("emitter-activity", {
   methods: ["GET"], authLevel: "anonymous", route: "emitter-activity",
-  handler: handler(async () => (await updateEmitterState(
+  handler: handler(async () => publicActivityFeed((await updateEmitterState(
     blob("emitter-state.json"), (state) => pruneEmitterReadActivities(state, new Date().toISOString()),
-  )).state.feed),
+  )).state.feed)),
 });
 app.http("emitter-activity-baseline", {
   methods: ["GET"], authLevel: "function", route: "emitter-activity/baseline",
@@ -163,7 +164,7 @@ app.http("emitter-activity-ack", {
     const { state, result } = await updateEmitterState(
       blob("emitter-state.json"), (state) => acknowledgeEmitter(state, input, new Date().toISOString()),
     );
-    return { feed: state.feed, acknowledgementId: result };
+    return { feed: publicActivityFeed(state.feed), acknowledgementId: result };
   }),
 });
 app.http("emitter-activity-restore", {
@@ -173,6 +174,6 @@ app.http("emitter-activity-restore", {
     const { state } = await updateEmitterState(
       blob("emitter-state.json"), (state) => restoreEmitter(state, input, new Date().toISOString()),
     );
-    return { feed: state.feed, acknowledgementId: null };
+    return { feed: publicActivityFeed(state.feed), acknowledgementId: null };
   }),
 });

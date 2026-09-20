@@ -82,7 +82,7 @@ interface Pending {
   state: string; browserToken: string; verifier: string; nonce: string; expiresAt: number;
 }
 interface Session {
-  id: string; objectId: string; tenantMember: boolean; login: string; csrfToken: string; expiresAt: number;
+  id: string; objectId: string; tenantMember: boolean; login: string; displayName?: string; csrfToken: string; expiresAt: number;
 }
 
 export function createEntraAuth(config: AzureAuthConfig, client: EntraClient) {
@@ -179,8 +179,9 @@ export function createEntraAuth(config: AzureAuthConfig, client: EntraClient) {
       const previous = findSession(header);
       if (!previous && sessions.size >= MAX_ENTRIES) throw new ActivityError(503, "Too many active sessions.");
       if (previous) sessions.delete(digest(previous.id));
-      const session: Session = { id: randomToken(), objectId, tenantMember,
-        login: typeof identity.name === "string" && identity.name.trim() ? identity.name : objectId,
+      const displayName = typeof identity.name === "string" && identity.name.trim() ? identity.name : undefined;
+      const session: Session = { id: randomToken(), objectId, tenantMember, displayName,
+        login: displayName ?? objectId,
         csrfToken: randomToken(), expiresAt: Math.min(now + SESSION_TTL, identity.exp * 1000) };
       sessions.set(digest(session.id), session);
       return { location: `${config.origin}/`, cookies: [

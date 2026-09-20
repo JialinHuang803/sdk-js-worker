@@ -2,6 +2,7 @@ import type { ActivityGroup } from "./sharedActivity";
 import { acknowledgeGroup, pullKey } from "./sharedActivity";
 import type { SharedActivityState } from "./useSharedActivity";
 import { canChangeActivity, useActivityAuth } from "../../shared/ActivityAuth";
+import { ReadHistory } from "../../shared/ReadHistory";
 
 const labels = {
   "new-pr": "New PR",
@@ -64,6 +65,7 @@ export function SharedActivityList({
                     <span>First <ReadableTime value={group.firstAt} /></span>
                     <span>Latest <ReadableTime value={group.latestAt} /></span>
                   </div>
+                  {read && <ReadHistory events={events} />}
                   <div className="shared-activity__actions">
                     {latestComment && <a href={latestComment.url} target="_blank" rel="noreferrer">Comment by {latestComment.author}</a>}
                     <button type="button" className="button-secondary"

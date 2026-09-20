@@ -175,18 +175,22 @@ describe("hosted state and static HTTP integration", () => {
       const feed = await response.json();
       expect(response.status, JSON.stringify(feed)).toBe(200);
       expect(feed.events[0].readAt).toBeNull();
-      const body = { generation: feed.generation, throughSequence: 1,
+      const body = { generation: feed.generation, throughSequence: 1, readBy: "Forged reader",
         ...(feature === "activity" ? { repository, pullRequestNumber: 1 } : { number: 2 }) };
       const ack = await send(`/api/${feature}/ack`, { method: "POST", headers: mutations, body: JSON.stringify(body) });
       expect(ack.status).toBe(200);
       const result = await ack.json();
       expect(result.feed.events[0].readAt).not.toBeNull();
+      expect(result.feed.events[0].readBy).toEqual({ name: "Test reviewer", acknowledgementId: result.acknowledgementId });
       const read = await (await send(`/api/${feature}`, { headers: signedIn })).json();
       expect(read.events[0].acknowledgementId).toBe(result.acknowledgementId);
+      expect(read.events[0].readBy.name).toBe("Test reviewer");
       const restored = await send(`/api/${feature}/restore`, { method: "POST", headers: mutations,
         body: JSON.stringify({ generation: feed.generation, acknowledgementIds: [result.acknowledgementId] }) });
       expect(restored.status).toBe(200);
-      expect((await restored.json()).feed.events[0].readAt).toBeNull();
+      const restoredEvent = (await restored.json()).feed.events[0];
+      expect(restoredEvent.readAt).toBeNull();
+      expect(restoredEvent).not.toHaveProperty("readBy");
     }
     expect(sdk.write).toHaveBeenCalled();
     expect(emitter.write).toHaveBeenCalled();
@@ -221,6 +225,7 @@ describe("hosted state and static HTTP integration", () => {
       expect(result.feed.generation).toBe(feed.generation);
       expect(result.feed.events[0].id).toBe(feed.events[0].id);
       expect(result.feed.events[0].readAt).not.toBeNull();
+      expect(result.feed.events[0].readBy).toEqual({ name: "Test reviewer", acknowledgementId: result.acknowledgementId });
       expect(blob.write).toHaveBeenCalledTimes(2);
       expect(blob.read).toHaveBeenCalledTimes(2);
     }

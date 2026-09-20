@@ -1,4 +1,5 @@
 import { randomUUID } from "node:crypto";
+import { discardStaleReader, validReaderName } from "../../src/data/read-attribution";
 import { isEmitterSnapshot, type EmitterActivity, type EmitterIssue, type EmitterPullRequest, type EmitterSnapshot } from "../../src/data/emitter-contracts";
 import {
   isEmitterActivityFeed, type EmitterActivityFeed, type EmitterActivityAcknowledgeRequest,
@@ -145,7 +146,7 @@ export function validateEmitterState(value: unknown): EmitterActivityState {
     JSON.stringify(value.feed.excludedIssueNumbers) !== JSON.stringify(excluded) ||
     JSON.stringify(value.feed.issues) !== JSON.stringify(snapshot?.issues ?? []) ||
     JSON.stringify(value.feed.pullRequests) !== JSON.stringify(snapshot?.pullRequests ?? [])) throw invalid();
-  return { schemaVersion: 1, feed: value.feed, snapshot, nextSequence: value.nextSequence,
+  return { schemaVersion: 1, feed: { ...value.feed, events: value.feed.events.map(discardStaleReader) }, snapshot, nextSequence: value.nextSequence,
     rate: { minute: value.rate.minute, count: value.rate.count } };
 }
 
@@ -204,7 +205,8 @@ function mutation(state: EmitterActivityState, generation: string, now: string):
   pruneEmitterReadActivities(state, now);
 }
 
-export function acknowledgeEmitter(state: EmitterActivityState, body: EmitterActivityAcknowledgeRequest, now: string): string | null {
+export function acknowledgeEmitter(state: EmitterActivityState, body: EmitterActivityAcknowledgeRequest, now: string, readBy?: string): string | null {
+  if (readBy !== undefined && !validReaderName(readBy)) throw new ActivityError(500, "Reader identity is invalid.");
   if (!state.feed.events.some((event) => event.number === body.number && event.sequence === body.throughSequence)) {
     throw new ActivityError(409, "This emitter activity card changed. Reload before trying again.");
   }
@@ -213,7 +215,12 @@ export function acknowledgeEmitter(state: EmitterActivityState, body: EmitterAct
     event.number === body.number && event.sequence <= body.throughSequence && event.readAt === null);
   if (!events.length) return null;
   const id = randomUUID();
-  for (const event of events) { event.readAt = now; event.acknowledgementId = id; }
+  for (const event of events) {
+    event.readAt = now;
+    event.acknowledgementId = id;
+    if (readBy !== undefined) event.readBy = { name: readBy, acknowledgementId: id };
+    else delete event.readBy;
+  }
   return id;
 }
 
@@ -224,6 +231,7 @@ export function restoreEmitter(state: EmitterActivityState, body: EmitterActivit
     if (event.acknowledgementId && ids.has(event.acknowledgementId)) {
       event.readAt = null;
       event.acknowledgementId = null;
+      delete event.readBy;
     }
   }
 }
