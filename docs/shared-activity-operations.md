@@ -134,9 +134,10 @@ by the user. The managed identity can read the existing SDK and emitter state
 without changing them, and federated token exchange succeeds without a secret.
 
 The initial assigned-user configuration showed **"Need admin approval."**
-After the user's requested change to tenant-member access, interactive sign-in
-must be retried; broader eligibility does not itself grant consent or override
-the organization's consent policies. The registration declares only the sign-in
+After the user's requested change to tenant-member access, the user confirmed
+that sign-in opens the dashboard. No tenant consent policy was changed and
+no administrator consent was granted by this deployment. Broader eligibility
+does not override the organization's consent policies. The registration declares only the sign-in
 permissions actually requested by MSAL: `openid`, `profile`, and
 `offline_access`. These are delegated sign-in scopes; no mail, files,
 directory-wide read or application permissions were requested. MSAL includes
