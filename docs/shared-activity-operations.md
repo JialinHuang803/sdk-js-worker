@@ -12,7 +12,136 @@ implementation for evaluation. It does not migrate these blobs, modify the
 deployed API or change workflow credentials. Approved hosting and explicit state
 migration are required before any cutover.
 
-## Private Container Apps provisioning experiment
+## Authenticated Container Apps evaluation
+
+The Azure evaluation uses resource names without a `-poc` suffix:
+`ca-sdk-js-worker`, `cae-sdk-js-worker`, `vnet-sdk-js-worker`,
+`nsg-sdk-js-worker`, `id-sdk-js-worker` and `acrsdkjsworker2807`.
+Azure cannot rename these resources in place; replacements are provisioned
+before the original four private provisioning resources are retired.
+
+`infra/container-app-foundation.bicep` creates the VNet-injected external
+environment, authenticated registry and user-assigned managed identity. It does
+not expose an application. The identity receives image-pull permission on the
+registry and Blob Data Contributor on the existing `activity` container only.
+The existing storage account, blobs, Function and their network settings are
+not redeployed. Registry administrator credentials and anonymous pull are disabled.
+
+`infra/container-app-dashboard.bicep` deploys an explicitly supplied runtime
+image with ingress **disabled by default**. Enable HTTPS ingress only after
+the authenticated runtime, Entra callback and access restrictions are ready.
+Do not expose the provisioning quickstart image as a dashboard replacement.
+
+The single-tenant Entra registration must be associated with an approved
+Service Tree service using `serviceManagementReference`. The enterprise
+application requires explicit user assignment; initially only the requesting
+user is assigned for evaluation. Tenant policy rejects password credentials.
+Use a managed-identity federated credential instead of requesting an exception,
+enabling implicit grants, or putting credentials in the browser. Its issuer is
+`https://login.microsoftonline.com/<tenant-id>/v2.0`, subject is the user-assigned
+identity's **principal ID**, and audience is `api://AzureADTokenExchange`.
+The registered web callback is the exact HTTPS app origin plus
+`/api/auth/callback`; both implicit grant settings remain disabled.
+
+This is a separate authenticated evaluation, not a production cutover or
+authorization for shared-team DDFun hosting. Existing GitHub Pages workflows
+and collector configuration remain unchanged. Do not disable Azure policies,
+add remediation-skip tags or redeploy templates to undo a subsequent security
+restriction. Obtain the appropriate hosting approval before expanding team use.
+An accepted ARM deployment does not establish that approval or guarantee that
+security automation will leave the endpoint reachable.
+
+### Runtime and deployment
+
+The Node entrypoint is `api/src/azure/main.ts`. It serves the built dashboard and
+both activity APIs from one origin on port 8080. It uses MSAL authorization code
+flow with PKCE and a managed-identity client assertion, not EasyAuth headers.
+The runtime does not trust caller-supplied identity headers. Browser sessions
+use opaque Secure/HttpOnly cookies, server-side expiry and per-session CSRF
+tokens. Mutations additionally require the configured exact Origin and JSON.
+Only the login/callback endpoints are public; dashboard assets and snapshots
+require a session too.
+
+Configure these non-secret environment values:
+
+| Variable | Value |
+| --- | --- |
+| `ACTIVITY_AUTH_MODE` | `entra-federated` |
+| `ACTIVITY_ENTRA_TENANT_ID` | The single tenant containing the app and identity |
+| `ACTIVITY_ENTRA_CLIENT_ID` | The Entra application client ID |
+| `ACTIVITY_ENTRA_MANAGED_IDENTITY_CLIENT_ID` | The user-assigned identity client ID |
+| `ACTIVITY_ALLOWED_OBJECT_IDS` | Comma-separated explicitly allowed user object IDs |
+| `ACTIVITY_ORIGIN` | Exact HTTPS dashboard origin, without a trailing slash |
+| `ACTIVITY_STORAGE_ACCOUNT` | Existing account containing the original state |
+| `ACTIVITY_STORAGE_CONTAINER` | `activity` |
+| `AZURE_CLIENT_ID` | The same user-assigned identity client ID, for Blob access |
+
+Pass these as the Bicep `runtimeEnvironment` array of `{name, value}` entries.
+Do not confuse the identity's client ID used here with its principal ID used
+as the federated credential subject. Keep the enterprise application configured
+with assignment required as well as the server allowlist.
+
+Build with `VITE_ACTIVITY_AUTH=entra`, `VITE_ACTIVITY_API_URL=/api` and
+`VITE_BASE_PATH=/`, then run `npm run build` and `npm --prefix api run build`.
+Stage the two validated, currently published JSON snapshots unchanged into
+`dist/data` after the build; do not run collectors during a UI deployment.
+The root `Dockerfile` consumes these compiled artifacts. `.dockerignore`
+allowlists build inputs and excludes credential files. The dependency stage
+maps known public Azure Artifacts tarball URLs to public npm inside the image
+build copy, retaining locked versions and integrity hashes. No `.npmrc`,
+Entra token, GitHub private key or local environment file belongs in the context.
+
+Deploy the resulting image by digest, initially with `enableIngress=false` and
+`minReplicas=1`. Use control-plane container execution to confirm startup,
+federated token exchange and read-only access to both existing blobs before
+enabling HTTPS ingress. Use TCP startup/readiness probes; there is no anonymous
+application health endpoint. Afterwards the evaluation can use zero minimum
+replicas, but never more than one: sessions are bounded in-memory and do not
+survive restarts, revisions or scale-to-zero. Users must sign in again then.
+
+The runtime never initializes a missing state blob. Unavailable or corrupt
+storage is an error, not an empty inbox. The same `state.json` and
+`emitter-state.json` are used, without migrating or replacing history.
+Normal feed reads can prune already-read entries beyond the existing 72-hour
+recovery window; unread activity is retained.
+
+**Refresh limitation:** Azure collector baseline/ingest routes deliberately
+return an explicit unavailable response in this evaluation. Existing GitHub
+Actions still target the restricted Function. Consequently the deployed
+snapshot is the last published snapshot, not newly collected data. Machine
+authentication and collector routing must be implemented before this can
+replace the daily shared service. Do not configure collectors to use browser
+cookies, expose anonymous collector routes, or weaken user authentication.
+
+### September 20 evaluation status
+
+The authenticated image is deployed at
+`https://ca-sdk-js-worker.ambitiouspond-79d04e69.eastus2.azurecontainerapps.io/`.
+The Entra app is `sdk-js-worker`, client ID
+`d8714cdb-8d6d-443e-969a-5beab691ce59`. Its Service Tree association was supplied
+by the user. The managed identity can read the existing SDK and emitter state
+without changing them, and federated token exchange succeeds without a secret.
+
+Interactive sign-in is **blocked by tenant administrator consent**: the user
+received "Need admin approval." The registration declares only the sign-in
+permissions actually requested by MSAL: `openid`, `profile`, and
+`offline_access`. These are delegated sign-in scopes; no mail, files,
+directory-wide read or application permissions were requested. MSAL includes
+`offline_access` by default; this runtime does not persist refresh tokens.
+
+An authorized tenant administrator must review the registration's API
+permissions and grant consent through the organization's normal approval
+process. App ownership, Service Tree association and Azure resource ownership
+do not themselves grant tenant-wide consent. Do not bypass this by enabling
+anonymous access, implicit grants or using an unrelated application's identity.
+Consent also does not replace the separate approval for shared-team hosting.
+
+Until approval, only the requesting user's object ID is allowed and the app
+uses zero minimum / one maximum replica. No production collector cutover or
+GitHub Pages update has occurred. The original `-poc` app has been deleted;
+its environment deletion and subsequent VNet/NSG cleanup are asynchronous.
+
+## Original private Container Apps provisioning experiment
 
 `infra/container-app-prototype.bicep` is a separate, temporary personal R&D
 provisioning experiment. It creates only:

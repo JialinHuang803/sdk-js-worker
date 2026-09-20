@@ -8,8 +8,12 @@ export default defineConfig(({ command, mode, isPreview }) => {
   if (localAuth && (!/^\d+$/.test(activityPort) || Number(activityPort) < 1024 || Number(activityPort) > 65535)) {
     throw new Error("ACTIVITY_PORT must be an integer from 1024 to 65535.");
   }
+  if (env.VITE_ACTIVITY_AUTH === "entra" &&
+    (env.VITE_ACTIVITY_API_URL !== "/api" || env.VITE_BASE_PATH !== "/")) {
+    throw new Error("Entra hosting requires VITE_ACTIVITY_API_URL=/api and VITE_BASE_PATH=/.");
+  }
   return {
-    base: "/sdk-js-worker/",
+    base: env.VITE_BASE_PATH?.trim() || "/sdk-js-worker/",
     plugins: [react()],
     server: {
       fs: { deny: [".env", ".env.*", "*.{crt,pem}", "**/.git/**", "**/.local/**", "**/*.pem"] },

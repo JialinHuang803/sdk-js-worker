@@ -11,7 +11,8 @@ export async function fetchEmitterSnapshot(signal?: AbortSignal): Promise<Emitte
   const response = await fetch(`${import.meta.env.BASE_URL}data/emitter.json`, {
     signal,
     cache: "no-cache",
-    credentials: "omit",
+    credentials: import.meta.env.VITE_ACTIVITY_AUTH === "entra" ? "same-origin" : "omit",
+    ...(import.meta.env.VITE_ACTIVITY_AUTH === "entra" ? { redirect: "error" as const } : {}),
   });
   if (response.status === 404) {
     throw new Error(

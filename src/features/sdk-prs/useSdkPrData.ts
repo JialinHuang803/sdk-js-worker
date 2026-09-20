@@ -20,7 +20,8 @@ export function useSdkPrData(): DataState {
   useEffect(() => {
     const controller = new AbortController();
     const url = `${import.meta.env.BASE_URL}data/sdk-prs.json`;
-    fetch(url, { signal: controller.signal, cache: "no-cache" })
+    fetch(url, { signal: controller.signal, cache: "no-cache",
+      ...(import.meta.env.VITE_ACTIVITY_AUTH === "entra" ? { credentials: "same-origin", redirect: "error" } : {}) })
       .then(async (response) => {
         if (!response.ok) {
           throw new Error(`Snapshot request failed (${response.status})`);

@@ -17,7 +17,9 @@ export function EmitterActivityNotice({ activity, baseline, retry, now = Date.no
   return <div className="emitter-inbox-notice">
     <p><strong>Read state is shared across the team.</strong> Mark read clears unread activity for everyone,
       not Unassigned or Review requested. Opening a link never marks it read.</p>
-    {auth.enabled && <p>GitHub sign-in is required to mark or restore activities. Anyone can view the inbox.</p>}
+    {auth.enabled && <p>{auth.provider === "entra"
+      ? "Microsoft Entra sign-in is required to view the inbox and mark or restore activities."
+      : "GitHub sign-in is required to mark or restore activities. Anyone can view the inbox."}</p>}
     {activity.error && <div className="freshness-warning" role="alert">
       <p>{activity.error}</p>
       <p>{activity.feed ? "Showing the last available activity. Shared read changes are disabled until reconnected."

@@ -111,7 +111,7 @@ describe("optional GitHub auth UI", () => {
     expect(publicActivityTransport.options(true)).toEqual({ credentials: "omit" });
     expect(renderWithAuth(createElement(ActivityAuthControls), ready, false)).toBe("");
     const html = renderToStaticMarkup(createElement(ActivityAuthProvider, {
-      enabled: true, baseUrl: "/api", children: createElement(ActivityAuthControls),
+      enabled: true, provider: "github", baseUrl: "/api", children: createElement(ActivityAuthControls),
     }));
     expect(html).toContain('href="/api/auth/login"');
     expect(html).toContain("Checking GitHub sign-in");

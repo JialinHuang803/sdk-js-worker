@@ -142,10 +142,10 @@ export function ReviewInboxView({ snapshot, activity = null }: {
           <div className="shared-activity__toolbar">
             <span
               title={auth.enabled
-                ? "Sign in with GitHub to mark or restore activities for everyone. Opening a PR never marks it read."
+                ? `Sign in with ${auth.provider === "entra" ? "Microsoft Entra" : "GitHub"} to mark or restore activities for everyone. Opening a PR never marks it read.`
                 : "Anyone can mark activities as read for everyone. Opening a PR never marks it read."}
             >{auth.enabled
-                ? "Read state is shared with everyone. GitHub sign-in is required to mark or restore activities."
+                ? `Read state is shared with everyone. ${auth.provider === "entra" ? "Microsoft Entra" : "GitHub"} sign-in is required to mark or restore activities.`
                 : "Read state is shared with everyone. Anyone can mark activities as read."}</span>
             <span className="shared-activity__timing">{sharedTiming}</span>
             <button type="button" className="button-secondary" aria-expanded={showRead}
