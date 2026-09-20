@@ -12,6 +12,39 @@ implementation for evaluation. It does not migrate these blobs, modify the
 deployed API or change workflow credentials. Approved hosting and explicit state
 migration are required before any cutover.
 
+## Private Container Apps provisioning experiment
+
+`infra/container-app-prototype.bicep` is a separate, temporary personal R&D
+provisioning experiment. It creates only:
+
+- `nsg-sdk-js-worker-poc` and isolated `vnet-sdk-js-worker-poc`, with a delegated
+  Container Apps subnet and no peering or corporate routing.
+- `cae-sdk-js-worker-poc`, a VNet-injected internal environment with public
+  network access disabled.
+- `ca-sdk-js-worker-poc`, a Consumption provisioning app using Microsoft's
+  public quickstart image, no ingress, zero minimum replicas and one maximum.
+
+This does **not** deploy the dashboard API, copy GitHub App credentials, migrate
+activity, change the existing Function, or create a publicly reachable service.
+No Container Registry is needed for the public quickstart image. A successful
+provisioning experiment is not approval for public access or shared-team hosting.
+An approved private access path would also be required to reach an app exposed
+inside the environment.
+
+Validate first, then deploy incrementally only when authorized:
+
+```powershell
+az deployment group validate --subscription 2807db07-c2ff-4a43-b586-5cfc12779347 --resource-group rg-sdk-js-worker --name sdk-js-worker-container-prototype --template-file .\infra\container-app-prototype.bicep --mode Incremental
+az deployment group create --subscription 2807db07-c2ff-4a43-b586-5cfc12779347 --resource-group rg-sdk-js-worker --name sdk-js-worker-container-prototype --template-file .\infra\container-app-prototype.bicep --mode Incremental
+```
+
+Azure Monitor is the configured log destination, but no diagnostic sink is
+provisioned by this small template. Scale-to-zero is not a promise of zero cost:
+inspect charges for Azure-managed networking and infrastructure as well.
+Delete this named prototype app, then its environment, VNet and NSG when the
+experiment is no longer needed; never delete the resource group to clean up
+the prototype, because it contains existing activity storage and the Function.
+
 ## Deployed resources
 
 - Subscription: `2807db07-c2ff-4a43-b586-5cfc12779347`
