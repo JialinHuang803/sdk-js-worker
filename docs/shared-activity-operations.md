@@ -33,9 +33,11 @@ the authenticated runtime, Entra callback and access restrictions are ready.
 Do not expose the provisioning quickstart image as a dashboard replacement.
 
 The single-tenant Entra registration must be associated with an approved
-Service Tree service using `serviceManagementReference`. The enterprise
-application requires explicit user assignment; initially only the requesting
-user is assigned for evaluation. Tenant policy rejects password credentials.
+Service Tree service using `serviceManagementReference`. Initially the enterprise
+application required explicit user assignment. At the user's request, access
+now extends to all **member accounts in the configured Microsoft tenant**,
+excluding guests. The enterprise app no longer requires individual assignment;
+the server enforces membership. Tenant policy rejects password credentials.
 Use a managed-identity federated credential instead of requesting an exception,
 enabling implicit grants, or putting credentials in the browser. Its issuer is
 `https://login.microsoftonline.com/<tenant-id>/v2.0`, subject is the user-assigned
@@ -47,7 +49,8 @@ This is a separate authenticated evaluation, not a production cutover or
 authorization for shared-team DDFun hosting. Existing GitHub Pages workflows
 and collector configuration remain unchanged. Do not disable Azure policies,
 add remediation-skip tags or redeploy templates to undo a subsequent security
-restriction. Obtain the appropriate hosting approval before expanding team use.
+restriction. Shared-team hosting approval remains a separate requirement;
+changing the application's access policy does not grant that approval.
 An accepted ARM deployment does not establish that approval or guarantee that
 security automation will leave the endpoint reachable.
 
@@ -70,7 +73,8 @@ Configure these non-secret environment values:
 | `ACTIVITY_ENTRA_TENANT_ID` | The single tenant containing the app and identity |
 | `ACTIVITY_ENTRA_CLIENT_ID` | The Entra application client ID |
 | `ACTIVITY_ENTRA_MANAGED_IDENTITY_CLIENT_ID` | The user-assigned identity client ID |
-| `ACTIVITY_ALLOWED_OBJECT_IDS` | Comma-separated explicitly allowed user object IDs |
+| `ACTIVITY_ENTRA_ACCESS_POLICY` | `allowlist` (default) or explicitly `tenant-members` |
+| `ACTIVITY_ALLOWED_OBJECT_IDS` | Required for `allowlist`; omit for `tenant-members` |
 | `ACTIVITY_ORIGIN` | Exact HTTPS dashboard origin, without a trailing slash |
 | `ACTIVITY_STORAGE_ACCOUNT` | Existing account containing the original state |
 | `ACTIVITY_STORAGE_CONTAINER` | `activity` |
@@ -78,8 +82,15 @@ Configure these non-secret environment values:
 
 Pass these as the Bicep `runtimeEnvironment` array of `{name, value}` entries.
 Do not confuse the identity's client ID used here with its principal ID used
-as the federated credential subject. Keep the enterprise application configured
-with assignment required as well as the server allowlist.
+as the federated credential subject. For `allowlist`, keep enterprise application
+assignment required as well as the server allowlist. For `tenant-members`,
+disable per-user assignment and configure the optional **ID token** claim
+`acct`. The server accepts only an explicit member value (`0`) from the
+trusted code exchange, alongside its existing tenant, audience, issuer, nonce
+and expiry checks. Guest (`1`), missing and malformed membership claims are
+denied, including for the original owner. Email suffixes are never used to
+authorize membership. Membership and access are evaluated at sign-in;
+existing sessions expire within one hour and are not a live directory lookup.
 
 Build with `VITE_ACTIVITY_AUTH=entra`, `VITE_ACTIVITY_API_URL=/api` and
 `VITE_BASE_PATH=/`, then run `npm run build` and `npm --prefix api run build`.
@@ -122,24 +133,26 @@ The Entra app is `sdk-js-worker`, client ID
 by the user. The managed identity can read the existing SDK and emitter state
 without changing them, and federated token exchange succeeds without a secret.
 
-Interactive sign-in is **blocked by tenant administrator consent**: the user
-received "Need admin approval." The registration declares only the sign-in
+The initial assigned-user configuration showed **"Need admin approval."**
+After the user's requested change to tenant-member access, interactive sign-in
+must be retried; broader eligibility does not itself grant consent or override
+the organization's consent policies. The registration declares only the sign-in
 permissions actually requested by MSAL: `openid`, `profile`, and
 `offline_access`. These are delegated sign-in scopes; no mail, files,
 directory-wide read or application permissions were requested. MSAL includes
 `offline_access` by default; this runtime does not persist refresh tokens.
 
-An authorized tenant administrator must review the registration's API
-permissions and grant consent through the organization's normal approval
-process. App ownership, Service Tree association and Azure resource ownership
+If the approval screen persists, an authorized tenant administrator must review
+the registration's API permissions and grant consent through the organization's
+normal approval process. App ownership, Service Tree association and Azure resource ownership
 do not themselves grant tenant-wide consent. Do not bypass this by enabling
 anonymous access, implicit grants or using an unrelated application's identity.
 Consent also does not replace the separate approval for shared-team hosting.
 
-Until approval, only the requesting user's object ID is allowed and the app
+The app now permits Microsoft tenant members (not guests) and
 uses zero minimum / one maximum replica. No production collector cutover or
-GitHub Pages update has occurred. The original `-poc` app has been deleted;
-its environment deletion and subsequent VNet/NSG cleanup are asynchronous.
+GitHub Pages update has occurred. All four original `-poc` resources have
+been retired; the replacement app, environment, VNet and NSG have no suffix.
 
 ## Original private Container Apps provisioning experiment
 

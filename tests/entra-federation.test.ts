@@ -28,7 +28,7 @@ const config: AzureAuthConfig = {
   mode: "entra-federated", tenantId: "72f988bf-86f1-41af-91ab-2d7cd011db47",
   clientId: "d8714cdb-8d6d-443e-969a-5beab691ce59",
   managedIdentityClientId: "11111111-1111-4111-8111-111111111111",
-  allowedObjectIds: ["1c15547f-ea83-425d-aeaf-7312df6f6148"], origin: "https://dashboard.example",
+  accessPolicy: "allowlist", allowedObjectIds: ["1c15547f-ea83-425d-aeaf-7312df6f6148"], origin: "https://dashboard.example",
 };
 beforeEach(() => {
   vi.clearAllMocks();

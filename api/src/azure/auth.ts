@@ -17,6 +17,7 @@ export interface AzureAuthConfig {
   tenantId: string;
   clientId: string;
   managedIdentityClientId: string;
+  accessPolicy: "allowlist" | "tenant-members";
   allowedObjectIds: string[];
   origin: string;
 }
@@ -33,10 +34,16 @@ export function readAzureAuthConfig(env: NodeJS.ProcessEnv): AzureAuthConfig {
   const tenantId = env.ACTIVITY_ENTRA_TENANT_ID ?? "";
   const clientId = env.ACTIVITY_ENTRA_CLIENT_ID ?? "";
   const managedIdentityClientId = env.ACTIVITY_ENTRA_MANAGED_IDENTITY_CLIENT_ID ?? "";
-  const allowedObjectIds = (env.ACTIVITY_ALLOWED_OBJECT_IDS ?? "").split(",").map((id) => id.trim().toLowerCase());
+  const accessPolicy = env.ACTIVITY_ENTRA_ACCESS_POLICY ?? "allowlist";
+  if (accessPolicy !== "allowlist" && accessPolicy !== "tenant-members") {
+    throw new Error("ACTIVITY_ENTRA_ACCESS_POLICY must be allowlist or tenant-members.");
+  }
+  const configuredIds = env.ACTIVITY_ALLOWED_OBJECT_IDS?.trim();
+  const allowedObjectIds = configuredIds ? configuredIds.split(",").map((id) => id.trim().toLowerCase()) : [];
   if (![tenantId, clientId, managedIdentityClientId].every((id) => uuid.test(id)) ||
-    !allowedObjectIds.length || allowedObjectIds.some((id) => !uuid.test(id))) {
-    throw new Error("Valid Entra tenant, application/client, managed identity client IDs and a nonempty object ID allowlist are required.");
+    allowedObjectIds.some((id) => !uuid.test(id)) ||
+    (accessPolicy === "allowlist" ? !allowedObjectIds.length : allowedObjectIds.length > 0)) {
+    throw new Error("Valid Entra IDs are required. Configure object IDs for allowlist access, or omit them for tenant-members access.");
   }
   const origin = env.ACTIVITY_ORIGIN ?? "";
   const parsed = new URL(origin);
@@ -44,7 +51,7 @@ export function readAzureAuthConfig(env: NodeJS.ProcessEnv): AzureAuthConfig {
     throw new Error("ACTIVITY_ORIGIN must be an exact HTTPS origin without a trailing slash.");
   }
   return { mode: "entra-federated", tenantId: tenantId.toLowerCase(), clientId: clientId.toLowerCase(),
-    managedIdentityClientId, allowedObjectIds, origin };
+    managedIdentityClientId, accessPolicy, allowedObjectIds, origin };
 }
 
 const randomToken = () => randomBytes(32).toString("base64url");
@@ -75,7 +82,7 @@ interface Pending {
   state: string; browserToken: string; verifier: string; nonce: string; expiresAt: number;
 }
 interface Session {
-  id: string; objectId: string; login: string; csrfToken: string; expiresAt: number;
+  id: string; objectId: string; tenantMember: boolean; login: string; csrfToken: string; expiresAt: number;
 }
 
 export function createEntraAuth(config: AzureAuthConfig, client: EntraClient) {
@@ -83,6 +90,8 @@ export function createEntraAuth(config: AzureAuthConfig, client: EntraClient) {
   const callbackUrl = `${config.origin}/api/auth/callback`;
   const pending = new Map<string, Pending>();
   const sessions = new Map<string, Session>();
+  const authorized = (objectId: string, tenantMember: boolean) =>
+    config.accessPolicy === "tenant-members" ? tenantMember : config.allowedObjectIds.includes(objectId);
   const prune = <T extends { expiresAt: number }>(entries: Map<string, T>) => {
     for (const [key, value] of entries) if (value.expiresAt <= Date.now()) entries.delete(key);
   };
@@ -90,7 +99,7 @@ export function createEntraAuth(config: AzureAuthConfig, client: EntraClient) {
     prune(sessions);
     const id = readCookie(header, SESSION_COOKIE);
     const session = id ? sessions.get(digest(id)) : undefined;
-    return session && matches(id, session.id) && config.allowedObjectIds.includes(session.objectId) ? session : undefined;
+    return session && matches(id, session.id) && authorized(session.objectId, session.tenantMember) ? session : undefined;
   };
   const requireSession = (header: string | undefined) => {
     const session = findSession(header);
@@ -159,13 +168,18 @@ export function createEntraAuth(config: AzureAuthConfig, client: EntraClient) {
         throw new ActivityError(401, "Invalid Microsoft Entra identity.");
       }
       const objectId = identity.oid.toLowerCase();
-      if (!config.allowedObjectIds.includes(objectId)) throw new ActivityError(403, "This Microsoft Entra user is not authorized.");
+      const tenantMember = identity.acct === 0 || identity.acct === "0";
+      if (!authorized(objectId, tenantMember)) {
+        throw new ActivityError(403, config.accessPolicy === "tenant-members"
+          ? "A confirmed member account in this Microsoft Entra tenant is required."
+          : "This Microsoft Entra user is not authorized.");
+      }
       if (entry.expiresAt <= now) throw new ActivityError(400, "Invalid or expired sign-in state.");
       prune(sessions);
       const previous = findSession(header);
       if (!previous && sessions.size >= MAX_ENTRIES) throw new ActivityError(503, "Too many active sessions.");
       if (previous) sessions.delete(digest(previous.id));
-      const session: Session = { id: randomToken(), objectId,
+      const session: Session = { id: randomToken(), objectId, tenantMember,
         login: typeof identity.name === "string" && identity.name.trim() ? identity.name : objectId,
         csrfToken: randomToken(), expiresAt: Math.min(now + SESSION_TTL, identity.exp * 1000) };
       sessions.set(digest(session.id), session);

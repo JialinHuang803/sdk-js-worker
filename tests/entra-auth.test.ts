@@ -6,9 +6,9 @@ const config: AzureAuthConfig = {
   mode: "entra-federated", tenantId: "72f988bf-86f1-41af-91ab-2d7cd011db47",
   clientId: "d8714cdb-8d6d-443e-969a-5beab691ce59",
   managedIdentityClientId: "11111111-1111-4111-8111-111111111111",
-  allowedObjectIds: ["1c15547f-ea83-425d-aeaf-7312df6f6148"], origin: "https://dashboard.example",
+  accessPolicy: "allowlist", allowedObjectIds: ["1c15547f-ea83-425d-aeaf-7312df6f6148"], origin: "https://dashboard.example",
 };
-function setup(overrides: Record<string, unknown> = {}) {
+function setup(overrides: Record<string, unknown> = {}, authConfig = config) {
   let authorization: Parameters<EntraClient["getAuthCodeUrl"]>[0];
   const getAuthCodeUrl = vi.fn<EntraClient["getAuthCodeUrl"]>(async (request) => {
     authorization = request;
@@ -22,7 +22,7 @@ function setup(overrides: Record<string, unknown> = {}) {
       iat: Math.floor(Date.now() / 1000), name: "Test reviewer", ...overrides,
     },
   }));
-  const auth = createEntraAuth(config, { getAuthCodeUrl, acquireTokenByCode });
+  const auth = createEntraAuth(authConfig, { getAuthCodeUrl, acquireTokenByCode });
   async function start() {
     const result = await auth.start();
     return { ...result, browser: result.cookies[0].split(";")[0],
@@ -93,6 +93,35 @@ describe("Entra authorization-code PKCE BFF", () => {
     const { auth, start } = setup({ oid: "11111111-1111-4111-8111-111111111111", name: config.allowedObjectIds[0] });
     const login = await start();
     await expect(auth.callback(login.url, login.browser)).rejects.toMatchObject({ status: 403 });
+  });
+
+  it.each([0, "0"])("allows a tenant member outside the former allowlist with acct=%j", async (acct) => {
+    const { auth, start } = setup({ oid: "11111111-1111-4111-8111-111111111111", acct },
+      { ...config, accessPolicy: "tenant-members", allowedObjectIds: [] });
+    const login = await start();
+    const result = await auth.callback(login.url, login.browser);
+    const sessionCookie = result.cookies[0].split(";")[0];
+    const session = auth.session(sessionCookie);
+    expect(session.authenticated).toBe(true);
+    expect(auth.requireMutation({ cookie: sessionCookie, origin: config.origin,
+      "content-type": "application/json", "x-csrf-token": session.csrfToken }).objectId)
+      .toBe("11111111-1111-4111-8111-111111111111");
+  });
+
+  it.each([1, "1", undefined, null, false, "", "00", [], {}, 2])(
+    "rejects guest, missing and malformed membership claims: %j", async (acct) => {
+      const { auth, start } = setup({ acct, preferred_username: "member@microsoft.com" },
+        { ...config, accessPolicy: "tenant-members", allowedObjectIds: [] });
+      const login = await start();
+      await expect(auth.callback(login.url, login.browser)).rejects.toMatchObject({ status: 403 });
+      expect(() => auth.session(undefined)).toThrow("sign-in is required");
+    });
+
+  it("does not treat a member of another tenant as a member of the configured tenant", async () => {
+    const { auth, start } = setup({ acct: 0, tid: "11111111-1111-4111-8111-111111111111" },
+      { ...config, accessPolicy: "tenant-members", allowedObjectIds: [] });
+    const login = await start();
+    await expect(auth.callback(login.url, login.browser)).rejects.toMatchObject({ status: 401 });
   });
 
   it("expires pending state and sessions, rotates prior sessions and binds CSRF to each session", async () => {

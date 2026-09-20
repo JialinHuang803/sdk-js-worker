@@ -17,7 +17,7 @@ const otherId = "11111111-1111-4111-8111-111111111111";
 const clientId = "d8714cdb-8d6d-443e-969a-5beab691ce59";
 const origin = "https://dashboard.example";
 const config: AzureAuthConfig = { mode: "entra-federated", tenantId, clientId,
-  managedIdentityClientId: otherId, allowedObjectIds: [objectId], origin };
+  managedIdentityClientId: otherId, accessPolicy: "allowlist", allowedObjectIds: [objectId], origin };
 const repository = "example/sdk";
 const now = new Date().toISOString();
 
@@ -120,11 +120,17 @@ describe("federated BFF trust boundary", () => {
       ACTIVITY_ENTRA_CLIENT_ID: clientId, ACTIVITY_ENTRA_MANAGED_IDENTITY_CLIENT_ID: otherId,
       ACTIVITY_ALLOWED_OBJECT_IDS: objectId, ACTIVITY_ORIGIN: origin };
     expect(readAzureAuthConfig(env)).toEqual(config);
+    expect(readAzureAuthConfig({ ...env, ACTIVITY_ENTRA_ACCESS_POLICY: "tenant-members",
+      ACTIVITY_ALLOWED_OBJECT_IDS: undefined })).toEqual({
+      ...config, accessPolicy: "tenant-members", allowedObjectIds: [],
+    });
     for (const changes of [
       { ACTIVITY_AUTH_MODE: undefined }, { ACTIVITY_AUTH_MODE: "anonymous" },
       { ACTIVITY_AUTH_MODE: "aca-easyauth" }, { ACTIVITY_ENTRA_CLIENT_ID: undefined },
       { ACTIVITY_ENTRA_MANAGED_IDENTITY_CLIENT_ID: "" },
       { ACTIVITY_ENTRA_TENANT_ID: "bad" }, { ACTIVITY_ALLOWED_OBJECT_IDS: "" },
+      { ACTIVITY_ENTRA_ACCESS_POLICY: "all" }, { ACTIVITY_ENTRA_ACCESS_POLICY: "" },
+      { ACTIVITY_ENTRA_ACCESS_POLICY: "tenant-members" },
       { ACTIVITY_ORIGIN: "http://dashboard.example" }, { ACTIVITY_ORIGIN: `${origin}/` },
     ]) expect(() => readAzureAuthConfig({ ...env, ...changes })).toThrow();
   });
