@@ -53,7 +53,7 @@ function storage(sdk: unknown, emitter: unknown) {
   const sha = (text: string) => createHash("sha1").update(text).digest("hex");
   const client: GitHubClient = {
     async request(path, init) {
-      if (path === "/repos/example/state/") return Response.json({ private: true, default_branch: "main" });
+      if (path === "/repos/example/state") return Response.json({ private: true, default_branch: "main" });
       if (path.includes("/git/ref/heads/")) return Response.json({ ref: "refs/heads/dashboard-state" });
       const file = path.split("?")[0], text = files.get(file);
       if (text === undefined) return Response.json({}, { status: 404 });

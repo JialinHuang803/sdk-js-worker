@@ -13,7 +13,7 @@ function gitHub(privateRepo = true) {
   const files = new Map<string, string>();
   const sha = (text: string) => createHash("sha1").update(text).digest("hex");
   const request = vi.fn<GitHubClient["request"]>(async (path, init) => {
-    if (path === `${root}/`) return Response.json({ private: privateRepo, default_branch: "main" });
+    if (path === root) return Response.json({ private: privateRepo, default_branch: "main" });
     if (path === `${root}/git/ref/heads/dashboard-state`) return Response.json({ ref: "refs/heads/dashboard-state" });
     const file = path.split("?")[0];
     const current = files.get(file);
@@ -47,7 +47,7 @@ describe("GitHub state branch", () => {
     mock.request.mockResolvedValueOnce(Response.json({}, { status: 403 }));
     await expect(createGitHubState(mock.client, config).blob("sdk", true).read()).rejects.toThrow("unavailable");
     const branchMissing: GitHubClient = {
-      request: async (path) => path === `${root}/` ?
+      request: async (path) => path === root ?
         Response.json({ private: true, default_branch: "main" }) : Response.json({}, { status: 404 }),
     };
     await expect(createGitHubState(branchMissing, config).blob("sdk", true).read()).rejects.toThrow("branch");
@@ -117,7 +117,7 @@ describe("GitHub App installation credentials", () => {
       return Response.json({});
     });
     const client = createGitHubClient({ appId: "123", installationId: "456", privateKey, repository: config.repository }, fetcher);
-    await Promise.all([client.request(`${root}/`), client.request(`${root}/git/ref/heads/dashboard-state`)]);
+    await Promise.all([client.request(root), client.request(`${root}/git/ref/heads/dashboard-state`)]);
     expect(issuances).toBe(1);
     await expect(client.request("/repos/elsewhere/code/")).rejects.toThrow("outside");
   });
@@ -137,7 +137,7 @@ describe("GitHub App installation credentials", () => {
     const client = createGitHubClient({ appId: "123", installationId: "456", privateKey, repository: config.repository }, fetcher);
     expect((await client.request(`${root}/contents/activity/sdk.json`, { method: "PUT", body: "{}" })).status).toBe(401);
     expect(writes).toBe(1);
-    expect((await client.request(`${root}/`)).status).toBe(200);
+    expect((await client.request(root)).status).toBe(200);
     expect(issued).toBe(2);
   });
 });

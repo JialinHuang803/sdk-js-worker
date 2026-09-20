@@ -18,7 +18,7 @@ export function createGitHubState(client: GitHubClient, config: GitHubStateConfi
 
   async function verify(): Promise<void> {
     // A missing/inaccessible repo or branch must not be mistaken for new activity state.
-    const repo = await client.request(`${root}/`);
+    const repo = await client.request(root);
     if (!repo.ok) throw new ActivityError(503, "State repository is unavailable to the GitHub App.");
     const info: unknown = await repo.json();
     if (!object(info) || typeof info.private !== "boolean" || typeof info.default_branch !== "string") {

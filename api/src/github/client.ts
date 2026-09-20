@@ -54,7 +54,8 @@ export function createGitHubClient(config: GitHubAppConfig, fetcher: typeof fetc
 
   return {
     async request(path: string, init: RequestInit = {}): Promise<Response> {
-      if (!path.startsWith(`/repos/${config.repository}/`)) {
+      const repositoryPath = `/repos/${config.repository}`;
+      if (path !== repositoryPath && !path.startsWith(`${repositoryPath}/`)) {
         throw new Error("GitHub request is outside the configured state repository.");
       }
       const headers = new Headers(init.headers);
