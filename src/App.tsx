@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { dashboardFeatures, resolveFeature } from "./features/registry";
+import { ActivityAuthControls } from "./shared/ActivityAuth";
 
 function routeFromHash() {
   return location.hash.slice(1).split("?")[0] || dashboardFeatures[0].route;
@@ -69,6 +70,7 @@ export default function App() {
               </a>
             </div>
           </div>
+          <ActivityAuthControls />
           <Feature />
         </main>
       </div>

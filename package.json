@@ -12,7 +12,9 @@
     "collect:emitter": "tsx scripts/collect-emitter.ts",
     "data:restore-emitter": "tsx scripts/restore-emitter.ts",
     "data:restore": "tsx scripts/restore-published-snapshot.ts",
-    "activity:seed": "tsx scripts/seed-activity.ts"
+    "activity:seed": "tsx scripts/seed-activity.ts",
+    "activity:github": "node --env-file=.env.github.local --import tsx api/src/github/main.ts",
+    "activity:github:init": "node --env-file=.env.github.local --import tsx scripts/init-github-activity.ts"
   },
   "dependencies": {
     "@vitejs/plugin-react": "^5.0.2",

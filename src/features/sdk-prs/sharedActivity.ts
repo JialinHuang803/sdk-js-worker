@@ -147,15 +147,19 @@ export function parseActivityMutation(value: unknown): ActivityMutationResponse 
   return { feed: parseActivityFeed(value.feed), acknowledgementId: value.acknowledgementId };
 }
 
+export class ActivityResponseError extends Error {
+  constructor(message: string, readonly status: number) { super(message); }
+}
+
 export async function readActivityResponse(response: Response): Promise<unknown> {
   let value: unknown;
   try { value = await response.json(); } catch {
-    throw new Error(`Activity service returned an unreadable response (HTTP ${response.status}).`);
+    throw new ActivityResponseError(`Activity service returned an unreadable response (HTTP ${response.status}).`, response.status);
   }
   if (!response.ok) {
     const detail = record(value) && text(value.error) ? value.error :
       record(value) && text(value.message) ? value.message : "Request failed";
-    throw new Error(`Activity service: ${detail.slice(0, 240)} (HTTP ${response.status}).`);
+    throw new ActivityResponseError(`Activity service: ${detail.slice(0, 240)} (HTTP ${response.status}).`, response.status);
   }
   return value;
 }

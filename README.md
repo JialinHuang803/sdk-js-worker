@@ -81,6 +81,11 @@ Copy `.env.example` to `.env.local` to connect the UI to the shared public
 activity service. Read actions against that URL affect the real team inbox;
 leave it unset for local refresh-cycle-only previews.
 
+An opt-in [GitHub-backed local prototype](docs/github-activity-local.md) replaces
+Azure storage with a dedicated state branch and adds GitHub sign-in for shared
+read actions. It requires your own GitHub App configuration and explicit state
+initialization/import. It does not change production or resolve hosting approval.
+
 Dependencies are resolved through the Azure SDK public npm feed. The local
 `.npmrc` is ignored because the credential provider may add authentication
 material; never commit it. The committed `.npmrc.example` contains only the

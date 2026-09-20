@@ -3,6 +3,8 @@ dist/
 public/data/emitter.json
 .env
 .env.local
+.env.*.local
+.local/
 .npmrc
 coverage/
 *.tsbuildinfo

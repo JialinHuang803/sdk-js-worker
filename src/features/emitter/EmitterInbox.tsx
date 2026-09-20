@@ -5,6 +5,7 @@ import {
 } from "./emitterInboxModel";
 import { EmitterTime } from "./EmitterTable";
 import type { EmitterActivityActions, EmitterActivityState } from "./useEmitterActivity";
+import { canChangeActivity, useActivityAuth } from "../../shared/ActivityAuth";
 
 export function EmitterActivityNotice({ activity, baseline, retry, now = Date.now() }: {
   activity: EmitterActivityState;
@@ -12,9 +13,11 @@ export function EmitterActivityNotice({ activity, baseline, retry, now = Date.no
   retry?: () => void;
   now?: number;
 }) {
+  const auth = useActivityAuth();
   return <div className="emitter-inbox-notice">
     <p><strong>Read state is shared across the team.</strong> Mark read clears unread activity for everyone,
       not Unassigned or Review requested. Opening a link never marks it read.</p>
+    {auth.enabled && <p>GitHub sign-in is required to mark or restore activities. Anyone can view the inbox.</p>}
     {activity.error && <div className="freshness-warning" role="alert">
       <p>{activity.error}</p>
       <p>{activity.feed ? "Showing the last available activity. Shared read changes are disabled until reconnected."
@@ -63,7 +66,9 @@ function EmitterNotification({ entry, activity, actions, now, read = false }: {
   const restoreIds = emitterAcknowledgementIds(entry);
   const reviewers = "draft" in entry.item
     ? [...entry.item.requestedReviewers ?? [], ...entry.item.requestedTeams ?? []] : [];
-  const writable = activity.canWrite && !activity.loading && !activity.pending && !activity.error && Boolean(actions);
+  const auth = useActivityAuth();
+  const writable = activity.canWrite && !activity.loading && !activity.pending && !activity.error && Boolean(actions) &&
+    (!auth.enabled || canChangeActivity(auth.state));
   const generation = activity.feed?.generation;
   return <article className={`emitter-notification${read ? " emitter-notification--read" : ""}`}>
     <div className="emitter-notification__heading">

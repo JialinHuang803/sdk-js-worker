@@ -4,6 +4,7 @@ import {
   type EmitterActivityAcknowledgeRequest, type EmitterActivityRestoreRequest,
 } from "../../data/emitter-activity-contracts";
 import { fetchActivityResponse } from "../sdk-prs/sharedActivity";
+import { canChangeActivity, publicActivityTransport, useActivityAuth, type ActivityAuthTransport } from "../../shared/ActivityAuth";
 
 export type EmitterAcknowledgeRequest = EmitterActivityAcknowledgeRequest;
 export type EmitterRestoreRequest = EmitterActivityRestoreRequest;
@@ -43,6 +44,7 @@ export function parseEmitterMutation(value: unknown): EmitterActivityFeed {
 export function createEmitterActivityClient(
   baseUrl: string | undefined,
   publish: (state: EmitterActivityState) => void,
+  transport: ActivityAuthTransport = publicActivityTransport,
 ) {
   const endpoint = baseUrl?.replace(/\/+$/, "");
   let state: EmitterActivityState = { ...unavailableEmitterActivity, configured: Boolean(endpoint) };
@@ -67,6 +69,11 @@ export function createEmitterActivityClient(
   async function request(action?: "ack" | "restore", body?: EmitterAcknowledgeRequest | EmitterRestoreRequest) {
     if (!endpoint || disposed || state.pending ||
       (action && (!state.canWrite || body?.generation !== state.feed?.generation))) return;
+    let options: RequestInit;
+    try { options = transport.options(Boolean(action)); } catch (cause) {
+      update({ canWrite: false, error: cause instanceof Error ? cause.message : "Sign in before changing shared read state." });
+      return;
+    }
     const requestVersion = ++version;
     controller?.abort();
     const currentController = new AbortController();
@@ -74,15 +81,16 @@ export function createEmitterActivityClient(
     update({ loading: !action, pending: Boolean(action), canWrite: false });
     try {
       const value = await fetchActivityResponse(`${endpoint}/emitter-activity${action ? `/${action}` : ""}`, {
-        cache: "no-store", credentials: "omit",
+        cache: "no-store", ...options,
         ...(action ? {
-          method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body),
+          method: "POST", headers: { "Content-Type": "application/json", ...options.headers }, body: JSON.stringify(body),
         } : {}),
       }, currentController.signal);
       if (disposed || requestVersion !== version || currentController.signal.aborted) return;
       accept(action ? parseEmitterMutation(value) : parseEmitterFeed(value), action ? body?.generation : undefined);
     } catch (cause) {
       if (disposed || requestVersion !== version || currentController.signal.aborted) return;
+      if (action) transport.failed(cause);
       const detail = cause instanceof Error ? cause.message : "Unable to load emitter activity.";
       update({ error: action
         ? `${detail} The action may not have been saved. Retry loading before another action.`
@@ -100,13 +108,15 @@ export function createEmitterActivityClient(
 }
 
 export function useEmitterActivity(baseUrl: string | undefined): EmitterActivityState & EmitterActivityActions {
+  const auth = useActivityAuth();
+  const transport = auth.transport;
   const [state, setState] = useState<EmitterActivityState>({
     ...unavailableEmitterActivity, configured: Boolean(baseUrl), loading: Boolean(baseUrl),
   });
   const [client, setClient] = useState<ReturnType<typeof createEmitterActivityClient> | null>(null);
   useEffect(() => {
     setState({ ...unavailableEmitterActivity, configured: Boolean(baseUrl), loading: Boolean(baseUrl) });
-    const next = createEmitterActivityClient(baseUrl, setState);
+    const next = createEmitterActivityClient(baseUrl, setState, transport);
     setClient(next);
     void next.refresh();
     const timer = window.setInterval(() => void next.refresh(), 60_000);
@@ -117,9 +127,10 @@ export function useEmitterActivity(baseUrl: string | undefined): EmitterActivity
       window.clearInterval(timer);
       window.removeEventListener("focus", onFocus);
     };
-  }, [baseUrl]);
+  }, [baseUrl, transport]);
   return {
     ...state,
+    canWrite: state.canWrite && (!auth.enabled || canChangeActivity(auth.state)),
     retry: () => { void client?.refresh(); },
     acknowledge: (request) => { void client?.acknowledge(request); },
     restore: (request) => { void client?.restore(request); },

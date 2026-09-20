@@ -5,18 +5,22 @@ import type {
   SharedActivityFeed,
 } from "../../data/activity-contracts";
 import { fetchActivityResponse, parseActivityFeed, parseActivityMutation } from "./sharedActivity";
+import { canChangeActivity, useActivityAuth } from "../../shared/ActivityAuth";
 
 export interface SharedActivityState {
   feed: SharedActivityFeed | null;
   loading: boolean;
   pending: boolean;
   error: string | null;
+  canWrite?: boolean;
   retry: () => void;
   acknowledge: (request: ActivityAcknowledgeRequest) => void;
   restore: (request: ActivityRestoreRequest) => void;
 }
 
 export function useSharedActivity(baseUrl: string | undefined): SharedActivityState {
+  const auth = useActivityAuth();
+  const transport = auth.transport;
   const [feed, setFeed] = useState<SharedActivityFeed | null>(null);
   const [loading, setLoading] = useState(Boolean(baseUrl));
   const [pending, setPending] = useState(false);
@@ -42,7 +46,7 @@ export function useSharedActivity(baseUrl: string | undefined): SharedActivitySt
     setLoading(true);
     try {
       const response = await fetchActivityResponse(`${endpoint}/activity`, {
-        cache: "no-store", credentials: "omit",
+        cache: "no-store", ...transport.options(),
       }, controller.signal);
       const next = parseActivityFeed(response);
       if (!active.current || controller.signal.aborted || requestVersion !== version.current) return;
@@ -55,7 +59,7 @@ export function useSharedActivity(baseUrl: string | undefined): SharedActivitySt
     } finally {
       if (active.current && requestVersion === version.current) setLoading(false);
     }
-  }, [endpoint, acceptFeed]);
+  }, [endpoint, acceptFeed, transport]);
 
   useEffect(() => {
     if (!endpoint) {
@@ -87,6 +91,11 @@ export function useSharedActivity(baseUrl: string | undefined): SharedActivitySt
     request: ActivityAcknowledgeRequest | ActivityRestoreRequest,
   ) => {
     if (!endpoint || !active.current || busy.current || !available.current) return;
+    let options: RequestInit;
+    try { options = transport.options(true); } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "Sign in before changing shared read state.");
+      return;
+    }
     busy.current = true;
     available.current = false;
     const requestVersion = ++version.current;
@@ -97,8 +106,8 @@ export function useSharedActivity(baseUrl: string | undefined): SharedActivitySt
     setLoading(false);
     try {
       const response = await fetchActivityResponse(`${endpoint}/activity/${action}`, {
-        method: "POST", credentials: "omit",
-        headers: { "Content-Type": "application/json" }, body: JSON.stringify(request),
+        ...options, method: "POST",
+        headers: { "Content-Type": "application/json", ...options.headers }, body: JSON.stringify(request),
       }, controller.signal);
       const result = parseActivityMutation(response);
       if (!active.current || controller.signal.aborted || requestVersion !== version.current) return;
@@ -108,6 +117,7 @@ export function useSharedActivity(baseUrl: string | undefined): SharedActivitySt
     } catch (cause) {
       if (!active.current || controller.signal.aborted || requestVersion !== version.current) return;
       const detail = cause instanceof Error ? cause.message : "Unable to save shared read state.";
+      transport.failed(cause);
       setError(`${detail} The action may not have been saved. Retry loading before another action.`);
     } finally {
       if (active.current && requestVersion === version.current) {
@@ -115,10 +125,11 @@ export function useSharedActivity(baseUrl: string | undefined): SharedActivitySt
         setPending(false);
       }
     }
-  }, [endpoint, acceptFeed]);
+  }, [endpoint, acceptFeed, transport]);
 
   return {
     feed, loading, pending, error,
+    canWrite: !auth.enabled || canChangeActivity(auth.state),
     retry: () => { void refresh(); },
     acknowledge: (request) => { void mutate("ack", request); },
     restore: (request) => { void mutate("restore", request); },

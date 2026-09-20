@@ -1,6 +1,7 @@
 import type { ActivityGroup } from "./sharedActivity";
 import { acknowledgeGroup, pullKey } from "./sharedActivity";
 import type { SharedActivityState } from "./useSharedActivity";
+import { canChangeActivity, useActivityAuth } from "../../shared/ActivityAuth";
 
 const labels = {
   "new-pr": "New PR",
@@ -17,7 +18,9 @@ export function SharedActivityList({
   read?: boolean;
 }) {
   const { feed, loading, pending, error } = activity;
-  const disabled = loading || pending || !!error || !feed?.collectedAt;
+  const auth = useActivityAuth();
+  const disabled = loading || pending || !!error || !feed?.collectedAt || activity.canWrite === false ||
+    (auth.enabled && !canChangeActivity(auth.state));
   const emptyMessage = loading && !feed ? "Loading shared activities…" :
     error || !feed ? "Shared activities are unavailable." :
     feed.collectedAt === null ? "Awaiting first collection. Unread activity is not available yet." :

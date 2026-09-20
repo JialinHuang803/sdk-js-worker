@@ -384,3 +384,15 @@ tbody tr:hover { background: #fbfcfe; }
   .inbox-notification__footer { display: block; }
   .inbox-notification__comment { margin-top: 8px; }
 }
+.activity-auth {
+  margin-bottom: 1rem;
+  padding: 1rem;
+  border: 1px solid currentColor;
+  border-radius: 0.5rem;
+}
+
+.activity-auth__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}

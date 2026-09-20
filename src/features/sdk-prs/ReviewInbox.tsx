@@ -12,6 +12,7 @@ import { attentionEntries, groupActivities, pullKey } from "./sharedActivity";
 import { SharedActivityList } from "./SharedActivityList";
 import { useSharedActivity } from "./useSharedActivity";
 import type { SharedActivityState } from "./useSharedActivity";
+import { useActivityAuth } from "../../shared/ActivityAuth";
 
 type InboxPull = Pick<
   PullRequestRecord,
@@ -53,6 +54,7 @@ export function ReviewInboxView({ snapshot, activity = null }: {
   snapshot: DashboardSnapshot;
   activity?: SharedActivityState | null;
 }) {
+  const auth = useActivityAuth();
   const [plane, setPlane] = useState<Plane>(snapshot.inbox.defaultPlane);
   const [showRead, setShowRead] = useState(false);
   const pulls = useMemo(
@@ -139,8 +141,12 @@ export function ReviewInboxView({ snapshot, activity = null }: {
           {activity.pending && <p role="status">Saving shared read state…</p>}
           <div className="shared-activity__toolbar">
             <span
-              title="Anyone can mark activities as read for everyone. Opening a PR never marks it read."
-            >Read state is shared with everyone. Anyone can mark activities as read.</span>
+              title={auth.enabled
+                ? "Sign in with GitHub to mark or restore activities for everyone. Opening a PR never marks it read."
+                : "Anyone can mark activities as read for everyone. Opening a PR never marks it read."}
+            >{auth.enabled
+                ? "Read state is shared with everyone. GitHub sign-in is required to mark or restore activities."
+                : "Read state is shared with everyone. Anyone can mark activities as read."}</span>
             <span className="shared-activity__timing">{sharedTiming}</span>
             <button type="button" className="button-secondary" aria-expanded={showRead}
               onClick={() => setShowRead(!showRead)}>

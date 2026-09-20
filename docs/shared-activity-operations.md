@@ -1,5 +1,17 @@
 # Shared activity operations
 
+## Current hosting restriction and local alternative
+
+As of September 20, 2026, public access to the deployed Function App is blocked
+by network restrictions following security remediation. Do not override those
+settings: the individual DDFun subscription is not intended for a shared team
+service. Failed collectors stop without replacing the last good Pages snapshot.
+
+The [GitHub-backed local prototype](github-activity-local.md) provides a separate
+implementation for evaluation. It does not migrate these blobs, modify the
+deployed API or change workflow credentials. Approved hosting and explicit state
+migration are required before any cutover.
+
 ## Deployed resources
 
 - Subscription: `2807db07-c2ff-4a43-b586-5cfc12779347`
