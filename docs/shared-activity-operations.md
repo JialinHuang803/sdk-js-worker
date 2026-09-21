@@ -250,6 +250,24 @@ PR CI has no OIDC permission and does not deploy.
 Do not configure collectors to use browser cookies, expose anonymous collector
 routes, or weaken user authentication to troubleshoot an authorization error.
 
+### September 21 collection cutover
+
+The collector-enabled image was manually deployed as revision
+`ca-sdk-js-worker--0000006`, digest
+`sha256:fbbe70e043aab7879acd9e108e54db72b531ab01d96bc1ed9cecb3b1f31ee988`.
+Both first Azure-backed dispatches completed successfully:
+
+- [SDK run 35553946616](https://github.com/JialinHuang803/sdk-js-worker/actions/runs/35553946616):
+  snapshot `2026-09-21T02:23:05.632Z`, 41 open AutoPRs and 11 recent merges.
+- [Emitter run 35553948596](https://github.com/JialinHuang803/sdk-js-worker/actions/runs/35553948596):
+  snapshot `2026-09-21T02:22:27.939Z`, 45 issues and one PR.
+
+The existing state generations and all four still-retained SDK acknowledgements
+were preserved. Neither snapshot contains reader attribution. The repository
+API variable now points to Container Apps, and the Pages redirect is live.
+The old Function remains network-restricted. Scheduled data collection is
+enabled; image deployment remains manual under the tenant restriction above.
+
 ### September 20 evaluation status
 
 The authenticated image is deployed at
