@@ -148,24 +148,41 @@ describe("emitter collection", () => {
 });
 
 describe("independent emitter preservation", () => {
-  it("serializes every Pages publisher and restores the other data source", () => {
+  it("isolates Azure collectors from each other and from image/redirect deployments", () => {
     const workflow = (name: string) => readFileSync(
       new URL(`../.github/workflows/${name}.yml`, import.meta.url), "utf8",
     ).replace(/\r\n/g, "\n");
     const emitter = workflow("collect-emitter");
     const sdk = workflow("collect-and-deploy");
     const ui = workflow("deploy-ui");
-    for (const text of [emitter, sdk, ui]) {
-      expect(text).toContain("group: pages");
+    const azure = workflow("deploy-azure");
+    for (const text of [emitter, sdk, ui, azure]) {
       expect(text).toContain("cancel-in-progress: false");
       expect(text).not.toContain("pull_request:");
+      expect(text).toContain("github.ref == 'refs/heads/main'");
     }
-    expect(emitter).toContain("run: npm run data:restore\n");
+    for (const text of [emitter, sdk]) {
+      expect(text).toContain("id-token: write");
+      expect(text).toContain("ACTIVITY_COLLECTOR_AUTH: github-oidc");
+      expect(text).not.toContain("ACTIVITY_INGEST_KEY");
+      expect(text).not.toContain("environment:");
+      expect(text).not.toContain("pages: write");
+      expect(text).not.toContain("data:restore");
+      expect(text).not.toContain("npm run build");
+    }
+    expect(emitter).toContain("group: collect-emitter");
+    expect(sdk).toContain("group: collect-sdk");
     expect(emitter).toContain("run: npm run collect:emitter");
-    expect(emitter).toContain("ACTIVITY_INGEST_KEY: ${{ secrets.ACTIVITY_INGEST_KEY }}");
-    expect(sdk).toContain("run: npm run data:restore-emitter");
-    expect(ui).toContain("run: npm run data:restore-emitter");
-    expect(ui).not.toContain("run: npm run collect");
+    expect(sdk).toContain("run: npm run collect\n");
+    expect(sdk).not.toContain("collect:emitter");
+    expect(ui).toContain("group: pages");
+    expect(ui).toContain("path: pages-redirect");
+    expect(azure).toContain("group: azure-dashboard");
+    expect(azure).toContain("name: azure-dashboard");
+    for (const text of [ui, azure]) {
+      expect(text).not.toContain("npm run collect");
+      expect(text).not.toContain("data:restore");
+    }
   });
 
   it("preserves the snapshot byte-for-byte and handles only initial 404 as absent", async () => {
