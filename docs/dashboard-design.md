@@ -184,6 +184,14 @@ are not included in collector snapshots or baselines. HoldOn hides a card withou
 closed PR references persist while their activities remain, but closure itself
 does not notify. Read state is not stored in localStorage.
 
+Sign-in sessions have a seven-day absolute maximum, backed by encrypted private
+server-side storage separate from activity state. MSAL renews authentication
+when due, with tenant/application/user identity and membership revalidated.
+Entra can require interaction or MFA sooner; a seven-day application cookie
+does not override tenant policies. Restarts and scale-to-zero do not themselves
+end a valid persisted session. A required sign-in is distinct from a transient
+service failure in the UI, and neither loses saved read markers.
+
 The UI polls the service and Azure snapshots every minute and on focus, without
 triggering collection. Errors show stale/unavailable
 feed state and disable writes, while the table and Needs attention remain usable.

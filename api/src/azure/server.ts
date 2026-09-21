@@ -114,7 +114,13 @@ export function createAzureActivityServer(deps: Dependencies) {
         const result = await deps.auth.callback(new URL(request.url!, deps.origin), request.headers.cookie);
         return redirect(result.location, result.cookies);
       }
-      try { deps.auth.requireSession(request.headers.cookie); }
+      if (path === "/api/auth/logout" && method === "POST") {
+        await deps.auth.requireMutation(request.headers, false);
+        await readBody(request);
+        response.setHeader("Set-Cookie", await deps.auth.logout(request.headers));
+        return json({ authenticated: false, login: null, csrfToken: null });
+      }
+      try { await deps.auth.requireSession(request.headers.cookie); }
       catch (error) {
         if (error instanceof ActivityError && error.status === 401 && path === "/" && method === "GET") {
           return redirect("/api/auth/login");
@@ -122,13 +128,7 @@ export function createAzureActivityServer(deps: Dependencies) {
         throw error;
       }
       if (path === "/api/auth/session" && method === "GET") {
-        return json(deps.auth.session(request.headers.cookie));
-      }
-      if (path === "/api/auth/logout" && method === "POST") {
-        deps.auth.requireMutation(request.headers);
-        await readBody(request);
-        response.setHeader("Set-Cookie", deps.auth.logout(request.headers));
-        return json({ authenticated: false, login: null, csrfToken: null });
+        return json(await deps.auth.session(request.headers.cookie));
       }
       if (path === "/api/health" && method === "GET") return json({ status: "running", mode: "entra-federated" });
       if (path.startsWith("/api/")) {
@@ -136,7 +136,7 @@ export function createAzureActivityServer(deps: Dependencies) {
         if (!route) throw new ActivityError(404, "Route not found.");
         const [, feature, action] = route;
         if (method !== (action ? "POST" : "GET")) throw new ActivityError(405, "Method not allowed.");
-        const actor = action ? deps.auth.requireMutation(request.headers) : undefined;
+        const actor = action ? await deps.auth.requireMutation(request.headers) : undefined;
         const input = action ? await readBody(request) : null;
         const now = new Date().toISOString();
         if (feature === "activity") {

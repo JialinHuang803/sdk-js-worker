@@ -94,7 +94,11 @@ export function createActivityAuthClient(
       if (!disposed && currentVersion === version) update({ session, loading: false, error: null });
     } catch (cause) {
       if (disposed || currentVersion !== version || currentController.signal.aborted) return;
-      update({ session: null, loading: false, error: `${logout ? "Unable to confirm sign out." : `Unable to check ${label} sign-in.`} ${cause instanceof Error ? cause.message : "Service unavailable."} Retry checking sign-in.` });
+      const needsSignIn = provider === "entra" && !logout &&
+        cause instanceof ActivityResponseError && cause.status === 401;
+      update({ session: null, loading: false, error: needsSignIn
+        ? "Your Microsoft Entra session ended or requires renewed verification. Select Sign in to continue. Your saved read state is unchanged."
+        : `${logout ? "Unable to confirm sign out." : `Unable to check ${label} sign-in.`} ${cause instanceof Error ? cause.message : "Service unavailable."} Retry checking sign-in.` });
     } finally {
       if (currentVersion === version) { signingOut = false; controller = undefined; }
     }

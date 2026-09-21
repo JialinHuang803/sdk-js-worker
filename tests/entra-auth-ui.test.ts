@@ -58,6 +58,29 @@ describe("opt-in Entra UI", () => {
     expect(html).toBe("");
   });
 
+  it("explains a required new sign-in separately from a temporary authentication outage", async () => {
+    const fetcher = vi.fn<typeof fetch>()
+      .mockResolvedValueOnce(Response.json({ error: "Microsoft Entra sign-in is required." }, { status: 401 }))
+      .mockResolvedValueOnce(Response.json({ error: "Session storage is unavailable." }, { status: 503 }))
+      .mockResolvedValueOnce(Response.json(session));
+    vi.stubGlobal("fetch", fetcher);
+    let state: ActivityAuthState = { session: null, loading: true, error: null };
+    const client = createActivityAuthClient("/api", (next) => { state = next; }, "entra");
+    await client.refresh();
+    expect(state.error).toContain("Select Sign in to continue");
+    expect(state.error).toContain("saved read state is unchanged");
+    expect(state.error).not.toContain("Unable to check");
+    expect(state.error).not.toContain("Retry checking");
+    expect(canChangeActivity(state)).toBe(false);
+    await client.refresh();
+    expect(state.error).toContain("Unable to check Microsoft Entra sign-in");
+    expect(state.error).toContain("Retry checking");
+    expect(canChangeActivity(state)).toBe(false);
+    await client.refresh();
+    expect(canChangeActivity(state)).toBe(true);
+    client.dispose();
+  });
+
   function header(state: ActivityAuthState, enabled = true, provider: "entra" | "github" = "entra") {
     return renderToStaticMarkup(createElement(ActivityAuthContext.Provider, {
       value: { enabled, provider, state, transport: publicActivityTransport,

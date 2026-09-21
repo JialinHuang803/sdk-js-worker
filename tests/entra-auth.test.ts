@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createEntraAuth, type AzureAuthConfig, type EntraClient } from "../api/src/azure/auth";
+import { memorySessionStore } from "./helpers/session-store";
 
 const config: AzureAuthConfig = {
   mode: "entra-federated", tenantId: "72f988bf-86f1-41af-91ab-2d7cd011db47",
@@ -15,6 +16,7 @@ function setup(overrides: Record<string, unknown> = {}, authConfig = config) {
     return `https://login.microsoftonline.com/${config.tenantId}/oauth2/v2.0/authorize?state=${request.state}`;
   });
   const acquireTokenByCode = vi.fn<EntraClient["acquireTokenByCode"]>(async () => ({
+    cache: '{"serverOnly":"refresh-token"}', accountId: "test-account",
     idTokenClaims: {
       tid: config.tenantId, aud: config.clientId, oid: config.allowedObjectIds[0],
       iss: `https://login.microsoftonline.com/${config.tenantId}/v2.0`,
@@ -22,7 +24,8 @@ function setup(overrides: Record<string, unknown> = {}, authConfig = config) {
       iat: Math.floor(Date.now() / 1000), name: "Test reviewer", ...overrides,
     },
   }));
-  const auth = createEntraAuth(authConfig, { getAuthCodeUrl, acquireTokenByCode });
+  const auth = createEntraAuth(authConfig, { getAuthCodeUrl, acquireTokenByCode,
+    renew: vi.fn(async () => acquireTokenByCode({ scopes: [], code: "", redirectUri: "" })) }, memorySessionStore());
   async function start() {
     const result = await auth.start();
     return { ...result, browser: result.cookies[0].split(";")[0],
@@ -38,7 +41,7 @@ describe("Entra authorization-code PKCE BFF", () => {
     const login = await start();
     expect(authorization()).toMatchObject({
       redirectUri: `${config.origin}/api/auth/callback`, responseMode: "query", codeChallengeMethod: "S256",
-      scopes: ["openid", "profile"], prompt: "select_account",
+      scopes: ["openid", "profile", "offline_access"], prompt: "select_account",
     });
     expect(authorization().nonce).toMatch(/^[A-Za-z0-9_-]{43}$/);
     expect(authorization().state).not.toBe(authorization().nonce);
@@ -51,11 +54,11 @@ describe("Entra authorization-code PKCE BFF", () => {
     expect(result.cookies[0]).toMatch(/^__Host-activity_session=[A-Za-z0-9_-]{43}; Max-Age=\d+; Path=\/; HttpOnly; Secure; SameSite=Lax$/);
     expect(result.cookies[1]).toContain("Max-Age=0");
     const cookie = result.cookies[0].split(";")[0];
-    expect(auth.session(cookie)).toEqual({
+    expect(await auth.session(cookie)).toEqual({
       authenticated: true, login: "Test reviewer", csrfToken: expect.stringMatching(/^[A-Za-z0-9_-]{43}$/),
     });
     expect(JSON.stringify(result)).not.toMatch(/idToken|accessToken|test-code|codeVerifier/);
-    expect(() => auth.session(`${cookie}; ${cookie}`)).toThrow("sign-in is required");
+    await expect(auth.session(`${cookie}; ${cookie}`)).rejects.toThrow("sign-in is required");
   });
 
   it("rejects missing/wrong browser state, duplicate parameters, replay and provider rejection", async () => {
@@ -99,7 +102,7 @@ describe("Entra authorization-code PKCE BFF", () => {
     const { auth, start } = setup({ name: undefined });
     const login = await start();
     const result = await auth.callback(login.url, login.browser);
-    const actor = auth.requireSession(result.cookies[0].split(";")[0]);
+    const actor = await auth.requireSession(result.cookies[0].split(";")[0]);
     expect(actor.login).toBe(config.allowedObjectIds[0]);
     expect(actor.displayName).toBeUndefined();
   });
@@ -110,10 +113,10 @@ describe("Entra authorization-code PKCE BFF", () => {
     const login = await start();
     const result = await auth.callback(login.url, login.browser);
     const sessionCookie = result.cookies[0].split(";")[0];
-    const session = auth.session(sessionCookie);
+    const session = await auth.session(sessionCookie);
     expect(session.authenticated).toBe(true);
-    expect(auth.requireMutation({ cookie: sessionCookie, origin: config.origin,
-      "content-type": "application/json", "x-csrf-token": session.csrfToken }).objectId)
+    expect((await auth.requireMutation({ cookie: sessionCookie, origin: config.origin,
+      "content-type": "application/json", "x-csrf-token": session.csrfToken })).objectId)
       .toBe("11111111-1111-4111-8111-111111111111");
   });
 
@@ -123,7 +126,7 @@ describe("Entra authorization-code PKCE BFF", () => {
         { ...config, accessPolicy: "tenant-members", allowedObjectIds: [] });
       const login = await start();
       await expect(auth.callback(login.url, login.browser)).rejects.toMatchObject({ status: 403 });
-      expect(() => auth.session(undefined)).toThrow("sign-in is required");
+      await expect(auth.session(undefined)).rejects.toThrow("sign-in is required");
     });
 
   it("does not treat a member of another tenant as a member of the configured tenant", async () => {
@@ -141,17 +144,17 @@ describe("Entra authorization-code PKCE BFF", () => {
     await expect(auth.callback(expired.url, expired.browser)).rejects.toMatchObject({ status: 400 });
     const first = await start();
     const firstCookie = (await auth.callback(first.url, first.browser)).cookies[0].split(";")[0];
-    const firstCsrf = auth.session(firstCookie).csrfToken;
+    const firstCsrf = (await auth.session(firstCookie)).csrfToken;
     const second = await start();
     const secondCookie = (await auth.callback(second.url, `${second.browser}; ${firstCookie}`)).cookies[0].split(";")[0];
-    expect(() => auth.session(firstCookie)).toThrow("sign-in is required");
-    expect(() => auth.requireMutation({ cookie: secondCookie, origin: config.origin,
-      "content-type": "application/json", "x-csrf-token": firstCsrf })).toThrow("CSRF");
-    const csrf = auth.session(secondCookie).csrfToken;
-    expect(auth.requireMutation({ cookie: secondCookie, origin: config.origin,
-      "content-type": "application/json", "x-csrf-token": csrf }).login).toBe("Test reviewer");
-    await vi.advanceTimersByTimeAsync(60 * 60_000);
-    expect(() => auth.session(secondCookie)).toThrow("sign-in is required");
+    await expect(auth.session(firstCookie)).rejects.toThrow("sign-in is required");
+    await expect(auth.requireMutation({ cookie: secondCookie, origin: config.origin,
+      "content-type": "application/json", "x-csrf-token": firstCsrf })).rejects.toThrow("CSRF");
+    const csrf = (await auth.session(secondCookie)).csrfToken;
+    expect((await auth.requireMutation({ cookie: secondCookie, origin: config.origin,
+      "content-type": "application/json", "x-csrf-token": csrf })).login).toBe("Test reviewer");
+    await vi.advanceTimersByTimeAsync(7 * 24 * 60 * 60_000);
+    await expect(auth.session(secondCookie)).rejects.toThrow("sign-in is required");
   });
 
   it("fails closed on unavailable or timed-out code exchange without logging or returning tokens", async () => {

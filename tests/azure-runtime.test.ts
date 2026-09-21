@@ -12,6 +12,7 @@ import { acknowledge, createState } from "../api/src/engine";
 import { acknowledgeEmitter, createEmitterState } from "../api/src/emitter-engine";
 import { createGithubCollectorAuth, readCollectorAuthConfig } from "../api/src/azure/collector-auth";
 import type { StateBlob } from "../api/src/store";
+import { memorySessionStore } from "./helpers/session-store";
 
 const tenantId = "72f988bf-86f1-41af-91ab-2d7cd011db47";
 const objectId = "1c15547f-ea83-425d-aeaf-7312df6f6148";
@@ -92,6 +93,7 @@ function memory(initial: unknown) {
 const servers: Server[] = [];
 const directory = resolve("tests", ".azure-runtime-fixtures");
 afterEach(async () => {
+  vi.restoreAllMocks();
   await Promise.all(servers.splice(0).map((server) => new Promise<void>((done) => {
     server.closeAllConnections();
     server.close(() => done());
@@ -110,12 +112,14 @@ async function setup(sdk = memory(sdkState()), emitter = memory(emitterState()),
       return `https://login.microsoftonline.com/${tenantId}/oauth2/v2.0/authorize?state=${request.state}`;
     },
     async acquireTokenByCode(request) {
-      return { idTokenClaims: { tid: tenantId, oid: objectId, aud: clientId,
+      return { cache: '{"test":"cache"}', accountId: "test-account", idTokenClaims: { tid: tenantId, oid: objectId, aud: clientId,
         iss: `https://login.microsoftonline.com/${tenantId}/v2.0`, name: "Test reviewer",
         nonce: request.nonce, exp: Math.floor(Date.now() / 1000) + 3600, iat: Math.floor(Date.now() / 1000) } };
     },
+    async renew() { throw new Error("Unexpected renewal."); },
   };
-  const auth = createEntraAuth(config, client);
+  const sessionStore = memorySessionStore();
+  const auth = createEntraAuth(config, client, sessionStore);
   const server = createAzureActivityServer({ auth, origin, sdk, emitter, staticDirectory: resolve(directory, "public"),
     collectorAuth: enableCollector ? collectorAuth : undefined });
   servers.push(server);
@@ -141,10 +145,49 @@ async function setup(sdk = memory(sdkState()), emitter = memory(emitterState()),
     });
     request.on("error", reject); request.end();
   });
-  return { send, raw, sdk, emitter, signedIn, mutations };
+  return { send, raw, sdk, emitter, signedIn, mutations, client, sessionStore };
 }
 
 describe("federated BFF trust boundary", () => {
+  it("renews expired ID tokens before serving HTTP data, preserves CSRF, and fails closed on outages/revocation", async () => {
+    const { send, client, signedIn, mutations, sdk } = await setup();
+    const session = await (await send("/api/auth/session", { headers: signedIn })).json();
+    const clock = vi.spyOn(Date, "now").mockReturnValue(Date.now() + 2 * 60 * 60_000);
+    const renew = vi.spyOn(client, "renew").mockImplementation(async () => ({
+      cache: '{"test":"fresh-cache"}', accountId: "test-account",
+      idTokenClaims: { tid: tenantId, oid: objectId, aud: clientId,
+        iss: `https://login.microsoftonline.com/${tenantId}/v2.0`, name: "Test reviewer",
+        exp: Math.floor(Date.now() / 1000) + 3600, iat: Math.floor(Date.now() / 1000) },
+    }));
+    const renewed = await send("/api/auth/session", { headers: signedIn });
+    expect(renewed.status).toBe(200);
+    expect(await renewed.json()).toEqual(session);
+    expect(renewed.headers.get("set-cookie")).toBeNull();
+    expect(renew).toHaveBeenCalledOnce();
+    clock.mockReturnValue(Date.now() + 60 * 60_000);
+    renew.mockRejectedValueOnce(new Error("private upstream response"));
+    const before = vi.mocked(sdk.write).mock.calls.length;
+    const blocked = await send("/api/activity/ack", { method: "POST", headers: mutations, body: "{}" });
+    expect(blocked.status).toBe(503);
+    expect(JSON.stringify(await blocked.json())).not.toContain("private");
+    expect(vi.mocked(sdk.write).mock.calls).toHaveLength(before);
+    renew.mockResolvedValueOnce({ cache: '{"test":"cache"}', accountId: "test-account",
+      idTokenClaims: { tid: tenantId, oid: otherId, aud: clientId,
+        iss: `https://login.microsoftonline.com/${tenantId}/v2.0`,
+        exp: Math.floor(Date.now() / 1000) + 3600, iat: Math.floor(Date.now() / 1000) } });
+    expect((await send("/api/auth/session", { headers: signedIn })).status).toBe(401);
+    expect((await send("/api/activity", { headers: signedIn })).status).toBe(401);
+  });
+
+  it("allows CSRF-protected durable logout even when online renewal is unavailable", async () => {
+    const { send, client, signedIn, mutations } = await setup();
+    vi.spyOn(Date, "now").mockReturnValue(Date.now() + 2 * 60 * 60_000);
+    const renew = vi.spyOn(client, "renew").mockRejectedValue(new Error("Entra unavailable"));
+    expect((await send("/api/auth/logout", { method: "POST", headers: mutations, body: "{}" })).status).toBe(200);
+    expect(renew).not.toHaveBeenCalled();
+    expect((await send("/api/auth/session", { headers: signedIn })).status).toBe(401);
+  });
+
   it("requires explicit federated mode, HTTPS origin, fixed IDs and nonempty object allowlist", () => {
     const env = { ACTIVITY_AUTH_MODE: "entra-federated", ACTIVITY_ENTRA_TENANT_ID: tenantId,
       ACTIVITY_ENTRA_CLIENT_ID: clientId, ACTIVITY_ENTRA_MANAGED_IDENTITY_CLIENT_ID: otherId,

@@ -20,6 +20,13 @@ The source repository remains public.
 This is a temporary authenticated hosting evaluation. Technical deployment
 does not establish approval for a shared team service in DDFun.
 
+Dashboard sign-in has a **seven-day maximum session**, with server-side
+background renewal. Entra can require sign-in or MFA sooner. Authentication
+records and token caches are encrypted in a separate private Blob container,
+so sessions can survive container restarts and scale-to-zero. No tokens are
+stored in browser JavaScript or dashboard snapshots. See the
+[session operations guidance](docs/shared-activity-operations.md#persistent-sign-in-sessions).
+
 The maintained product and decision contract is in
 [`docs/dashboard-design.md`](docs/dashboard-design.md).
 

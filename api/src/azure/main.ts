@@ -4,11 +4,12 @@ import { createFederatedEntraClient } from "./federation";
 import { createAzureState } from "./blob";
 import { createAzureActivityServer } from "./server";
 import { createGithubCollectorAuth, readCollectorAuthConfig } from "./collector-auth";
+import { createAzureSessionStore } from "./session-store";
 
 const config = readAzureAuthConfig(process.env);
 const collectorConfig = readCollectorAuthConfig(process.env);
 const server = createAzureActivityServer({
-  auth: createEntraAuth(config, createFederatedEntraClient(config)),
+  auth: createEntraAuth(config, createFederatedEntraClient(config), createAzureSessionStore(process.env)),
   collectorAuth: collectorConfig ? createGithubCollectorAuth(collectorConfig) : undefined,
   origin: config.origin,
   ...createAzureState(process.env),

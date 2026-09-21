@@ -87,6 +87,12 @@ Configure these non-secret environment values:
 | `ACTIVITY_STORAGE_CONTAINER` | `activity` |
 | `AZURE_CLIENT_ID` | The same user-assigned identity client ID, for Blob access |
 | `ACTIVITY_COLLECTOR_AUTH` | `github-oidc` to enable hosted collection; disabled when omitted |
+| `ACTIVITY_SESSION_STORAGE_CONTAINER` | `sessions`, separate from activity state |
+
+`ACTIVITY_SESSION_ENCRYPTION_KEY` is **secret configuration**, not a value in
+the table above: reference the Container App secret `session-encryption-key`.
+Never put its value in a Bicep parameter file, source control, build context,
+workflow log or `VITE_*` variable.
 
 Pass these as the Bicep `runtimeEnvironment` array of `{name, value}` entries.
 Do not confuse the identity's client ID used here with its principal ID used
@@ -97,8 +103,8 @@ disable per-user assignment and configure the optional **ID token** claim
 trusted code exchange, alongside its existing tenant, audience, issuer, nonce
 and expiry checks. Guest (`1`), missing and malformed membership claims are
 denied, including for the original owner. Email suffixes are never used to
-authorize membership. Membership and access are evaluated at sign-in;
-existing sessions expire within one hour and are not a live directory lookup.
+authorize membership. Membership and access are evaluated at sign-in and
+background renewal. They are not a live directory lookup on every request.
 
 Build with `VITE_ACTIVITY_AUTH=entra`, `VITE_ACTIVITY_API_URL=/api` and
 `VITE_BASE_PATH=/`, then run `npm run build` and `npm --prefix api run build`.
@@ -120,8 +126,64 @@ Deploy the resulting image by digest, initially with `enableIngress=false` and
 federated token exchange and read-only access to both existing blobs before
 enabling HTTPS ingress. Use TCP startup/readiness probes; there is no anonymous
 application health endpoint. Afterwards the evaluation can use zero minimum
-replicas, but never more than one: sessions are bounded in-memory and do not
-survive restarts, revisions or scale-to-zero. Users must sign in again then.
+replicas. Keep the current one-replica maximum; this change is not a general
+multi-replica scaling rollout. Durable authentication records allow sessions
+to survive restarts, revisions and scale-to-zero when the encryption key,
+origin and Entra configuration remain unchanged.
+
+### Persistent sign-in sessions
+
+The browser receives only a random, opaque Secure/HttpOnly/SameSite=Lax session
+cookie and the existing session-bound CSRF token. Its absolute lifetime is
+seven days from interactive sign-in; activity does not extend that deadline.
+An ID token expiring after roughly an hour no longer ends the application
+session by itself. Requests renew authentication server-side through MSAL
+before allowing continued access when renewal is due, at most 30 minutes after
+the previous verification or five minutes before token expiry.
+
+Microsoft Entra remains authoritative: renewal must obtain fresh identity
+claims for the same user, tenant and application and satisfy the configured
+member/allowlist policy. Revocation, an interaction-required response or a
+policy requiring sign-in/MFA ends access until interactive sign-in succeeds.
+Network/storage failures are explicit errors, not permission to use stale
+authorization. A longer application session is not a promise that Entra will
+allow seven uninterrupted days.
+
+`infra/container-app-sessions.bicep` adds a private `sessions` container and
+Storage Blob Data Contributor for the existing runtime identity scoped only
+to that container. It does not change storage networking or the `activity`
+container. Session and pending OAuth records are encrypted with AES-256-GCM;
+the random 256-bit key is stored separately as a Container App secret. Blob
+names are derived from hashes, not raw bearer cookies. The encrypted MSAL
+cache is server-only and never part of a feed, snapshot, collector baseline,
+GitHub artifact or browser response.
+
+The initial one-hour in-memory sessions cannot be migrated: existing users
+must sign in once after this deployment. Thereafter, retain the same encryption
+key across image updates. Losing or replacing it invalidates stored sessions;
+do not rotate it as part of routine deployment. Authorized access to both the
+key and session records is sensitive. Do not print decrypted records while
+troubleshooting.
+
+Expired records are rejected by the application regardless of cleanup timing.
+The storage lifecycle rules delete `sessions/sessions/` after eight days
+without modification and `sessions/pending/` after one day. This is asynchronous storage hygiene, not authentication
+expiry; renewed records can remain longer before deletion. The account currently
+has no Blob versioning or soft deletion enabled. Review retention if enabling
+either later. The Bicep lifecycle option defaults off because setting an
+account-wide lifecycle policy can replace other rules; inspect and merge an
+existing policy rather than overwriting it. Activity blobs are never covered
+by this rule.
+
+Anonymous login starts are limited per process to 100 per minute and 20
+concurrent starts, before metadata requests and storage writes. The current
+one-replica deployment keeps this admission bound simple; it is not a global
+DDoS defense or a guaranteed Azure spending limit.
+
+Keep manually updating only the image for normal deployments. If reprovisioning
+the Container App configuration, preserve its secret and environment secret
+reference explicitly; never treat the older foundation/dashboard templates as
+a safe reset of live authentication or networking configuration.
 
 The runtime never initializes a missing state blob. Unavailable or corrupt
 storage is an error, not an empty inbox. The same `state.json` and
@@ -285,7 +347,9 @@ does not override the organization's consent policies. The registration declares
 permissions actually requested by MSAL: `openid`, `profile`, and
 `offline_access`. These are delegated sign-in scopes; no mail, files,
 directory-wide read or application permissions were requested. MSAL includes
-`offline_access` by default; this runtime does not persist refresh tokens.
+`offline_access` by default. The original evaluation did not persist refresh
+tokens; the persistent-session implementation now retains the MSAL cache only
+inside encrypted server-side session storage.
 
 If the approval screen persists, an authorized tenant administrator must review
 the registration's API permissions and grant consent through the organization's
