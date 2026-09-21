@@ -148,15 +148,14 @@ describe("emitter collection", () => {
 });
 
 describe("independent emitter preservation", () => {
-  it("isolates Azure collectors from each other and from image/redirect deployments", () => {
+  it("isolates Azure collectors from each other and from the Pages redirect", () => {
     const workflow = (name: string) => readFileSync(
       new URL(`../.github/workflows/${name}.yml`, import.meta.url), "utf8",
     ).replace(/\r\n/g, "\n");
     const emitter = workflow("collect-emitter");
     const sdk = workflow("collect-and-deploy");
     const ui = workflow("deploy-ui");
-    const azure = workflow("deploy-azure");
-    for (const text of [emitter, sdk, ui, azure]) {
+    for (const text of [emitter, sdk, ui]) {
       expect(text).toContain("cancel-in-progress: false");
       expect(text).not.toContain("pull_request:");
       expect(text).toContain("github.ref == 'refs/heads/main'");
@@ -177,12 +176,8 @@ describe("independent emitter preservation", () => {
     expect(sdk).not.toContain("collect:emitter");
     expect(ui).toContain("group: pages");
     expect(ui).toContain("path: pages-redirect");
-    expect(azure).toContain("group: azure-dashboard");
-    expect(azure).toContain("name: azure-dashboard");
-    for (const text of [ui, azure]) {
-      expect(text).not.toContain("npm run collect");
-      expect(text).not.toContain("data:restore");
-    }
+    expect(ui).not.toContain("npm run collect");
+    expect(ui).not.toContain("data:restore");
   });
 
   it("preserves the snapshot byte-for-byte and handles only initial 404 as absent", async () => {

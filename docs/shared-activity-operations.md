@@ -210,37 +210,41 @@ The Azure UI reloads snapshots every minute and on focus, independently of
 read-state polling. Polling never triggers GitHub collection.
 Normal 72-hour read-detail pruning still applies.
 
-### Automated image deployment and Pages redirect
+### Manual image deployment and Pages redirect
 
-`deploy-azure.yml` builds and deploys the Entra UI/API on `main` pushes or
-explicit main-branch dispatch, without collecting data. It uses a dedicated
-`id-sdk-js-worker-deploy` managed identity and a GitHub federated credential for
-the `azure-dashboard` environment, whose deployment branch policy permits
-only `main`. Its audience is `api://AzureADTokenExchange`, distinct from the
-collector audience. The deployment identity has no Blob data role.
-The federated subject is
-`repo:JialinHuang803@139532647/sdk-js-worker@1370752026:environment:azure-dashboard`.
-Its client ID is `6adb95f8-ba3c-4609-9082-94109cb714d5`; its principal ID is
-`938f0dd2-aaf9-4320-bdaf-8e053dd8f457`.
+Automatic image deployment was attempted with a separate, narrowly scoped
+managed identity. The Microsoft tenant rejected the token exchange with
+`AADSTS7002381`: GitHub-issued credentials must contain an enterprise claim
+of `microsoft`, `github` or `microsoftopensource`. This personal repository
+does not have such a claim. Matching the immutable subject is necessary but
+does not override that tenant policy.
 
-| Deployment role | Exact scope |
-| --- | --- |
-| AcrPush and Reader | Registry `acrsdkjsworker2807` |
-| Container Apps Contributor | App `ca-sdk-js-worker` only |
-| Managed Identity Operator | Runtime identity `id-sdk-js-worker` only, to retain the existing assignment |
+At the user's choice, UI/API images remain **manually deployed** using an
+authorized Azure operator's existing CLI access. The unsuccessful deployment
+workflow and its unused deployment identity/grants have been removed. Do not
+forge claims, change tenant policy, substitute credentials or add a privileged
+deployment proxy to work around this restriction. Automatic Azure deployment
+requires an approved repository/hosting arrangement.
 
-No subscription-wide or resource-group Contributor grant is needed. Repository
-variables are `AZURE_DEPLOY_CLIENT_ID`, `AZURE_TENANT_ID`,
-`AZURE_SUBSCRIPTION_ID`, `AZURE_RESOURCE_GROUP`, `AZURE_CONTAINER_APP` and
-`AZURE_CONTAINER_REGISTRY`. These are identifiers, not credentials.
-The workflow pushes to ACR, deploys the pushed immutable image digest and waits
-for the revision to be healthy and ready; it does not redeploy infrastructure
-or reset app environment/network configuration.
+Build the Entra frontend and API as described above. Use a curated ACR build
+context containing only `Dockerfile`, `.dockerignore`, the API package/lock and
+`container-lock.mjs`, compiled `api/dist`, and frontend `dist/index.html` plus
+`dist/assets`. Never include `.npmrc`, `.env*`, private keys, local prototypes
+or snapshot JSON. `az acr build` can build this context without local Docker.
+Deploy the resulting digest with `az containerapp update --image`, preserving
+existing environment, networking and identity. Wait for the latest revision
+to be healthy and ready. No image deployment should run collectors.
+
+Scheduled collection is a separate application-level integration: GitHub tokens
+authorize only validated baseline/ingest operations, never Azure resource
+management, deployment, storage credentials or user read-state actions.
+The application's existing managed identity performs Blob writes. This does
+not grant the personal repository Azure federation or establish hosting approval.
 
 `deploy-ui.yml` publishes only `pages-redirect/index.html` to GitHub Pages.
 The redirect retains existing hash routes/filters and provides a visible link
 when JavaScript is disabled. It contains no snapshot or account data.
-Each deployment and collector has a separate non-cancelling concurrency group.
+Each collector and the Pages publisher has a separate non-cancelling concurrency group.
 PR CI has no OIDC permission and does not deploy.
 
 Do not configure collectors to use browser cookies, expose anonymous collector

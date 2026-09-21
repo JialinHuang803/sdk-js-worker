@@ -253,10 +253,12 @@ hours without a successful refresh. The collector paginates every list endpoint
 and marks changed-file data partial if GitHub's 3,000-file limit or another
 discrepancy is detected.
 
-`.github/workflows/deploy-azure.yml` handles trusted pushes to `main` and manual
-deployment. It builds the Entra frontend/API, pushes an image and updates the
-existing Container App by digest using a dedicated federated deployment identity.
-It does not collect, copy or reset data. UI changes therefore cannot advance
+Azure UI/API images are deployed manually by an authorized Azure operator,
+without collecting, copying or resetting data. Microsoft's tenant currently
+blocks Azure deployment federation from this personal GitHub repository
+(`AADSTS7002381`: an approved enterprise claim is required).
+GitHub collection still works through the narrowly scoped application API;
+collectors receive no Azure access token or role. UI changes cannot advance
 the activity comparison window. `.github/workflows/deploy-ui.yml` publishes
 only the small GitHub Pages redirect, with no dashboard data or API credentials.
 
@@ -316,11 +318,11 @@ the last good Azure snapshot with an empty snapshot. When a prior local
 snapshot exists, the collector also marks that file explicitly stale and
 records a sanitized error for diagnosis.
 
-Deployment identity, repository variables, workflow trust and troubleshooting
+Manual deployment, repository variables, workflow trust and troubleshooting
 are documented in the [operations guide](docs/shared-activity-operations.md).
 The original Function remains network-restricted and is no longer used.
 PR workflows have read-only repository permission, no deployment environment
-and no OIDC grant. Deployment and collection jobs reject non-main refs.
+and no OIDC grant. Collection and Pages jobs reject non-main refs.
 
 ## Not implemented
 

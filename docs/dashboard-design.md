@@ -296,13 +296,15 @@ The legacy inbox displays **Changes since** for this window and **Last refreshed
 for the snapshot. The shared inbox displays activity and attention collection
 times separately; read-state changes never advance either collection timestamp.
 
-Code pushes run a separate Azure image deployment workflow. Images contain no
-snapshot data; the authenticated server reads the current canonical blobs.
+Code pushes run CI and publish the Pages redirect, not a data refresh.
+Azure image deployment remains manual because tenant policy blocks deployment
+federation from this personal repository. Images contain no snapshot data;
+the authenticated server reads the current canonical blobs.
 Deployments do not collect, ingest, apply changed collector configuration or
 advance comparison windows. Missing or incompatible hosted data is an explicit
 error, never a fallback to an old bundled snapshot. Schema migrations require
-compatible readers and explicit collection. Each collector and deployment has
-its own non-cancelling concurrency group; Blob ETags protect collection from
+compatible readers and explicit collection. Each collector has its own
+non-cancelling concurrency group; Blob ETags protect collection from
 concurrent acknowledgements.
 
 ## Package selection
