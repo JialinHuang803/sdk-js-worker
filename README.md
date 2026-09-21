@@ -204,8 +204,8 @@ If your network blocks npmjs.org, set `EMITTER_NPM_REGISTRY` to the public Azure
 SDK feed URL from `.npmrc.example` for local collection. This explicitly uses
 that registry's `latest` tag, which may lag npm; the scheduled workflow always
 uses npmjs.org. No GitHub credentials are sent to either package registry.
-`.github/workflows/collect-emitter.yml` (**Collect JS emitter**) collects daily
-at **20:17 UTC** or by manual dispatch, independently of the SDK collector.
+`.github/workflows/collect-emitter.yml` (**Collect JS emitter**) collects twice daily
+at **06:00 and 20:17 UTC** or by manual dispatch, independently of the SDK collector.
 The emitter tab's **Refresh data** link opens that workflow.
 This workflow uses only `GITHUB_TOKEN` for public repository reads; no Azure
 organization installation or new token secret is required.
@@ -246,8 +246,8 @@ Missing or invalid hosted state is unavailable, not zero-filled or initialized.
 
 ### SDK PRs and shared UI
 
-`.github/workflows/collect-and-deploy.yml` runs on manual dispatch and daily at
-approximately **20:00 UTC**. GitHub does not guarantee
+`.github/workflows/collect-and-deploy.yml` runs on manual dispatch and twice daily at
+approximately **06:00 and 20:00 UTC**. GitHub does not guarantee
 exact schedule times, so the UI shows snapshot freshness and warns after 26
 hours without a successful refresh. The collector paginates every list endpoint
 and marks changed-file data partial if GitHub's 3,000-file limit or another

@@ -155,6 +155,8 @@ describe("independent emitter preservation", () => {
     const emitter = workflow("collect-emitter");
     const sdk = workflow("collect-and-deploy");
     const ui = workflow("deploy-ui");
+    expect(sdk.match(/cron: "[^"]+"/g)).toEqual(['cron: "0 6 * * *"', 'cron: "0 20 * * *"']);
+    expect(emitter.match(/cron: "[^"]+"/g)).toEqual(['cron: "0 6 * * *"', 'cron: "17 20 * * *"']);
     for (const text of [emitter, sdk, ui]) {
       expect(text).toContain("cancel-in-progress: false");
       expect(text).not.toContain("pull_request:");

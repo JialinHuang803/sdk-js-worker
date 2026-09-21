@@ -24,8 +24,8 @@ inconsistent report data blocks collection rather than publishing invented
 rates. Older snapshots without coverage show an explicit unavailable message.
 No separate Spector view or combined team inbox is needed for this initial scope.
 
-`Collect JS emitter` refreshes its versioned `data/emitter.json` daily at
-20:17 UTC or manually. SDK collection remains independent. Each collector
+`Collect JS emitter` refreshes its versioned `data/emitter.json` twice daily at
+06:00 and 20:17 UTC or manually. SDK collection remains independent. Each collector
 atomically updates its own canonical Azure state and snapshot; neither modifies
 the other feature. UI-only image deployment advances neither source's timestamp.
 The registry owns each feature's repository and refresh links. GitHub Pages
@@ -170,7 +170,7 @@ prevent the collector from overwriting concurrent read actions.
 Recently read offers recovery for 3 days through Restore unread on each card,
 without a separate Undo button. When expanded, it appears between Unread
 activities and Needs attention. Acknowledged details expire after 72 hours and
-are pruned on the next API read, mutation or collection, not just the daily
+are pruned on the next API read, mutation or collection, not just the scheduled
 collection. Unread history never expires automatically. The monotonic sequence and
 collector baseline remain after pruning. History starts with the current
 published activities at migration; overwritten older activities are not
@@ -275,7 +275,7 @@ take effect on the next data refresh, not a UI-only deployment.
 
 ## Refresh and comparison
 
-The scheduled refresh target is **20:00 UTC daily**. GitHub Actions schedules
+The scheduled SDK refresh targets are **06:00 and 20:00 UTC daily**. GitHub Actions schedules
 are best effort and may start late. A manual refresh is available through
 workflow dispatch.
 

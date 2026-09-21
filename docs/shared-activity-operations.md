@@ -188,8 +188,8 @@ and again after collection, avoiding expiry during a long GitHub scan.
 
 | Workflow | Schedule | Azure state |
 | --- | --- | --- |
-| `collect-and-deploy.yml` / Collect Azure SDK dashboard | Daily 20:00 UTC (04:00 UTC+8 next day) | `activity/state.json` |
-| `collect-emitter.yml` / Collect JS emitter | Daily 20:17 UTC (04:17 UTC+8 next day) | `activity/emitter-state.json` |
+| `collect-and-deploy.yml` / Collect Azure SDK dashboard | Daily 06:00 and 20:00 UTC (14:00 and 04:00 next day in UTC+8) | `activity/state.json` |
+| `collect-emitter.yml` / Collect JS emitter | Daily 06:00 and 20:17 UTC (14:00 and 04:17 next day in UTC+8) | `activity/emitter-state.json` |
 
 Schedules are best effort; GitHub may delay or skip scheduled runs. Manual
 dispatch on `main` is the recovery path. Public repository reads continue using
