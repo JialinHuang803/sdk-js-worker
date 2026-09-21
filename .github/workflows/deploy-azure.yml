@@ -41,10 +41,13 @@ jobs:
           cache-dependency-path: |
             package-lock.json
             api/package-lock.json
-      - name: Install locked dependencies
+      - name: Install locked frontend dependencies
+        run: npm ci --userconfig .npmrc.example
+      - name: Install locked public API dependencies without feed credentials
+        working-directory: api
         run: |
-          npm ci --userconfig .npmrc.example
-          npm ci --prefix api --userconfig .npmrc.example
+          node container-lock.mjs
+          npm ci --registry=https://registry.npmjs.org/ --userconfig ../.npmrc.example
       - name: Test and typecheck
         run: |
           npm test

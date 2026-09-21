@@ -19,7 +19,11 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci --userconfig .npmrc.example
-      - run: npm ci --prefix api --userconfig .npmrc.example
+      - name: Install locked public API dependencies without feed credentials
+        working-directory: api
+        run: |
+          node container-lock.mjs
+          npm ci --registry=https://registry.npmjs.org/ --userconfig ../.npmrc.example
       - run: npm test
       - run: npm run typecheck
       - run: npm run build

@@ -98,6 +98,9 @@ Dependencies are resolved through the Azure SDK public npm feed. The local
 `.npmrc` is ignored because the credential provider may add authentication
 material; never commit it. The committed `.npmrc.example` contains only the
 feed location and is also used by CI.
+API CI and container builds fetch those same locked public packages from npmjs.org
+using the allowlisted registry transformation in `api/container-lock.mjs`.
+Versions and integrity hashes are preserved; no feed credential is stored in Actions.
 
 REST collection can use public unauthenticated API access, but the authoritative
 GraphQL review decision requires `GITHUB_TOKEN` or `GH_TOKEN`. Without one, the

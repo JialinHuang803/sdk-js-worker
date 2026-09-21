@@ -110,6 +110,10 @@ allowlists build inputs and excludes credential files. The dependency stage
 maps known public Azure Artifacts tarball URLs to public npm inside the image
 build copy, retaining locked versions and integrity hashes. No `.npmrc`,
 Entra token, GitHub private key or local environment file belongs in the context.
+CI uses the same allowlisted lock transformation in its temporary API checkout:
+some new API packages require authentication at the Azure Artifacts mirror.
+The public npm tarballs install with the existing locked integrity hashes,
+without adding feed credentials or changing the committed lockfile.
 
 Deploy the resulting image by digest, initially with `enableIngress=false` and
 `minReplicas=1`. Use control-plane container execution to confirm startup,
