@@ -42,6 +42,8 @@ export function readCollectorAuthConfig(env: NodeJS.ProcessEnv): CollectorAuthCo
 }
 
 export function createGithubCollectorAuth(config: CollectorAuthConfig, trustedKeys?: JSONWebKeySet) {
+  const [owner, repositoryName] = config.repository.split("/");
+  const subject = `repo:${owner}@${config.repositoryOwnerId}/${repositoryName}@${config.repositoryId}:ref:${branch}`;
   // Static keys are an injection boundary for offline tests, never configuration supplied by a request.
   const keys = trustedKeys ? createLocalJWKSet(trustedKeys) : createRemoteJWKSet(
     new URL(`${issuer}/.well-known/jwks`),
@@ -71,11 +73,11 @@ export function createGithubCollectorAuth(config: CollectorAuthConfig, trustedKe
         throw new ActivityError(503, "Collector authentication is unavailable.");
       }
       if (payload.aud !== config.audience) throw new ActivityError(401, "Invalid GitHub collector token.");
-      if (payload.sub !== `repo:${config.repository}:ref:${branch}` ||
+      if (payload.sub !== subject ||
         payload.repository !== config.repository || payload.repository_id !== config.repositoryId ||
         payload.repository_owner_id !== config.repositoryOwnerId || payload.ref !== branch ||
         payload.workflow_ref !== `${config.repository}/.github/workflows/${workflows[feature]}@${branch}` ||
-        !["schedule", "workflow_dispatch"].includes(String(payload.event_name))) {
+        (payload.event_name !== "schedule" && payload.event_name !== "workflow_dispatch")) {
         throw new ActivityError(403, "This workflow is not authorized for this collector.");
       }
     },

@@ -173,7 +173,10 @@ It also requires this repository's immutable repository/owner IDs, exact
 main-branch subject/ref, `schedule` or `workflow_dispatch`, and the feature's
 exact workflow file at `refs/heads/main`. There is no collection environment,
 so the required subject is
-`repo:JialinHuang803/sdk-js-worker:ref:refs/heads/main`.
+`repo:JialinHuang803@139532647/sdk-js-worker@1370752026:ref:refs/heads/main`.
+This repository has GitHub's immutable subject format enabled. Do not disable
+it or configure the older name-only subject; GitHub reports its exact prefix
+through `repos/JialinHuang803/sdk-js-worker/actions/oidc/customization/sub`.
 The default trust pins repository ID `1370752026` and owner ID `139532647`.
 Moving the service to another workflow repository requires setting all three
 `ACTIVITY_COLLECTOR_REPOSITORY`, `ACTIVITY_COLLECTOR_REPOSITORY_ID` and
@@ -215,6 +218,8 @@ explicit main-branch dispatch, without collecting data. It uses a dedicated
 the `azure-dashboard` environment, whose deployment branch policy permits
 only `main`. Its audience is `api://AzureADTokenExchange`, distinct from the
 collector audience. The deployment identity has no Blob data role.
+The federated subject is
+`repo:JialinHuang803@139532647/sdk-js-worker@1370752026:environment:azure-dashboard`.
 Its client ID is `6adb95f8-ba3c-4609-9082-94109cb714d5`; its principal ID is
 `938f0dd2-aaf9-4320-bdaf-8e053dd8f457`.
 

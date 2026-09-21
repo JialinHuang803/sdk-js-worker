@@ -14,7 +14,8 @@ function claims() {
   const now = Math.floor(Date.now() / 1000);
   return {
     iss: "https://token.actions.githubusercontent.com", aud: config.audience,
-    sub: `repo:${config.repository}:ref:refs/heads/main`, repository: config.repository,
+    sub: "repo:JialinHuang803@139532647/sdk-js-worker@1370752026:ref:refs/heads/main",
+    repository: config.repository,
     repository_id: config.repositoryId, repository_owner_id: config.repositoryOwnerId,
     ref: "refs/heads/main",
     workflow_ref: `${config.repository}/.github/workflows/collect-and-deploy.yml@refs/heads/main`,
@@ -68,6 +69,9 @@ describe("GitHub collector OIDC authentication", () => {
   });
 
   it.each([
+    { sub: "repo:JialinHuang803/sdk-js-worker:ref:refs/heads/main" },
+    { sub: "repo:JialinHuang803@1/sdk-js-worker@1370752026:ref:refs/heads/main" },
+    { sub: "repo:JialinHuang803@139532647/sdk-js-worker@1:ref:refs/heads/main" },
     { sub: "repo:JialinHuang803/sdk-js-worker:environment:github-pages" },
     { sub: "repo:JialinHuang803/sdk-js-worker:ref:refs/heads/other" },
     { ref: "refs/heads/other" }, { repository: "attacker/sdk-js-worker" },
@@ -75,6 +79,7 @@ describe("GitHub collector OIDC authentication", () => {
     { repository_owner_id: undefined }, { workflow_ref: "arbitrary" },
     { workflow_ref: `${config.repository}/.github/workflows/collect-and-deploy.yml@refs/heads/other` },
     { event_name: "push" }, { event_name: "pull_request" }, { event_name: "pull_request_target" },
+    { event_name: ["schedule"] },
   ])("rejects signed but unauthorized identities: %j", async (changes) => {
     await expect(verify(token(changes))).rejects.toMatchObject({ status: 403 });
   });

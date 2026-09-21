@@ -30,7 +30,8 @@ const collectorAuth = createGithubCollectorAuth(collectorConfig, {
 function collectorHeaders(feature: string) {
   const seconds = Math.floor(Date.now() / 1000);
   const payload = { iss: "https://token.actions.githubusercontent.com", aud: collectorConfig.audience,
-    sub: `repo:${collectorConfig.repository}:ref:refs/heads/main`, repository: collectorConfig.repository,
+    sub: "repo:JialinHuang803@139532647/sdk-js-worker@1370752026:ref:refs/heads/main",
+    repository: collectorConfig.repository,
     repository_id: collectorConfig.repositoryId, repository_owner_id: collectorConfig.repositoryOwnerId,
     ref: "refs/heads/main", event_name: "schedule", exp: seconds + 300, nbf: seconds - 10, iat: seconds - 10,
     workflow_ref: `${collectorConfig.repository}/.github/workflows/${feature === "activity" ? "collect-and-deploy" : "collect-emitter"}.yml@refs/heads/main` };
