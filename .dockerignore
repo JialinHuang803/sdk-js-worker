@@ -13,9 +13,6 @@
 !dist/assets/
 !dist/assets/*.js
 !dist/assets/*.css
-!dist/data/
-!dist/data/sdk-prs.json
-!dist/data/emitter.json
 **/.env*
 **/.local
 **/.local/**

@@ -1,5 +1,6 @@
 import { once } from "node:events";
-import { mkdir, readFile, rm, symlink, writeFile } from "node:fs/promises";
+import { generateKeyPairSync, sign } from "node:crypto";
+import { mkdir, rm, symlink, writeFile } from "node:fs/promises";
 import { request as httpRequest, type Server } from "node:http";
 import { resolve } from "node:path";
 import { Readable } from "node:stream";
@@ -7,8 +8,9 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { createEntraAuth, readAzureAuthConfig, type AzureAuthConfig, type EntraClient } from "../api/src/azure/auth";
 import { azureStateBlob, requireExistingState } from "../api/src/azure/blob";
 import { createAzureActivityServer } from "../api/src/azure/server";
-import { createState } from "../api/src/engine";
-import { createEmitterState } from "../api/src/emitter-engine";
+import { acknowledge, createState } from "../api/src/engine";
+import { acknowledgeEmitter, createEmitterState } from "../api/src/emitter-engine";
+import { createGithubCollectorAuth, readCollectorAuthConfig } from "../api/src/azure/collector-auth";
 import type { StateBlob } from "../api/src/store";
 
 const tenantId = "72f988bf-86f1-41af-91ab-2d7cd011db47";
@@ -20,6 +22,23 @@ const config: AzureAuthConfig = { mode: "entra-federated", tenantId, clientId,
   managedIdentityClientId: otherId, accessPolicy: "allowlist", allowedObjectIds: [objectId], origin };
 const repository = "example/sdk";
 const now = new Date().toISOString();
+const collectorConfig = readCollectorAuthConfig({ ACTIVITY_COLLECTOR_AUTH: "github-oidc", ACTIVITY_ORIGIN: origin })!;
+const key = generateKeyPairSync("rsa", { modulusLength: 2048 });
+const collectorAuth = createGithubCollectorAuth(collectorConfig, {
+  keys: [{ ...key.publicKey.export({ format: "jwk" }), kty: "RSA", kid: "runtime", alg: "RS256" }],
+});
+function collectorHeaders(feature: string) {
+  const seconds = Math.floor(Date.now() / 1000);
+  const payload = { iss: "https://token.actions.githubusercontent.com", aud: collectorConfig.audience,
+    sub: `repo:${collectorConfig.repository}:ref:refs/heads/main`, repository: collectorConfig.repository,
+    repository_id: collectorConfig.repositoryId, repository_owner_id: collectorConfig.repositoryOwnerId,
+    ref: "refs/heads/main", event_name: "schedule", exp: seconds + 300, nbf: seconds - 10, iat: seconds - 10,
+    workflow_ref: `${collectorConfig.repository}/.github/workflows/${feature === "activity" ? "collect-and-deploy" : "collect-emitter"}.yml@refs/heads/main` };
+  const data = [JSON.stringify({ alg: "RS256", kid: "runtime" }), JSON.stringify(payload)]
+    .map((value) => Buffer.from(value).toString("base64url")).join(".");
+  return { Authorization: `Bearer ${data}.${sign("RSA-SHA256", Buffer.from(data), key.privateKey).toString("base64url")}`,
+    "Content-Type": "application/json" };
+}
 
 function sdkState() {
   const state = createState();
@@ -30,6 +49,15 @@ function sdkState() {
   });
   state.feed.events.push({ id: "sdk-event", sequence: 1, repository, pullRequestNumber: 1,
     kind: "new-pr", occurredAt: now, readAt: null, acknowledgementId: null });
+  state.feed.collectedAt = now;
+  state.snapshot = { schemaVersion: 3, generatedAt: now, stale: false,
+    source: { repository, query: "AutoPR", fetchedAt: now },
+    pullRequests: [{ repository, number: 1, title: "Test PR", url: "https://github.com/example/sdk/pull/1",
+      plane: "management", draft: false, holdOn: false, packages: [], headSha: "head1",
+      createdAt: now, updatedAt: now, releasePlanUrl: null, reviewDecision: "review-required",
+      checks: { failedCount: 0, qualification: "complete", observedCount: 1 }, conflicts: false,
+      completeness: { changedFiles: "complete", checks: "complete", reviews: "complete", metadata: "complete" }, warnings: [] }],
+    inbox: { comparisonFrom: null, generatedAt: now, baselineAvailable: false, defaultPlane: "management", items: [] } };
   return state;
 }
 function emitterState() {
@@ -69,7 +97,7 @@ afterEach(async () => {
   })));
   await rm(directory, { recursive: true, force: true });
 });
-async function setup(sdk = memory(sdkState()), emitter = memory(emitterState())) {
+async function setup(sdk = memory(sdkState()), emitter = memory(emitterState()), enableCollector = true) {
   await mkdir(resolve(directory, "public", "data"), { recursive: true });
   await mkdir(resolve(directory, "outside"), { recursive: true });
   await writeFile(resolve(directory, "public", "index.html"), "<!doctype html><h1>Test dashboard</h1>");
@@ -87,7 +115,8 @@ async function setup(sdk = memory(sdkState()), emitter = memory(emitterState()))
     },
   };
   const auth = createEntraAuth(config, client);
-  const server = createAzureActivityServer({ auth, origin, sdk, emitter, staticDirectory: resolve(directory, "public") });
+  const server = createAzureActivityServer({ auth, origin, sdk, emitter, staticDirectory: resolve(directory, "public"),
+    collectorAuth: enableCollector ? collectorAuth : undefined });
   servers.push(server);
   server.listen(0, "127.0.0.1");
   await once(server, "listening");
@@ -140,7 +169,7 @@ describe("federated BFF trust boundary", () => {
     expect((await send("/")).status).toBe(302);
     expect((await send("/")).headers.get("location")).toBe("/api/auth/login");
     for (const path of ["/data/sdk-prs.json", "/assets/app.js", "/api/health", "/api/auth/session",
-      "/api/activity", "/api/emitter-activity", "/api/activity/baseline", "/api/activity/ingest"]) {
+      "/api/activity", "/api/emitter-activity", "/api/activity/baseline"]) {
       expect((await send(path)).status).toBe(401);
       expect((await send(path, { headers: { Authorization: "Bearer ignored", "x-ms-client-principal-id": objectId,
         "x-ms-client-principal": Buffer.from(JSON.stringify({ auth_typ: "aad", claims: [
@@ -251,29 +280,227 @@ describe("hosted state and static HTTP integration", () => {
   });
 
   it("disables all collectors even for approved users, without touching storage", async () => {
-    const { send, sdk, emitter, mutations } = await setup();
+    const { send, sdk, emitter, mutations } = await setup(undefined, undefined, false);
     for (const feature of ["activity", "emitter-activity"]) {
       for (const action of ["baseline", "ingest"]) {
         const response = await send(`/api/${feature}/${action}`, { headers: mutations, method: action === "baseline" ? "GET" : "POST" });
-        expect(response.status).toBe(503);
-        expect((await response.json()).error).toContain("collector integration is disabled");
+        expect(response.status).toBe(401);
+        const machine = await send(`/api/${feature}/${action}`, { headers: collectorHeaders(feature),
+          method: action === "baseline" ? "GET" : "POST" });
+        expect(machine.status).toBe(503);
+        expect((await machine.json()).error).toContain("collector integration is disabled");
       }
     }
     expect(sdk.read).not.toHaveBeenCalled();
     expect(emitter.read).not.toHaveBeenCalled();
   });
 
-  it("serves exact snapshot bytes and rejects traversal, symlink escapes and absent files", async () => {
+  it("serves canonical snapshots rather than bundled files and rejects traversal and symlink escapes", async () => {
     const { send, raw, signedIn } = await setup();
     expect((await send("/", { headers: signedIn })).status).toBe(200);
     const data = await send("/data/sdk-prs.json", { headers: signedIn });
-    expect(Buffer.from(await data.arrayBuffer())).toEqual(await readFile(resolve(directory, "public", "data", "sdk-prs.json")));
+    expect(await data.json()).toEqual(sdkState().snapshot);
+    expect(await (await send("/data/emitter.json", { headers: signedIn })).json()).toEqual(emitterState().snapshot);
     expect((await send("/data/sdk-prs.json", { method: "HEAD", headers: signedIn })).status).toBe(200);
     for (const path of ["/../outside/private.json", "/%2e%2e/outside/private.json", "/%2e%2e%5coutside%5cprivate.json",
       "//outside/private.json", "/escape/private.json", "/.env", "/api/unknown", "/missing.js"]) {
       expect(await raw(path), path).toBe(404);
     }
     expect(await raw("/%xx")).toBe(400);
+  });
+});
+
+describe("hosted collectors and live snapshots", () => {
+  it("separates bearer collectors, browser sessions and Function keys on every route", async () => {
+    const { send, mutations, sdk, emitter } = await setup();
+    for (const feature of ["activity", "emitter-activity"]) {
+      const headers = collectorHeaders(feature);
+      for (const path of [`/api/${feature}`, "/data/sdk-prs.json", "/data/emitter.json", "/",
+        "/api/auth/session", "/api/auth/login", "/api/auth/callback"]) {
+        expect((await send(path, { headers })).status, path).toBe(401);
+        expect((await send(path, { headers: { ...mutations, ...headers } })).status, path).toBe(401);
+      }
+      for (const path of [`/api/${feature}/ack`, `/api/${feature}/restore`, "/api/auth/logout"]) {
+        expect((await send(path, { method: "POST", headers, body: "{}" })).status, path).toBe(401);
+      }
+      for (const action of ["baseline", "ingest"]) {
+        const method = action === "baseline" ? "GET" : "POST";
+        const credentialsToReject: HeadersInit[] = [mutations, { "x-functions-key": "spoof" }, {}];
+        for (const credentials of credentialsToReject) {
+          expect((await send(`/api/${feature}/${action}`, { method, headers: credentials })).status).toBe(401);
+        }
+      }
+      expect((await send(`/api/${feature}/baseline`, { headers, method: "POST" })).status).toBe(405);
+      expect((await send(`/api/${feature}/ingest`, { headers })).status).toBe(405);
+      expect((await send(`/api/${feature}/ingest`, { headers, method: "OPTIONS" })).status).toBe(405);
+    }
+    expect((await send("/api/emitter-activity/baseline", { headers: collectorHeaders("activity") })).status).toBe(403);
+    expect(sdk.read).not.toHaveBeenCalled();
+    expect(emitter.read).not.toHaveBeenCalled();
+  });
+
+  it("returns only the established collector baseline contracts without feed or reader attribution", async () => {
+    const sdk = sdkState(), emitter = emitterState();
+    acknowledge(sdk, { generation: sdk.feed.generation, repository, pullRequestNumber: 1, throughSequence: 1 }, now, "Private reader");
+    acknowledgeEmitter(emitter, { generation: emitter.feed.generation, number: 2, throughSequence: 1 }, now, "Private reader");
+    const { send } = await setup(memory(sdk), memory(emitter));
+    for (const feature of ["activity", "emitter-activity"]) {
+      const response = await send(`/api/${feature}/baseline`, { headers: collectorHeaders(feature) });
+      expect(response.status).toBe(200);
+      const body = await response.json();
+      expect(body).toEqual(feature === "activity"
+        ? { snapshot: sdk.snapshot, trackedPullRequests: sdk.feed.pullRequests } : { snapshot: emitter.snapshot });
+      expect(JSON.stringify(body)).not.toContain("readBy");
+      expect(JSON.stringify(body)).not.toContain("Private reader");
+      expect(body).not.toHaveProperty("feed");
+      expect(response.headers.get("access-control-allow-origin")).toBeNull();
+    }
+  });
+
+  it.each(["activity", "emitter-activity"])("atomically ingests %s while retaining a racing browser acknowledgement", async (feature) => {
+    const sdk = sdkState(), emitter = emitterState();
+    const { send, signedIn, sdk: sdkBlob, emitter: emitterBlob } = await setup(memory(sdk), memory(emitter));
+    const blob = feature === "activity" ? sdkBlob : emitterBlob;
+    const headers = collectorHeaders(feature);
+    const baseline = await (await send(`/api/${feature}/baseline`, { headers })).json();
+    const next = structuredClone(baseline.snapshot);
+    const collectedAt = new Date(Date.parse(now) + 1000).toISOString();
+    next.generatedAt = next.source.fetchedAt = collectedAt;
+    if (feature === "activity") {
+      next.inbox.comparisonFrom = baseline.snapshot.generatedAt;
+      next.inbox.generatedAt = collectedAt;
+      next.inbox.items = [{ repository, pullRequestNumber: 1, activityAt: collectedAt,
+        reasons: ["new-commit"], comments: [] }];
+      next.pullRequests[0].headSha = "new-head";
+      next.pullRequests[0].updatedAt = collectedAt;
+    } else {
+      next.activity.comparisonFrom = baseline.snapshot.generatedAt;
+      next.activity.events = [{ id: "new-comment", number: 2, kind: "new-comment", occurredAt: collectedAt,
+        url: "https://github.com/example/emitter/issues/2#issuecomment-1" }];
+    }
+    const write = vi.mocked(blob.write).getMockImplementation()!;
+    vi.mocked(blob.write).mockImplementationOnce(async (_text, etag) => {
+      if (feature === "activity") {
+        acknowledge(sdk, { generation: sdk.feed.generation, repository, pullRequestNumber: 1, throughSequence: 1 }, now, "Racing reviewer");
+      } else {
+        acknowledgeEmitter(emitter, { generation: emitter.feed.generation, number: 2, throughSequence: 1 }, now, "Racing reviewer");
+      }
+      await write(JSON.stringify(feature === "activity" ? sdk : emitter), etag);
+      throw { statusCode: 412 };
+    });
+    const response = await send(`/api/${feature}/ingest`, { method: "POST", headers,
+      body: JSON.stringify({ snapshot: next, inactivePullRequests: [] }) });
+    expect(response.status, JSON.stringify(await response.clone().json())).toBe(200);
+    expect(await response.json()).toEqual({ collectedAt, revision: 2 });
+    expect(blob.write).toHaveBeenCalledTimes(2);
+    const persisted = JSON.parse((await blob.read())!.text);
+    expect(persisted.snapshot).toEqual(next);
+    expect(persisted.feed.generation).toBe((feature === "activity" ? sdk : emitter).feed.generation);
+    expect(persisted.feed.events).toHaveLength(2);
+    expect(persisted.feed.events[0].readBy).toEqual({ name: "Racing reviewer",
+      acknowledgementId: persisted.feed.events[0].acknowledgementId });
+    expect(persisted.feed.events[1]).not.toHaveProperty("readBy");
+    expect(persisted.feed.events[1].readAt).toBeNull();
+    const snapshotPath = feature === "activity" ? "/data/sdk-prs.json" : "/data/emitter.json";
+    const visible = await (await send(snapshotPath, { headers: signedIn })).json();
+    expect(visible).toEqual(next);
+    expect(JSON.stringify(visible)).not.toContain("Racing reviewer");
+    expect(visible).not.toHaveProperty("feed");
+    const retry = await send(`/api/${feature}/ingest`, { method: "POST", headers,
+      body: JSON.stringify({ snapshot: next, inactivePullRequests: [] }) });
+    expect(retry.status).toBe(200);
+    expect(blob.write).toHaveBeenCalledTimes(2);
+    for (const bad of [
+      baseline.snapshot,
+      { ...next, generatedAt: new Date(Date.parse(collectedAt) + 1000).toISOString() },
+    ]) {
+      const stale = await send(`/api/${feature}/ingest`, { method: "POST", headers,
+        body: JSON.stringify({ snapshot: bad, inactivePullRequests: [] }) });
+      expect(stale.status).toBe(409);
+    }
+    expect(JSON.parse((await blob.read())!.text)).toEqual(persisted);
+  });
+
+  it("fails closed for missing, corrupt and unavailable canonical blobs without serving bundled snapshots", async () => {
+    const sdk = memory(null), emitter = memory(null);
+    const { send, signedIn } = await setup(sdk, emitter);
+    for (const [feature, path, blob] of [
+      ["activity", "/data/sdk-prs.json", sdk], ["emitter-activity", "/data/emitter.json", emitter],
+    ] as const) {
+      for (const source of [null, { text: "{broken", etag: '"1"' }, { text: '{"schemaVersion":99}', etag: '"1"' }]) {
+        vi.mocked(blob.read).mockResolvedValue(source);
+        expect((await send(path, { headers: signedIn })).status).toBe(503);
+        expect((await send(`/api/${feature}/baseline`, { headers: collectorHeaders(feature) })).status).toBe(503);
+      }
+      vi.mocked(blob.read).mockRejectedValue(new Error("SECRET storage account error"));
+      const failed = await send(path, { headers: signedIn });
+      expect(failed.status).toBe(503);
+      expect(await failed.text()).not.toContain("SECRET");
+      expect(blob.write).not.toHaveBeenCalled();
+    }
+  });
+
+  it("does not fall back to bundled data when an existing state has no snapshot", async () => {
+    const { send, signedIn, sdk, emitter } = await setup(memory(createState()), memory(createEmitterState()));
+    for (const path of ["/data/sdk-prs.json", "/data/emitter.json"]) {
+      expect((await send(path, { headers: signedIn })).status).toBe(503);
+    }
+    expect(sdk.write).not.toHaveBeenCalled();
+    expect(emitter.write).not.toHaveBeenCalled();
+  });
+
+  it("retains the last good snapshot and feed when storage rejects an ingest write", async () => {
+    const { send, sdk, signedIn } = await setup();
+    const before = await sdk.read();
+    const next = structuredClone(sdkState().snapshot);
+    if (!next) throw new Error("Expected fixture snapshot.");
+    next.inbox.comparisonFrom = next.generatedAt;
+    next.generatedAt = next.source.fetchedAt = new Date(Date.parse(now) + 1000).toISOString();
+    vi.mocked(sdk.write).mockRejectedValueOnce(new Error("SECRET storage credentials"));
+    const response = await send("/api/activity/ingest", { method: "POST", headers: collectorHeaders("activity"),
+      body: JSON.stringify({ snapshot: next, inactivePullRequests: [] }) });
+    expect(response.status).toBe(503);
+    expect(await response.text()).not.toContain("SECRET");
+    expect(await sdk.read()).toEqual(before);
+    expect(await (await send("/data/sdk-prs.json", { headers: signedIn })).json()).toEqual(sdkState().snapshot);
+  });
+
+  it("preserves old canonical freshness timestamps and never persists synthetic stale metadata", async () => {
+    const sdk = sdkState(), emitter = emitterState();
+    const old = new Date(Date.now() - 27 * 60 * 60_000).toISOString();
+    if (!sdk.snapshot || !emitter.snapshot) throw new Error("Expected fixture snapshots.");
+    sdk.feed.collectedAt = sdk.snapshot.generatedAt = sdk.snapshot.source.fetchedAt = old;
+    emitter.feed.collectedAt = emitter.snapshot.generatedAt = emitter.snapshot.source.fetchedAt = old;
+    sdk.feed.events[0].occurredAt = emitter.feed.events[0].occurredAt = old;
+    const { send, signedIn, sdk: sdkBlob, emitter: emitterBlob } = await setup(memory(sdk), memory(emitter));
+    for (const path of ["/data/sdk-prs.json", "/data/emitter.json"]) {
+      const snapshot = await (await send(path, { headers: signedIn })).json();
+      expect(snapshot.generatedAt).toBe(old);
+      expect(snapshot.source.fetchedAt).toBe(old);
+      expect(Date.now() - Date.parse(snapshot.generatedAt)).toBeGreaterThan(26 * 60 * 60_000);
+      const head = await send(path, { method: "HEAD", headers: signedIn });
+      expect(head.status).toBe(200);
+      expect(await head.text()).toBe("");
+      expect(head.headers.get("cache-control")).toBe("no-store");
+    }
+    expect(sdkBlob.write).not.toHaveBeenCalled();
+    expect(emitterBlob.write).not.toHaveBeenCalled();
+  });
+
+  it("bounds ingest at 4 MiB while keeping acknowledgement limits at 16 KiB", async () => {
+    const { send, mutations, sdk } = await setup();
+    const headers = collectorHeaders("activity");
+    const input = { snapshot: sdkState().snapshot, inactivePullRequests: [], padding: "x".repeat(20_000) };
+    expect((await send("/api/activity/ingest", { method: "POST", headers, body: JSON.stringify(input) })).status).toBe(200);
+    expect((await send("/api/activity/ack", { method: "POST", headers: mutations, body: JSON.stringify(input) })).status).toBe(413);
+    for (const body of ["", "not json", "{}"]) {
+      expect((await send("/api/activity/ingest", { method: "POST", headers, body })).status).toBe(400);
+    }
+    expect((await send("/api/activity/ingest", { method: "POST",
+      headers: { ...headers, "Content-Type": "text/plain" }, body: "{}" })).status).toBe(415);
+    expect((await send("/api/activity/ingest", { method: "POST", headers,
+      body: JSON.stringify({ padding: "x".repeat(4 * 1024 * 1024) }) })).status).toBe(413);
+    expect(sdk.write).not.toHaveBeenCalled();
   });
 });
 

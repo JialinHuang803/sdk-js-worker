@@ -1,9 +1,10 @@
 import { isEmitterSnapshot } from "../src/data/emitter-contracts.ts";
+import { collectorHeaders, type CollectorCredential } from "./collector-auth.ts";
 import type { EmitterActivityBaseline, EmitterActivityIngestRequest } from "../src/data/emitter-activity-contracts.ts";
 
 export function emitterActivityClient(
   baseUrl: string | undefined,
-  key: string | undefined,
+  key: CollectorCredential | undefined,
   fetcher: typeof fetch = fetch,
 ) {
   if (!baseUrl) {
@@ -16,13 +17,14 @@ export function emitterActivityClient(
     throw new Error("ACTIVITY_API_URL must not contain credentials, query, or fragment.");
   }
   if (!key) throw new Error("ACTIVITY_INGEST_KEY is required for shared emitter activity collection.");
+  const credential = key;
   const base = baseUrl.replace(/\/+$/, "");
-  const headers = { "x-functions-key": key, "Content-Type": "application/json" };
 
   async function send(path: string, body?: EmitterActivityIngestRequest): Promise<Response> {
     const response = await fetcher(`${base}/emitter-activity/${path}`, {
-      method: body ? "POST" : "GET", headers,
+      method: body ? "POST" : "GET", headers: await collectorHeaders(credential),
       ...(body ? { body: JSON.stringify(body) } : {}),
+      redirect: "error",
       cache: "no-store", signal: AbortSignal.timeout(60_000),
     });
     if (!response.ok) throw new Error(`Shared emitter activity ${path} failed (HTTP ${response.status}).`);

@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="referrer" content="no-referrer" />
+    <title>Azure SDK dashboard has moved</title>
+    <style>
+      body { margin: 0; padding: 3rem 1.5rem; background: #f4f7fb; color: #172b4d; font: 1rem/1.6 system-ui, sans-serif; }
+      main { max-width: 40rem; margin: 10vh auto; padding: 2rem; background: white; border: 1px solid #dce3ed; border-radius: 1rem; }
+      h1 { font-size: 1.75rem; line-height: 1.25; }
+      a { color: #075ab4; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>The Azure SDK dashboard has moved</h1>
+      <p>The dashboard and shared inbox now use Microsoft Entra sign-in.
+        Microsoft tenant member accounts can access the dashboard; guests are not eligible.</p>
+      <p><a id="dashboard" href="https://ca-sdk-js-worker.ambitiouspond-79d04e69.eastus2.azurecontainerapps.io/">Open the dashboard</a></p>
+    </main>
+    <script>
+      const link = document.getElementById("dashboard");
+      link.hash = window.location.hash;
+      window.location.replace(link.href);
+    </script>
+  </body>
+</html>

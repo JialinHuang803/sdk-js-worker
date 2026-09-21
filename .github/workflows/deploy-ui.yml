@@ -1,9 +1,10 @@
-name: Deploy dashboard UI
+name: Redirect GitHub Pages to Azure
 
 on:
   push:
     branches:
       - main
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -15,30 +16,19 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  build-deploy:
+  publish-redirect:
+    if: github.repository == 'JialinHuang803/sdk-js-worker' && github.ref == 'refs/heads/main'
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v5
-      - uses: actions/setup-node@v5
-        with:
-          node-version: 22
-          cache: npm
-      - run: npm ci --userconfig .npmrc.example
-      - name: Preserve the latest published data without collecting
-        run: npm run data:restore
-      - name: Preserve independently collected emitter data
-        run: npm run data:restore-emitter
-      - run: npm test
-      - run: npm run build
-        env:
-          VITE_ACTIVITY_API_URL: ${{ vars.ACTIVITY_API_URL }}
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: dist
+          path: pages-redirect
       - name: Deploy GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4

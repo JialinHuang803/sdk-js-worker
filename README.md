@@ -1,16 +1,24 @@
 # Azure SDK for JavaScript dashboard
 
-A public, read-only engineering dashboard for
+An engineering dashboard for public work in
 [`Azure/azure-sdk-for-js`](https://github.com/Azure/azure-sdk-for-js). The first
 feature tracks open pull requests whose titles start exactly with `[AutoPR`,
 including drafts.
 
-The UI is a static React application deployed to GitHub Pages. A scheduled
-GitHub Actions workflow collects a deliberately small, sanitized snapshot from
-GitHub's public APIs. A small Azure Functions service with private Blob Storage
-maintains shared unread activities and acknowledgements. Viewing and acknowledging
-activities require no sign-in; **any visitor can mark activities read for everyone**.
-Source GitHub PRs remain read-only, and there is no client-side GitHub credential.
+The React dashboard and same-origin API run in Azure Container Apps behind
+Microsoft Entra sign-in. Open the
+[Azure dashboard](https://ca-sdk-js-worker.ambitiouspond-79d04e69.eastus2.azurecontainerapps.io/);
+the old GitHub Pages address redirects there, preserving hash links.
+Microsoft tenant members can view it and mark shared activity read; guests
+are excluded. Private Azure Blob Storage holds current snapshots, unread
+activities and acknowledgements, including the authenticated reader's name.
+Scheduled GitHub Actions collect sanitized data from public GitHub APIs and
+publish directly to the Azure service using short-lived workload identity tokens.
+Source GitHub work remains read-only; no credential is bundled in the browser.
+The source repository remains public.
+
+This is a temporary authenticated hosting evaluation. Technical deployment
+does not establish approval for a shared team service in DDFun.
 
 The maintained product and decision contract is in
 [`docs/dashboard-design.md`](docs/dashboard-design.md).
@@ -77,9 +85,9 @@ npm run collect
 npm run dev
 ```
 
-Copy `.env.example` to `.env.local` to connect the UI to the shared public
-activity service. Read actions against that URL affect the real team inbox;
-leave it unset for local refresh-cycle-only previews.
+Local previews default to refresh-cycle-only data without shared write access.
+See `.env.example` for Azure build settings; the Entra API requires the
+same-origin server and cannot be used as an anonymous localhost API.
 
 An opt-in [GitHub-backed local prototype](docs/github-activity-local.md) replaces
 Azure storage with a dedicated state branch and adds GitHub sign-in for shared
@@ -115,9 +123,10 @@ npm run build
 | Feature registry | `src/features/registry.ts` | Typed tabs/routes and their independently owned components |
 | SDK PR feature | `src/features/sdk-prs/` | Query state, filters, table, and rendering |
 | Shared UI | `src/shared/` | Reusable panel and loading/error/empty states |
-| Static snapshot | `public/data/sdk-prs.json` | Only data copied into the public site |
-| Shared activity service | `api/` | Durable unread history, anonymous read/undo, protected ingestion |
-| Azure infrastructure | `infra/main.bicep` | Private storage and managed-identity Functions |
+| Local snapshot | `public/data/sdk-prs.json` | Standalone development data; not packaged into the Azure image |
+| Azure runtime | `api/src/azure/` | Entra sessions, GitHub OIDC ingestion, live Blob-backed snapshots |
+| Shared activity engines | `api/src/` | Durable unread history, attributed read/restore, ETag-protected ingestion |
+| Azure infrastructure | `infra/container-app-*.bicep` | Container Apps and scoped managed identities; original storage retained |
 
 Provisioning, deployment, access risks and recovery are documented in
 [`docs/shared-activity-operations.md`](docs/shared-activity-operations.md).
@@ -154,9 +163,10 @@ responses, secrets, or the contents behind release-plan links.
    shell automatically adds its navigation tab and hash route.
 3. Define a separate versioned data contract in `src/data/` and write a
    collector that emits only the public fields the feature needs.
-4. Add a collector workflow and contract/parser tests. All Pages publishers must
-   restore other features' published snapshots and share the `pages` concurrency
-   group, because each deployment replaces the whole site.
+4. Add a collector workflow and contract/parser tests. Give the feature its own
+   state blob, baseline/ingest handlers and authenticated snapshot route in the
+   Azure runtime. Explicitly authorize its main-branch workflow in the collector
+   identity allowlist and use a separate collection concurrency group.
 
 This registry is intentionally lightweight. Features own their display and
 query behavior without requiring a plugin runtime or placeholder tabs.
@@ -196,9 +206,10 @@ at **20:17 UTC** or by manual dispatch, independently of the SDK collector.
 The emitter tab's **Refresh data** link opens that workflow.
 This workflow uses only `GITHUB_TOKEN` for public repository reads; no Azure
 organization installation or new token secret is required.
-For team-shared read state, it also uses the existing `ACTIVITY_API_URL` variable
-and `ACTIVITY_INGEST_KEY` secret against an isolated emitter feed in the same
-Azure service. Deploy the updated API before running the collector.
+For team-shared read state, `ACTIVITY_API_URL` points to the Container Apps
+`/api` endpoint. `ACTIVITY_COLLECTOR_AUTH=github-oidc` requests a fresh GitHub
+Actions identity token for each baseline/ingestion request. No Functions key
+or Azure storage credential is supplied to collection jobs.
 
 **Mark read** is shared with everyone, not browser-local. It acknowledges only
 the displayed activity; it does not resolve unassigned work or a review request.
@@ -224,11 +235,11 @@ avoiding GitHub Search's result cap. A failed GitHub or npm lookup stops
 publication and leaves the previous deployment intact; timestamps and the
 26-hour freshness warning show when results are old.
 
-All three publishing workflows use the same `pages` concurrency group. The
-emitter workflow restores the SDK snapshot unchanged and never ingests SDK
-activity. SDK and UI deployments restore the emitter snapshot unchanged. A
-404 before the first emitter collection leaves the emitter view explicitly
-unavailable, not zero-filled; other restoration errors stop deployment.
+The emitter and SDK workflows update separate canonical state blobs and have
+independent concurrency groups. Each snapshot and its feed are persisted in
+one ETag-conditional update, so successful collection is immediately available
+through the Azure API without rebuilding or restarting the dashboard.
+Missing or invalid hosted state is unavailable, not zero-filled or initialized.
 
 ### SDK PRs and shared UI
 
@@ -239,12 +250,12 @@ hours without a successful refresh. The collector paginates every list endpoint
 and marks changed-file data partial if GitHub's 3,000-file limit or another
 discrepancy is detected.
 
-`.github/workflows/deploy-ui.yml` handles pushes to `main`. It downloads the
-latest published snapshot with `npm run data:restore` and deploys the new UI
-with that JSON unchanged. It never collects data or advances the activity
-window, and never falls back to the older checked-in snapshot. Both deployment
-workflows (including the emitter publisher) share a concurrency group so snapshot download/collection and
-deployment cannot overlap.
+`.github/workflows/deploy-azure.yml` handles trusted pushes to `main` and manual
+deployment. It builds the Entra frontend/API, pushes an image and updates the
+existing Container App by digest using a dedicated federated deployment identity.
+It does not collect, copy or reset data. UI changes therefore cannot advance
+the activity comparison window. `.github/workflows/deploy-ui.yml` publishes
+only the small GitHub Pages redirect, with no dashboard data or API credentials.
 
 The inbox shows **Unread activities**, aggregated per PR across collection
 cycles, and independent **Needs attention**. Mark read acknowledges only the
@@ -255,8 +266,9 @@ both blocks. Drafts are hidden from Needs attention but remain eligible for
 unread activity and stay in the full table/report. HoldOn hides activity without
 acknowledging it. Tab counts count unique visible PRs, not duplicated cards.
 
-The shared API is polled every minute and on browser focus; this updates read
-state without running the GitHub collector. When no API URL is configured,
+The shared API and Azure snapshots are polled every minute and on browser focus;
+this picks up completed collections and read changes without running the GitHub
+collector. When no API URL is configured,
 the UI explicitly falls back to the prior refresh-cycle-only New activity view.
 Snapshot timestamps do not change on UI-only pushes.
 `activity.excludedCommitAuthorPatterns` in `.github/dashboard-config.json`
@@ -276,42 +288,39 @@ Release packages with new entries under their version's **Breaking Changes**
 changelog heading receive a **Breaking change** badge in the table and existing
 inbox notifications. Historical releases do not trigger it. This is a
 dashboard badge, not a GitHub label or a full API compatibility assessment.
-Missing, invalid, or schema-incompatible published data blocks a UI deployment;
-run **Collect and deploy dashboard** explicitly for initial publication or a
-data-contract migration. Collector/configuration changes take effect on the
-next scheduled or manual collection, not on the code push.
+Missing, invalid, or schema-incompatible hosted data is surfaced as an error.
+Deploy compatible readers before changing a stored contract. Collector and
+configuration changes take effect on the next scheduled or manual collection,
+not on a code push. Run **Collect Azure SDK dashboard** for a manual SDK refresh.
 
 The dashboard's **Refresh data** button opens this workflow in GitHub Actions.
-Choose **Run workflow** there to start a manual collection; the public static
-site cannot trigger an authenticated workflow directly.
+Choose **Run workflow** there to start a manual collection; the dashboard
+does not obtain GitHub write credentials to trigger workflows itself.
 
 The workflow uses the repository `GITHUB_TOKEN` with read access for public
-GitHub API requests and grants only the Pages permissions required to deploy.
+GitHub API requests and `id-token: write` to authenticate to the Azure collector
+endpoints. Only these two exact main-branch workflows, scheduled or manually
+dispatched, can ingest their respective feature. Browser sessions cannot ingest,
+and collector tokens cannot acknowledge activity or read attributed feeds.
 No Azure organization app installation is needed for public reads. If GitHub's
 runtime token cannot read the source repository in a particular organization
 policy configuration, create an `AZURE_SDK_READ_TOKEN` Actions secret with
 public-repository read-only access. It is supplied only to the Node collector,
 never copied to `public/` or bundled by Vite.
 
-Collection failure is fatal to the deploy job, so a failed run cannot replace
-the last good Pages deployment with an empty snapshot. When a prior local
+Collection failure is fatal to the collection job, so a failed run cannot replace
+the last good Azure snapshot with an empty snapshot. When a prior local
 snapshot exists, the collector also marks that file explicitly stale and
 records a sanitized error for diagnosis.
 
-To publish:
-
-1. Merge the implementation into `main`.
-2. In **Settings → Pages**, select **GitHub Actions** as the build and deployment
-   source if it is not already selected.
-3. Run **Collect and deploy dashboard** manually for the initial data snapshot.
-   Subsequent `main` pushes deploy UI changes while preserving published data.
-
-PR workflows have read-only repository permission and never execute the Pages
-deployment job, preventing untrusted pull-request code from deploying with
-elevated credentials.
+Deployment identity, repository variables, workflow trust and troubleshooting
+are documented in the [operations guide](docs/shared-activity-operations.md).
+The original Function remains network-restricted and is no longer used.
+PR workflows have read-only repository permission, no deployment environment
+and no OIDC grant. Deployment and collection jobs reject non-main refs.
 
 ## Not implemented
 
-Historical trend analytics, authenticated/private source data, GitHub write
-actions, identity-based acknowledgement permissions, and AI summaries are future
+Historical trend analytics, private GitHub source data, GitHub write
+actions, per-person acknowledgement authorization, and AI summaries are future
 additions. Shared activity acknowledgements are the only current write feature.

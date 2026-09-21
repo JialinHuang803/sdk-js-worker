@@ -5,7 +5,13 @@
 As of September 20, 2026, public access to the deployed Function App is blocked
 by network restrictions following security remediation. Do not override those
 settings: the individual DDFun subscription is not intended for a shared team
-service. Failed collectors stop without replacing the last good Pages snapshot.
+service without the appropriate approval.
+
+The September 19-20 scheduled failures were baseline HTTP 403 responses, before
+source GitHub collection. `ACTIVITY_API_URL` still pointed to the blocked
+Function, not the new Container App. SDK run `35540257705` and emitter run
+`35541669274` confirmed this; it was not a source-repository token failure.
+The cutover below replaces that dependency without reopening the Function.
 
 The [GitHub-backed local prototype](github-activity-local.md) provides a separate
 implementation for evaluation. It does not migrate these blobs, modify the
@@ -45,9 +51,9 @@ identity's **principal ID**, and audience is `api://AzureADTokenExchange`.
 The registered web callback is the exact HTTPS app origin plus
 `/api/auth/callback`; both implicit grant settings remain disabled.
 
-This is a separate authenticated evaluation, not a production cutover or
-authorization for shared-team DDFun hosting. Existing GitHub Pages workflows
-and collector configuration remain unchanged. Do not disable Azure policies,
+This remains an authenticated hosting evaluation, not authorization for
+shared-team DDFun hosting. The current workflows target this Azure runtime;
+GitHub Pages publishes only a redirect. Do not disable Azure policies,
 add remediation-skip tags or redeploy templates to undo a subsequent security
 restriction. Shared-team hosting approval remains a separate requirement;
 changing the application's access policy does not grant that approval.
@@ -62,8 +68,9 @@ flow with PKCE and a managed-identity client assertion, not EasyAuth headers.
 The runtime does not trust caller-supplied identity headers. Browser sessions
 use opaque Secure/HttpOnly cookies, server-side expiry and per-session CSRF
 tokens. Mutations additionally require the configured exact Origin and JSON.
-Only the login/callback endpoints are public; dashboard assets and snapshots
-require a session too.
+Only the login/callback endpoints are unauthenticated; dashboard assets and
+snapshots require a session too. Collector routes have their own GitHub workload
+identity boundary, described below, and do not accept browser sessions.
 
 Configure these non-secret environment values:
 
@@ -79,6 +86,7 @@ Configure these non-secret environment values:
 | `ACTIVITY_STORAGE_ACCOUNT` | Existing account containing the original state |
 | `ACTIVITY_STORAGE_CONTAINER` | `activity` |
 | `AZURE_CLIENT_ID` | The same user-assigned identity client ID, for Blob access |
+| `ACTIVITY_COLLECTOR_AUTH` | `github-oidc` to enable hosted collection; disabled when omitted |
 
 Pass these as the Bicep `runtimeEnvironment` array of `{name, value}` entries.
 Do not confuse the identity's client ID used here with its principal ID used
@@ -94,8 +102,9 @@ existing sessions expire within one hour and are not a live directory lookup.
 
 Build with `VITE_ACTIVITY_AUTH=entra`, `VITE_ACTIVITY_API_URL=/api` and
 `VITE_BASE_PATH=/`, then run `npm run build` and `npm --prefix api run build`.
-Stage the two validated, currently published JSON snapshots unchanged into
-`dist/data` after the build; do not run collectors during a UI deployment.
+Do not run collectors or stage snapshot JSON during an image deployment.
+Snapshots are served from the canonical private state blobs, not image files,
+and `.dockerignore` excludes `dist/data`.
 The root `Dockerfile` consumes these compiled artifacts. `.dockerignore`
 allowlists build inputs and excludes credential files. The dependency stage
 maps known public Azure Artifacts tarball URLs to public npm inside the image
@@ -137,13 +146,96 @@ The blocked, previously deployed Function has not been upgraded: do not reopen
 its anonymous endpoints against these blobs without deploying the updated
 name-stripping handlers or replacing its authentication first.
 
-**Refresh limitation:** Azure collector baseline/ingest routes deliberately
-return an explicit unavailable response in this evaluation. Existing GitHub
-Actions still target the restricted Function. Consequently the deployed
-snapshot is the last published snapshot, not newly collected data. Machine
-authentication and collector routing must be implemented before this can
-replace the daily shared service. Do not configure collectors to use browser
-cookies, expose anonymous collector routes, or weaken user authentication.
+### GitHub Actions collection and live snapshots
+
+The data path is:
+
+```text
+GitHub Actions -> GitHub public APIs -> OIDC-authenticated Azure ingestion
+              -> existing private Blob state + snapshot in one ETag update
+              -> Entra-authenticated dashboard /data/*.json and activity APIs
+```
+
+Set repository variable `ACTIVITY_API_URL` to
+`https://ca-sdk-js-worker.ambitiouspond-79d04e69.eastus2.azurecontainerapps.io/api`.
+Both collectors set `ACTIVITY_COLLECTOR_AUTH=github-oidc` and have only
+`contents: read` and `id-token: write`. There is no collector Azure role,
+storage credential, Entra client secret or Functions key. The legacy
+`ACTIVITY_INGEST_KEY` secret is not used by these workflows.
+
+The server verifies the GitHub-issued JWT signature against the fixed GitHub
+JWKS endpoint, issuer, expiry and exact audience `<ACTIVITY_ORIGIN>/api/collector`.
+It also requires this repository's immutable repository/owner IDs, exact
+main-branch subject/ref, `schedule` or `workflow_dispatch`, and the feature's
+exact workflow file at `refs/heads/main`. There is no collection environment,
+so the required subject is
+`repo:JialinHuang803/sdk-js-worker:ref:refs/heads/main`.
+The default trust pins repository ID `1370752026` and owner ID `139532647`.
+Moving the service to another workflow repository requires setting all three
+`ACTIVITY_COLLECTOR_REPOSITORY`, `ACTIVITY_COLLECTOR_REPOSITORY_ID` and
+`ACTIVITY_COLLECTOR_REPOSITORY_OWNER_ID` together; do not configure only a name.
+Tokens from forks, PRs, other workflows/branches or the other feature cannot
+ingest. Collector tokens cannot access session-protected feeds, reader names,
+snapshots or acknowledgement routes. A fresh token is requested for baseline
+and again after collection, avoiding expiry during a long GitHub scan.
+
+| Workflow | Schedule | Azure state |
+| --- | --- | --- |
+| `collect-and-deploy.yml` / Collect Azure SDK dashboard | Daily 20:00 UTC (04:00 UTC+8 next day) | `activity/state.json` |
+| `collect-emitter.yml` / Collect JS emitter | Daily 20:17 UTC (04:17 UTC+8 next day) | `activity/emitter-state.json` |
+
+Schedules are best effort; GitHub may delay or skip scheduled runs. Manual
+dispatch on `main` is the recovery path. Public repository reads continue using
+`GITHUB_TOKEN`; the optional SDK read-only token is unnecessary unless source
+access policy actually prevents that token from working.
+
+The baseline remains the last successful collection, including across failed
+runs. Ingestion uses the existing validators, deduplication and ETag retries
+against concurrent acknowledgements. Existing names and read markers are not
+reset. Each stored snapshot and activity feed update atomically, independently
+of the other feature. No separate upload/image rebuild is needed for data.
+The authenticated `/data/sdk-prs.json` and `/data/emitter.json` return only
+validated snapshots, not the surrounding feed or `readBy` fields.
+Missing, corrupt or unavailable state is an explicit error, never an older
+bundled file or invented empty inventory. Failed collection leaves the previous
+snapshot and timestamps intact; the UI warns after 26 hours without freshness.
+The Azure UI reloads snapshots every minute and on focus, independently of
+read-state polling. Polling never triggers GitHub collection.
+Normal 72-hour read-detail pruning still applies.
+
+### Automated image deployment and Pages redirect
+
+`deploy-azure.yml` builds and deploys the Entra UI/API on `main` pushes or
+explicit main-branch dispatch, without collecting data. It uses a dedicated
+`id-sdk-js-worker-deploy` managed identity and a GitHub federated credential for
+the `azure-dashboard` environment, whose deployment branch policy permits
+only `main`. Its audience is `api://AzureADTokenExchange`, distinct from the
+collector audience. The deployment identity has no Blob data role.
+Its client ID is `6adb95f8-ba3c-4609-9082-94109cb714d5`; its principal ID is
+`938f0dd2-aaf9-4320-bdaf-8e053dd8f457`.
+
+| Deployment role | Exact scope |
+| --- | --- |
+| AcrPush and Reader | Registry `acrsdkjsworker2807` |
+| Container Apps Contributor | App `ca-sdk-js-worker` only |
+| Managed Identity Operator | Runtime identity `id-sdk-js-worker` only, to retain the existing assignment |
+
+No subscription-wide or resource-group Contributor grant is needed. Repository
+variables are `AZURE_DEPLOY_CLIENT_ID`, `AZURE_TENANT_ID`,
+`AZURE_SUBSCRIPTION_ID`, `AZURE_RESOURCE_GROUP`, `AZURE_CONTAINER_APP` and
+`AZURE_CONTAINER_REGISTRY`. These are identifiers, not credentials.
+The workflow pushes to ACR, deploys the pushed immutable image digest and waits
+for the revision to be healthy and ready; it does not redeploy infrastructure
+or reset app environment/network configuration.
+
+`deploy-ui.yml` publishes only `pages-redirect/index.html` to GitHub Pages.
+The redirect retains existing hash routes/filters and provides a visible link
+when JavaScript is disabled. It contains no snapshot or account data.
+Each deployment and collector has a separate non-cancelling concurrency group.
+PR CI has no OIDC permission and does not deploy.
+
+Do not configure collectors to use browser cookies, expose anonymous collector
+routes, or weaken user authentication to troubleshoot an authorization error.
 
 ### September 20 evaluation status
 
@@ -172,8 +264,8 @@ anonymous access, implicit grants or using an unrelated application's identity.
 Consent also does not replace the separate approval for shared-team hosting.
 
 The app now permits Microsoft tenant members (not guests) and
-uses zero minimum / one maximum replica. No production collector cutover or
-GitHub Pages update has occurred. All four original `-poc` resources have
+uses zero minimum / one maximum replica. The subsequent workflow cutover is
+described above. All four original `-poc` resources have
 been retired; the replacement app, environment, VNet and NSG have no suffix.
 
 ## Original private Container Apps provisioning experiment
@@ -209,7 +301,15 @@ Delete this named prototype app, then its environment, VNet and NSG when the
 experiment is no longer needed; never delete the resource group to clean up
 the prototype, because it contains existing activity storage and the Function.
 
-## Deployed resources
+## Legacy Function reference (not the current deployment)
+
+The following sections document the original Function architecture and its
+historical provisioning commands for recovery/reference only. **Do not run
+these commands to cut over the current service, reopen the Function, replace
+the repository API URL, or initialize the existing hosted state.** Current
+deployment, authentication and snapshot behavior are described above.
+
+### Original resources
 
 - Subscription: `2807db07-c2ff-4a43-b586-5cfc12779347`
 - Resource group: `rg-sdk-js-worker`
@@ -241,7 +341,7 @@ Deploy the updated API before enabling emitter shared collection. The first
 command for emitter activity. The existing repository API URL and ingestion key
 are reused by the independently scheduled emitter workflow.
 
-## Routes and permissions
+### Original routes and permissions
 
 | Route | Access | Purpose |
 |---|---|---|
@@ -266,7 +366,7 @@ the next API read, mutation or collection. Unread events never expire automatica
 this prototype volume; it is not a scalable event database. There is no
 independent permanent audit archive or configured Application Insights ingestion.
 
-## Provision and deploy
+### Original provisioning and deployment
 
 Run from the repository root with an authorized Azure CLI session:
 
@@ -303,7 +403,7 @@ To initialize an empty service without refreshing dashboard data, set
 published snapshot; it cannot recover overwritten history. It refuses to replace
 an existing service baseline. Do not run the seed against a different repository.
 
-## Consistency and recovery
+### Original consistency and recovery
 
 - Each event has an immutable ID and a monotonically increasing sequence.
   Timestamps are display data, not acknowledgement boundaries.

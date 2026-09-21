@@ -7,20 +7,17 @@ on:
 
 permissions:
   contents: read
-  pages: write
   id-token: write
 
-# Pages replaces the entire site. Serialize restoration, collection and publish.
 concurrency:
-  group: pages
+  group: collect-emitter
   cancel-in-progress: false
 
 jobs:
-  collect-build-deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+  collect:
+    if: github.repository == 'JialinHuang803/sdk-js-worker' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
@@ -28,22 +25,9 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci --userconfig .npmrc.example
-      - name: Preserve SDK snapshot and activity comparison window
-        run: npm run data:restore
-      - name: Collect public JS emitter work and shared activity
+      - name: Collect and atomically publish JS emitter data to Azure
         run: npm run collect:emitter
         env:
           GITHUB_TOKEN: ${{ github.token }}
           ACTIVITY_API_URL: ${{ vars.ACTIVITY_API_URL }}
-          ACTIVITY_INGEST_KEY: ${{ secrets.ACTIVITY_INGEST_KEY }}
-      - run: npm test
-      - run: npm run build
-        env:
-          VITE_ACTIVITY_API_URL: ${{ vars.ACTIVITY_API_URL }}
-      - uses: actions/configure-pages@v5
-      - uses: actions/upload-pages-artifact@v3
-        with:
-          path: dist
-      - name: Deploy GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+          ACTIVITY_COLLECTOR_AUTH: github-oidc

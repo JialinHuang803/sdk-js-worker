@@ -12,8 +12,7 @@ COPY --from=dependencies --chown=node:node /app/api/node_modules ./api/node_modu
 COPY --chown=node:node api/package.json ./api/package.json
 COPY --chown=node:node api/dist ./api/dist
 COPY --chown=node:node dist ./dist
-RUN test -s dist/index.html && test -s dist/data/sdk-prs.json && test -s dist/data/emitter.json \
-    && test -s api/dist/api/src/azure/main.js
+RUN test -s dist/index.html && test -s api/dist/api/src/azure/main.js
 USER node
 EXPOSE 8080
 CMD ["node", "api/dist/api/src/azure/main.js"]

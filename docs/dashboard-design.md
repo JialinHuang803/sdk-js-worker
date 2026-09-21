@@ -25,10 +25,11 @@ rates. Older snapshots without coverage show an explicit unavailable message.
 No separate Spector view or combined team inbox is needed for this initial scope.
 
 `Collect JS emitter` refreshes its versioned `data/emitter.json` daily at
-20:17 UTC or manually. SDK collection remains independent. Every Pages
-publisher preserves the other feature's snapshot byte-for-byte under a shared
-deployment concurrency group; UI-only publishing advances neither source's
-timestamp. The registry owns each feature's repository and refresh links.
+20:17 UTC or manually. SDK collection remains independent. Each collector
+atomically updates its own canonical Azure state and snapshot; neither modifies
+the other feature. UI-only image deployment advances neither source's timestamp.
+The registry owns each feature's repository and refresh links. GitHub Pages
+redirects to the Entra-protected Azure dashboard instead of hosting a second copy.
 
 ### Emitter inbox
 
@@ -62,17 +63,16 @@ is not transactional, so very short-lived work between collections is not a
 complete audit trail.
 
 Read acknowledgements are **team-shared**, using the existing Azure service with
-an isolated emitter state blob and routes. Anyone can mark activity read for
-everyone. Mark read acknowledges only displayed sequences, leaving later arrivals
+an isolated emitter state blob and routes. Authenticated Microsoft tenant members
+can mark activity read for everyone. Mark read acknowledges only displayed sequences, leaving later arrivals
 unread; it does not resolve persistent ownership/review work. Recently read is
 recoverable for three days. Opening a link does not acknowledge anything. API
 failure is explicit and disables writes rather than falling back to local read
 state. Closed/merged or no-longer-labeled work leaves this open-work inbox.
 
-The protected service baseline is authoritative. Ingestion precedes Pages
-publication so a failed deployment does not discard recorded events. The emitter
-feed can therefore be newer than the published snapshot. Work counts and tables
-use the fresher inventory; package and coverage remain from the published snapshot,
+The protected service baseline is authoritative. Ingestion updates the snapshot
+and activity feed in the same conditional Blob write. Separate browser requests
+can observe different refreshes; work counts and tables use the fresher inventory,
 with collection times displayed separately. No emitter operation rewrites SDK activity.
 There is no emitter CI signal, automatic triage inference, or AI prioritization.
 
@@ -153,15 +153,17 @@ headline, and relative timestamp share one scan line. Labels use readable title
 case rather than all-capital text. Additional reasons remain visible as
 secondary badges so reviewers can understand the full state without opening
 the PR. Shared cards provide Mark read, first/latest event times and event-type
-badges. An anonymous acknowledgement affects everyone; opening a PR link does
+badges. An authenticated acknowledgement affects everyone; opening a PR link does
 not acknowledge it.
 
 ### Shared read state
 
-The private `activity/state.json` blob contains a sanitized public feed,
-acknowledgements and the canonical collector baseline. Azure Functions exposes
-public read/acknowledge/restore endpoints and key-protected baseline/ingestion
-endpoints. Acknowledgements are scoped to the sequence actually displayed;
+The private `activity/state.json` blob contains a sanitized source-data feed,
+acknowledgements and the canonical collector snapshot. Azure Container Apps
+requires Entra sessions for dashboard data and read/acknowledge/restore endpoints.
+Baseline/ingestion require verified GitHub Actions OIDC identity from the exact
+authorized main-branch collection workflow, not a browser session or Function key.
+Acknowledgements are scoped to the sequence actually displayed;
 concurrent or late-discovered events stay unread. Conditional ETag updates
 prevent the collector from overwriting concurrent read actions.
 
@@ -175,13 +177,15 @@ published activities at migration; overwritten older activities are not
 reconstructed. Events are observed at scheduled collection, not a real-time
 GitHub event stream.
 
-Shared reads require no sign-in by explicit prototype choice. Any visitor can
-mark read or restore for the whole team; rate limits are not authorization.
-The UI explains this. HoldOn hides a card without acknowledging it. Merged and
+Shared reads and restores require sign-in. Member accounts in Microsoft's tenant
+are eligible; guests are excluded. Reader names come from the server session,
+are bound to the acknowledgement batch and share the 72-hour retention. They
+are not included in collector snapshots or baselines. HoldOn hides a card without acknowledging it. Merged and
 closed PR references persist while their activities remain, but closure itself
 does not notify. Read state is not stored in localStorage.
 
-The UI polls the service every minute and on focus. Errors show stale/unavailable
+The UI polls the service and Azure snapshots every minute and on focus, without
+triggering collection. Errors show stale/unavailable
 feed state and disable writes, while the table and Needs attention remain usable.
 With no API configured, a clearly labelled legacy New activity view covers only
 the previous refresh window. Tab counts deduplicate PRs across the visible
@@ -277,7 +281,7 @@ workflow dispatch.
 
 Each scheduled or manual collection loads the preceding shared-service snapshot
 when configured, otherwise the deployed snapshot. The service baseline is
-canonical so a failed Pages deployment cannot lose events already ingested.
+canonical so a failed image deployment cannot lose events already ingested.
 The comparison window is:
 
 ```text
@@ -292,13 +296,14 @@ The legacy inbox displays **Changes since** for this window and **Last refreshed
 for the snapshot. The shared inbox displays activity and attention collection
 times separately; read-state changes never advance either collection timestamp.
 
-Code pushes run a separate UI deployment workflow. They download and preserve
-the published JSON exactly, including its activity items, timestamps and stale
-state. They do not run the collector, ingest events, apply changed collector configuration, or
-advance the comparison window. Missing or incompatible published data fails the
-UI deployment instead of restoring older checked-in data; initial publication
-and schema migrations require an explicit collection. The UI and collection
-workflows share the Pages concurrency group to serialize their entire runs.
+Code pushes run a separate Azure image deployment workflow. Images contain no
+snapshot data; the authenticated server reads the current canonical blobs.
+Deployments do not collect, ingest, apply changed collector configuration or
+advance comparison windows. Missing or incompatible hosted data is an explicit
+error, never a fallback to an old bundled snapshot. Schema migrations require
+compatible readers and explicit collection. Each collector and deployment has
+its own non-cancelling concurrency group; Blob ETags protect collection from
+concurrent acknowledgements.
 
 ## Package selection
 

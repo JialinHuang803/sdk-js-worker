@@ -1,15 +1,17 @@
 import { readFile, realpath, stat } from "node:fs/promises";
 import { createServer, type IncomingMessage } from "node:http";
 import { extname, isAbsolute, relative, resolve, sep } from "node:path";
-import { ActivityError, acknowledge, parseAcknowledge, parseRestore, pruneReadActivities, restore } from "../engine";
-import { acknowledgeEmitter, parseEmitterAcknowledge, parseEmitterRestore, pruneEmitterReadActivities, restoreEmitter } from "../emitter-engine";
+import { ActivityError, acknowledge, ingest, parseIngest, parseAcknowledge, parseRestore, pruneReadActivities, restore, validateStoredState } from "../engine";
+import { acknowledgeEmitter, ingestEmitter, parseEmitterIngest, parseEmitterAcknowledge, parseEmitterRestore, pruneEmitterReadActivities, restoreEmitter, validateEmitterState } from "../emitter-engine";
 import { updateState, type StateBlob } from "../store";
 import { updateEmitterState } from "../emitter-store";
 import type { createEntraAuth } from "./auth";
 import { requireExistingState } from "./blob";
+import type { createGithubCollectorAuth } from "./collector-auth";
 
 interface Dependencies {
   auth: ReturnType<typeof createEntraAuth>;
+  collectorAuth?: ReturnType<typeof createGithubCollectorAuth>;
   origin: string;
   sdk: StateBlob;
   emitter: StateBlob;
@@ -23,12 +25,12 @@ const contentTypes: Record<string, string> = {
   ".woff2": "font/woff2", ".txt": "text/plain; charset=utf-8",
 };
 
-async function readBody(request: IncomingMessage): Promise<unknown> {
+async function readBody(request: IncomingMessage, limit = 16 * 1024): Promise<unknown> {
   const chunks: Buffer[] = [];
   let size = 0;
   for await (const chunk of request) {
     size += Buffer.byteLength(chunk);
-    if (size > 16 * 1024) throw new ActivityError(413, "Request is too large.");
+    if (size > limit) throw new ActivityError(413, "Request is too large.");
     chunks.push(Buffer.from(chunk));
   }
   try { return JSON.parse(Buffer.concat(chunks).toString("utf8")); }
@@ -56,6 +58,50 @@ export function createAzureActivityServer(deps: Dependencies) {
         throw new ActivityError(404, "Route not found.");
       }
       const method = request.method;
+      const collectorRoute = /^\/api\/(activity|emitter-activity)\/(baseline|ingest)$/.exec(path);
+      if (collectorRoute) {
+        const feature = collectorRoute[1] === "activity" ? "activity" : "emitter-activity";
+        const action = collectorRoute[2];
+        if (method !== (action === "baseline" ? "GET" : "POST")) throw new ActivityError(405, "Method not allowed.");
+        if (!deps.collectorAuth) {
+          if (!request.headers.authorization) throw new ActivityError(401, "A GitHub collector bearer token is required.");
+          throw new ActivityError(503, "Hosted collector integration is disabled.");
+        }
+        await deps.collectorAuth.requireCollector(request.headers, feature);
+        if (action === "baseline") {
+          if (feature === "activity") {
+            const state = validateStoredState(JSON.parse((await sdk.read())!.text));
+            return json({ snapshot: state.snapshot, trackedPullRequests: state.feed.pullRequests });
+          }
+          const state = validateEmitterState(JSON.parse((await emitter.read())!.text));
+          return json({ snapshot: state.snapshot?.activity ? state.snapshot : null });
+        }
+        if (!request.headers["content-type"]?.toLowerCase().startsWith("application/json")) {
+          throw new ActivityError(415, "Use application/json.");
+        }
+        const input = await readBody(request, 4 * 1024 * 1024);
+        const now = new Date().toISOString();
+        if (feature === "activity") {
+          const parsed = parseIngest(input);
+          const { state } = await updateState(sdk, (state) => {
+            const previous = state.snapshot;
+            const next = parsed.snapshot;
+            // The legacy SDK engine ignores old timestamps; hosted collectors must detect lost baselines.
+            const retry = previous && JSON.stringify(next) === JSON.stringify(previous);
+            if (!retry && ((previous && Date.parse(next.generatedAt) <= Date.parse(previous.generatedAt)) ||
+              next.inbox.comparisonFrom !== (previous?.generatedAt ?? null))) {
+              throw new ActivityError(409, "Activity baseline changed. Collect again from the shared baseline.");
+            }
+            ingest(state, parsed, now);
+          });
+          return json({ collectedAt: state.feed.collectedAt, revision: state.feed.revision });
+        }
+        const parsed = parseEmitterIngest(input);
+        const { state } = await updateEmitterState(emitter, (state) => ingestEmitter(state, parsed, now));
+        return json({ collectedAt: state.feed.collectedAt, revision: state.feed.revision });
+      }
+      // A bearer token is never an alternate login, even when a browser cookie is also present.
+      if (request.headers.authorization) throw new ActivityError(401, "Browser session authentication is required.");
       const redirect = (location: string, cookies: string[] = []) => {
         response.writeHead(302, { Location: location, ...(cookies.length ? { "Set-Cookie": cookies } : {}) });
         response.end();
@@ -86,12 +132,9 @@ export function createAzureActivityServer(deps: Dependencies) {
       }
       if (path === "/api/health" && method === "GET") return json({ status: "running", mode: "entra-federated" });
       if (path.startsWith("/api/")) {
-        const route = /^\/api\/(activity|emitter-activity)(?:\/(baseline|ingest|ack|restore))?$/.exec(path);
+        const route = /^\/api\/(activity|emitter-activity)(?:\/(ack|restore))?$/.exec(path);
         if (!route) throw new ActivityError(404, "Route not found.");
         const [, feature, action] = route;
-        if (action === "baseline" || action === "ingest") {
-          throw new ActivityError(503, "Hosted collector integration is disabled. This deployment does not collect activity.");
-        }
         if (method !== (action ? "POST" : "GET")) throw new ActivityError(405, "Method not allowed.");
         const actor = action ? deps.auth.requireMutation(request.headers) : undefined;
         const input = action ? await readBody(request) : null;
@@ -122,6 +165,17 @@ export function createAzureActivityServer(deps: Dependencies) {
         return json((await updateEmitterState(emitter, (state) => pruneEmitterReadActivities(state, now))).state.feed);
       }
       if (method !== "GET" && method !== "HEAD") throw new ActivityError(405, "Method not allowed.");
+      if (path === "/data/sdk-prs.json" || path === "/data/emitter.json") {
+        const state = path === "/data/sdk-prs.json"
+          ? validateStoredState(JSON.parse((await sdk.read())!.text))
+          : validateEmitterState(JSON.parse((await emitter.read())!.text));
+        if (!state.snapshot) throw new ActivityError(503, "Activity snapshot is unavailable.");
+        // Preserve timestamps: both dashboards already warn when canonical data is over 26 hours old.
+        const body = JSON.stringify(state.snapshot);
+        response.writeHead(200, { "Content-Type": "application/json", "Content-Length": Buffer.byteLength(body) });
+        response.end(method === "HEAD" ? undefined : body);
+        return;
+      }
       const root = await realpath(deps.staticDirectory);
       let file: string;
       try { file = await realpath(resolve(root, path === "/" ? "index.html" : path.slice(1))); }

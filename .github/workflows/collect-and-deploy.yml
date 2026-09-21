@@ -1,4 +1,4 @@
-name: Collect and deploy dashboard
+name: Collect Azure SDK dashboard
 
 on:
   schedule:
@@ -7,19 +7,17 @@ on:
 
 permissions:
   contents: read
-  pages: write
   id-token: write
 
 concurrency:
-  group: pages
+  group: collect-sdk
   cancel-in-progress: false
 
 jobs:
-  collect-build-deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+  collect:
+    if: github.repository == 'JialinHuang803/sdk-js-worker' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
@@ -27,22 +25,9 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci --userconfig .npmrc.example
-      - name: Preserve independently collected emitter data
-        run: npm run data:restore-emitter
-      - name: Collect public Azure SDK pull request data
+      - name: Collect and atomically publish Azure SDK data to Azure
         run: npm run collect
         env:
           GITHUB_TOKEN: ${{ secrets.AZURE_SDK_READ_TOKEN || github.token }}
           ACTIVITY_API_URL: ${{ vars.ACTIVITY_API_URL }}
-          ACTIVITY_INGEST_KEY: ${{ secrets.ACTIVITY_INGEST_KEY }}
-      - run: npm test
-      - run: npm run build
-        env:
-          VITE_ACTIVITY_API_URL: ${{ vars.ACTIVITY_API_URL }}
-      - uses: actions/configure-pages@v5
-      - uses: actions/upload-pages-artifact@v3
-        with:
-          path: dist
-      - name: Deploy GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+          ACTIVITY_COLLECTOR_AUTH: github-oidc

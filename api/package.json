@@ -11,7 +11,8 @@
     "@azure/functions": "^4.7.2",
     "@azure/identity": "^4.10.2",
     "@azure/msal-node": "^6.0.1",
-    "@azure/storage-blob": "^12.28.0"
+    "@azure/storage-blob": "^12.28.0",
+    "jose": "^5.10.0"
   },
   "devDependencies": {
     "@types/node": "^24.3.1",

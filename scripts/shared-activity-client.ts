@@ -1,4 +1,5 @@
 import { isDashboardSnapshot } from "../src/data/contracts.ts";
+import { collectorHeaders, type CollectorCredential } from "./collector-auth.ts";
 import type {
   ActivityBaseline,
   ActivityIngestRequest,
@@ -7,7 +8,7 @@ import type {
 
 export function sharedActivityClient(
   baseUrl: string | undefined,
-  key: string | undefined,
+  key: CollectorCredential | undefined,
   fetcher: typeof fetch = fetch,
 ) {
   if (!baseUrl) {
@@ -20,14 +21,15 @@ export function sharedActivityClient(
     throw new Error("ACTIVITY_API_URL must not contain credentials, query, or fragment.");
   }
   if (!key) throw new Error("ACTIVITY_INGEST_KEY is required for shared activity collection.");
+  const credential = key;
   const base = baseUrl.replace(/\/+$/, "");
-  const headers = { "x-functions-key": key, "Content-Type": "application/json" };
 
   async function send(path: string, body?: ActivityIngestRequest): Promise<Response> {
     const response = await fetcher(`${base}/activity/${path}`, {
       method: body ? "POST" : "GET",
-      headers,
+      headers: await collectorHeaders(credential),
       ...(body ? { body: JSON.stringify(body) } : {}),
+      redirect: "error",
       cache: "no-store",
       signal: AbortSignal.timeout(60_000),
     });

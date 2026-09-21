@@ -1,4 +1,5 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { collectorCredential } from "./collector-auth.ts";
 import { dirname, resolve } from "node:path";
 import {
   DASHBOARD_SCHEMA_VERSION,
@@ -648,7 +649,7 @@ async function main() {
   const config = await loadDashboardConfig();
   const activity = sharedActivityClient(
     process.env.ACTIVITY_API_URL,
-    process.env.ACTIVITY_INGEST_KEY,
+    collectorCredential(process.env),
   );
   const activityBaseline = activity ? await activity.baseline() : null;
   const previous = activityBaseline?.snapshot ?? await loadPreviousSnapshot();

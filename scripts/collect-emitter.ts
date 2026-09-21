@@ -4,9 +4,10 @@ import { collectEmitter } from "./emitter.ts";
 import { isEmitterSnapshot } from "../src/data/emitter-contracts.ts";
 import { loadDashboardConfig } from "./inbox.ts";
 import { emitterActivityClient } from "./emitter-activity-client.ts";
+import { collectorCredential } from "./collector-auth.ts";
 
 const output = resolve(process.env.EMITTER_OUTPUT ?? "public/data/emitter.json");
-const client = emitterActivityClient(process.env.ACTIVITY_API_URL, process.env.ACTIVITY_INGEST_KEY);
+const client = emitterActivityClient(process.env.ACTIVITY_API_URL, collectorCredential(process.env));
 let previous = null;
 if (client) previous = (await client.baseline()).snapshot;
 else {

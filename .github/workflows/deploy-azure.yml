@@ -1,0 +1,155 @@
+name: Deploy Azure dashboard
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: azure-dashboard
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    if: github.repository == 'JialinHuang803/sdk-js-worker' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment:
+      name: azure-dashboard
+      url: ${{ steps.ready.outputs.url }}
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      AZURE_SUBSCRIPTION_ID: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+      AZURE_RESOURCE_GROUP: ${{ vars.AZURE_RESOURCE_GROUP }}
+      AZURE_CONTAINER_APP: ${{ vars.AZURE_CONTAINER_APP }}
+      AZURE_CONTAINER_REGISTRY: ${{ vars.AZURE_CONTAINER_REGISTRY }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            api/package-lock.json
+      - name: Install locked dependencies
+        run: |
+          npm ci --userconfig .npmrc.example
+          npm ci --prefix api --userconfig .npmrc.example
+      - name: Test and typecheck
+        run: |
+          npm test
+          npm run typecheck
+      - name: Build authenticated application without snapshots
+        env:
+          VITE_ACTIVITY_AUTH: entra
+          VITE_ACTIVITY_API_URL: /api
+          VITE_BASE_PATH: /
+        run: |
+          # Canonical activity snapshots are served from Blob, never from the image.
+          rm -rf public/data dist api/dist
+          npm run build
+          npm --prefix api run build
+          test ! -e dist/data
+      - name: Sign in to Azure using GitHub OIDC
+        uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_DEPLOY_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+      - name: Build and push immutable application image
+        id: image
+        shell: bash
+        run: |
+          set -euo pipefail
+          registry="$(az acr show --name "$AZURE_CONTAINER_REGISTRY" \
+            --subscription "$AZURE_SUBSCRIPTION_ID" --query loginServer --output tsv)"
+          az acr login --name "$AZURE_CONTAINER_REGISTRY" --subscription "$AZURE_SUBSCRIPTION_ID"
+          image="$registry/sdk-js-worker:$GITHUB_SHA"
+          docker build --tag "$image" .
+          docker push "$image"
+          digest="$(docker image inspect "$image" --format '{{json .RepoDigests}}' \
+            | jq -er --arg prefix "$registry/sdk-js-worker@sha256:" \
+              '[.[] | select(startswith($prefix))] | if length == 1 then .[0] else error("Expected one pushed image digest") end')"
+          [[ "$digest" =~ @sha256:[0-9a-f]{64}$ ]]
+          echo "reference=$digest" >> "$GITHUB_OUTPUT"
+      - name: Update only the existing application image
+        env:
+          IMAGE_REFERENCE: ${{ steps.image.outputs.reference }}
+        run: |
+          az containerapp update --name "$AZURE_CONTAINER_APP" \
+            --resource-group "$AZURE_RESOURCE_GROUP" \
+            --subscription "$AZURE_SUBSCRIPTION_ID" \
+            --image "$IMAGE_REFERENCE" --only-show-errors --output none
+      - name: Wait for a healthy ready revision
+        id: ready
+        env:
+          IMAGE_REFERENCE: ${{ steps.image.outputs.reference }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          for attempt in $(seq 1 60); do
+            app="$(az containerapp show --name "$AZURE_CONTAINER_APP" \
+              --resource-group "$AZURE_RESOURCE_GROUP" \
+              --subscription "$AZURE_SUBSCRIPTION_ID" \
+              --query '{latest:properties.latestRevisionName,ready:properties.latestReadyRevisionName,state:properties.provisioningState,fqdn:properties.configuration.ingress.fqdn,image:properties.template.containers[0].image}' \
+              --output json)"
+            latest="$(jq -r '.latest // empty' <<< "$app")"
+            state="$(jq -r '.state' <<< "$app")"
+            if [[ "$state" == Failed || "$state" == Canceled ]]; then
+              echo "::error::Container App provisioning failed."
+              exit 1
+            fi
+            if [[ -n "$latest" ]] && jq -e --arg image "$IMAGE_REFERENCE" \
+              '.latest == .ready and .state == "Succeeded" and .image == $image' <<< "$app" > /dev/null; then
+              revision="$(az containerapp revision show --name "$AZURE_CONTAINER_APP" \
+                --resource-group "$AZURE_RESOURCE_GROUP" --revision "$latest" \
+                --subscription "$AZURE_SUBSCRIPTION_ID" \
+                --query '{health:properties.healthState,state:properties.provisioningState}' --output json)"
+              if jq -e '.health == "Healthy" and .state == "Provisioned"' <<< "$revision" > /dev/null; then
+                fqdn="$(jq -er '.fqdn | select(type == "string" and length > 0)' <<< "$app")"
+                echo "url=https://$fqdn" >> "$GITHUB_OUTPUT"
+                exit 0
+              fi
+            fi
+            sleep 10
+          done
+          echo "::error::Timed out waiting for the deployed revision to become healthy and ready."
+          exit 1
+      - name: Verify anonymous requests remain protected
+        env:
+          DASHBOARD_URL: ${{ steps.ready.outputs.url }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          probe() {
+            curl --silent --show-error --connect-timeout 10 --max-time 30 \
+              --output /dev/null --write-out '%{http_code} %{redirect_url}' "$1"
+          }
+          for attempt in $(seq 1 12); do
+            root="$(probe "$DASHBOARD_URL/")"
+            sdk="$(probe "$DASHBOARD_URL/data/sdk-prs.json")"
+            emitter="$(probe "$DASHBOARD_URL/data/emitter.json")"
+            api="$(probe "$DASHBOARD_URL/api/health")"
+            if [[ "$root" == "302 $DASHBOARD_URL/api/auth/login" \
+              && "$sdk" == "401 " && "$emitter" == "401 " && "$api" == "401 " ]]; then
+              echo "Anonymous root redirects to login; snapshot and API routes return HTTP 401."
+              exit 0
+            fi
+            sleep 10
+          done
+          echo "::error::Anonymous access checks failed; expected a login redirect and protected snapshot/API routes."
+          exit 1
+      - name: Clear registry credentials
+        if: always()
+        run: |
+          rm -f "$HOME/.docker/config.json"
