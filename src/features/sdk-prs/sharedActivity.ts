@@ -26,7 +26,7 @@ export function groupActivities(feed: SharedActivityFeed, read: boolean): Activi
     if ((event.readAt !== null) !== read) continue;
     const key = pullKey(event.repository, event.pullRequestNumber);
     const pull = pulls.get(key);
-    if (!pull || pull.holdOn) continue;
+    if (!pull) continue;
     let group = groups.get(key);
     if (!group) {
       group = {
@@ -62,7 +62,7 @@ export function acknowledgeGroup(feed: SharedActivityFeed, group: ActivityGroup)
 export function attentionEntries(snapshot: DashboardSnapshot) {
   const merged = new Set((snapshot.mergedPullRequests ?? []).map((pull) => pullKey(pull.repository, pull.number)));
   return snapshot.pullRequests.flatMap((pull) => {
-    if (pull.draft || pull.holdOn || merged.has(pullKey(pull.repository, pull.number))) return [];
+    if (pull.draft || merged.has(pullKey(pull.repository, pull.number))) return [];
     const reasons: InboxReason[] = [];
     if (pull.reviewDecision === "review-required") reasons.push("review-needed");
     if ((pull.checks.failedCount ?? 0) > 0) reasons.push("ci-failure");

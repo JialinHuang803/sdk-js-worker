@@ -29,6 +29,17 @@ export interface PreviousSnapshot {
   pullRequests: PullRequestRecord[];
 }
 
+export function commentComparisonFrom(
+  comparisonFrom: string,
+  holdOn: boolean,
+  recoverHoldOnComments: boolean,
+  now: Date,
+): string {
+  if (!holdOn || !recoverHoldOnComments) return comparisonFrom;
+  // Keep recovery well inside the three-day read-marker retention window.
+  return new Date(Math.min(Date.parse(comparisonFrom), now.getTime() - 24 * 60 * 60_000)).toISOString();
+}
+
 export async function loadDashboardConfig(): Promise<DashboardConfig> {
   const path = resolve(
     process.env.DASHBOARD_CONFIG ?? ".github/dashboard-config.json",
@@ -74,7 +85,6 @@ export function buildReviewInbox({
     (previous?.pullRequests ?? []).map((pull) => [pull.number, pull]),
   );
   const items = current.flatMap((pull) => {
-    if (pull.holdOn) return [];
     const prior = previousByNumber.get(pull.number);
     const pullComments = comments.get(pull.number) ?? [];
     const reasons: InboxReason[] = [];
@@ -110,7 +120,6 @@ export function buildReviewInbox({
   if (previous) {
     for (const pull of merged) {
       if (
-        pull.holdOn ||
         Date.parse(pull.mergedAt) <= Date.parse(previous.generatedAt) ||
         Date.parse(pull.mergedAt) > Date.parse(generatedAt)
       ) {

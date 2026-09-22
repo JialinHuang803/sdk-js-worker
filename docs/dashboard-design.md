@@ -141,6 +141,12 @@ feed, grouped by repository/PR across days and ordered oldest-unread first.
 The independent **Needs attention** block derives required-review and failed-CI
 work from the current status snapshot, regardless of whether activity is unread.
 
+Manual SDK collection can opt into `recover_holdon_comments` to include the last
+24 hours of comments on currently held PRs that the former exclusion skipped.
+It preserves author filters and the normal collection baseline, and uses existing
+event IDs to avoid duplicating or unreading acknowledged comments. Recovery is off
+for scheduled runs; it does not reconstruct older skipped activity or commits.
+
 Draft PRs are excluded from **Needs attention**, even when they require approval
 or have failed CI. They can still appear in **Unread activities** for new PRs, commits,
 or comments. Inbox tab counts reflect only visible entries; the full table and
@@ -180,7 +186,9 @@ GitHub event stream.
 Shared reads and restores require sign-in. Member accounts in Microsoft's tenant
 are eligible; guests are excluded. Reader names come from the server session,
 are bound to the acknowledgement batch and share the 72-hour retention. They
-are not included in collector snapshots or baselines. HoldOn hides a card without acknowledging it. Merged and
+are not included in collector snapshots or baselines. HoldOn does not suppress
+activity, recently read cards, or non-draft review/CI attention; cards show a
+`HoldOn` badge without changing read state. Merged and
 closed PR references persist while their activities remain, but closure itself
 does not notify. Read state is not stored in localStorage.
 
@@ -231,7 +239,8 @@ between refreshes, without requiring them to appear in the prior open list.
 Merged PRs are stored as lightweight `mergedPullRequests` summaries, separate
 from the open table and its counts. Notifications use the merge timestamp,
 the current plane label, and a GitHub PR link, with no obsolete review/CI
-reasons or guessed package metadata. `HoldOn` exclusion still applies.
+reasons or guessed package metadata. HoldOn merges remain eligible and retain
+their label.
 Merge events remain unread across refresh cycles until acknowledged and survive
 UI-only deploys.
 Without a previous snapshot, seven-day history is collected for the report

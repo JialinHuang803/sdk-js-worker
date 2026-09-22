@@ -142,7 +142,7 @@ describe("recent SDK merges", () => {
     expect(next.items).toEqual([]);
   });
 
-  it("retains HoldOn exclusion and does not notify merges outside the window", async () => {
+  it("includes HoldOn merges but does not notify merges outside the window", async () => {
     const merged = await collectMergedPullRequests(repository, since, async () => [
       closed(1, { labels: [{ name: "HoldOn" }] }),
       closed(2, { merged_at: "2026-09-18T00:00:00Z" }),
@@ -151,6 +151,6 @@ describe("recent SDK merges", () => {
       current: [], previous: { generatedAt: since, pullRequests: [] },
       comments: new Map(), generatedAt: now, defaultPlane: "management", merged,
     });
-    expect(inbox.items).toEqual([]);
+    expect(inbox.items.map((item) => [item.pullRequestNumber, item.reasons])).toEqual([[1, ["merged"]]]);
   });
 });

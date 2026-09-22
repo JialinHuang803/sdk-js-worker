@@ -21,6 +21,7 @@ import {
 } from "./collector-lib.ts";
 import {
   buildReviewInbox,
+  commentComparisonFrom,
   isExcludedCommentAuthor,
   loadDashboardConfig,
   type DashboardConfig,
@@ -274,17 +275,19 @@ function normalizeComment(
 }
 
 async function collectRecentComments(
-  pulls: PullListItem[],
+  pulls: Pick<PullRequestRecord, "number" | "updatedAt" | "holdOn">[],
   comparisonFrom: string | null,
   config: DashboardConfig,
+  recoverHoldOnComments: boolean,
 ): Promise<Map<number, InboxCommentActivity[]>> {
   const commentsByPull = new Map<number, InboxCommentActivity[]>();
   if (!comparisonFrom) return commentsByPull;
-  const candidates = pulls.filter(
-    (pull) => Date.parse(pull.updated_at) > Date.parse(comparisonFrom),
-  );
-  const entries = await mapLimit(candidates, 3, async (pull) => {
-    const since = encodeURIComponent(comparisonFrom);
+  const now = new Date();
+  const candidates = pulls.map((pull) => ({
+    pull, from: commentComparisonFrom(comparisonFrom, pull.holdOn, recoverHoldOnComments, now),
+  })).filter(({ pull, from }) => Date.parse(pull.updatedAt) > Date.parse(from));
+  const entries = await mapLimit(candidates, 3, async ({ pull, from }) => {
+    const since = encodeURIComponent(from);
     const [conversationComments, reviewComments, reviews] = await Promise.all([
       config.activity.includeConversationComments
         ? paginate<GitHubComment>(
@@ -314,7 +317,7 @@ async function collectRecentComments(
           review.state === "APPROVED" ||
           !review.body?.trim() ||
           !review.submitted_at ||
-          Date.parse(review.submitted_at) <= Date.parse(comparisonFrom)
+          Date.parse(review.submitted_at) <= Date.parse(from)
         ) {
           return [];
         }
@@ -333,6 +336,7 @@ async function collectRecentComments(
       }),
     ]
       .filter((comment): comment is InboxCommentActivity => comment !== null)
+      .filter((comment) => Date.parse(comment.createdAt) > Date.parse(from))
       .sort((left, right) => left.createdAt.localeCompare(right.createdAt));
     return [pull.number, normalized] as const;
   });
@@ -670,9 +674,10 @@ async function main() {
     ),
   );
   const comments = await collectRecentComments(
-    autoPulls,
+    pullRequests,
     previous?.generatedAt ?? null,
     config,
+    process.env.RECOVER_HOLDON_COMMENTS === "true",
   );
   const mergeHistoryFrom = mergeHistoryStart(
     previous?.generatedAt ?? null,

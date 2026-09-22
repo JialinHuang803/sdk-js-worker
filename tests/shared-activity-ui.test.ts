@@ -104,12 +104,12 @@ describe("shared activity grouping", () => {
     expect(restored.events).toHaveLength(4);
   });
 
-  it("hides HoldOn without consuming events, retains merged/closed and draft unread activity", () => {
+  it("retains HoldOn, merged/closed and draft unread activity without consuming events", () => {
     const data = feed({ pullRequests: [
       pull(1, { holdOn: true }), pull(2, { state: "merged" }),
       pull(3, { state: "closed" }), pull(4, { draft: true }),
     ], events: [event(1, 1), event(2, 2), event(3, 3), event(4, 4)] });
-    expect(groupActivities(data, false).map(({ pull: pr }) => pr.number)).toEqual([2, 3, 4]);
+    expect(groupActivities(data, false).map(({ pull: pr }) => pr.number)).toEqual([1, 2, 3, 4]);
     expect(data.events.every((entry) => entry.readAt === null)).toBe(true);
     expect(groupActivities({ ...data, pullRequests: data.pullRequests.map((pr) => ({ ...pr, holdOn: false })) }, false)).toHaveLength(4);
   });
@@ -174,16 +174,41 @@ describe("shared activity UI", () => {
     expect(attentionEntries(current)).toEqual([]);
   });
 
-  it("keeps drafts unread but excludes drafts and HoldOn from attention", () => {
+  it("includes labeled HoldOn in both blocks and counts it once, while excluding draft attention", () => {
     const pulls = [pull(1, { draft: true }), pull(2, { holdOn: true })];
     const html = renderToStaticMarkup(createElement(ReviewInboxView, {
       snapshot: snapshot(pulls), activity: state(feed({ pullRequests: pulls, events: [event(1, 1), event(2, 2)] })),
     }));
     expect(html).toContain("#1");
-    expect(html).not.toContain("#2");
+    expect(html.match(/>#2<\/a>/g)).toHaveLength(2);
+    expect(html.match(/>HoldOn<\/span>/g)).toHaveLength(2);
     expect(html).toContain(">Draft</span>");
-    expect(html).not.toContain("Needs attention");
-    expect(html).toContain("Management <span>1</span>");
+    expect(html).toContain("Needs attention");
+    expect(html).toContain("Management <span>2</span>");
+    expect(attentionEntries(snapshot(pulls)).map(({ pull: pr }) => pr.number)).toEqual([2]);
+  });
+
+  it("keeps labeled HoldOn in recently read and in refresh-cycle fallback activity", () => {
+    const held = pull(1, { holdOn: true });
+    const data = feed({ pullRequests: [held], events: [
+      event(1, 1, { readAt: time, acknowledgementId: "held-read" }),
+    ] });
+    const groups = groupActivities(data, true);
+    expect(groups[0].acknowledgementIds).toEqual(["held-read"]);
+    const read = renderToStaticMarkup(createElement(SharedActivityList, {
+      groups, activity: state(data), read: true,
+    }));
+    expect(read).toContain(">HoldOn</span>");
+    expect(read).toContain("Restore unread");
+    expect(groupActivities(data, false)).toEqual([]);
+    const current = snapshot([held]);
+    current.inbox.items = [{ repository, pullRequestNumber: 1, reasons: ["new-comment"],
+      activityAt: time, comments: [] }];
+    const fallback = renderToStaticMarkup(createElement(ReviewInboxView, { snapshot: current }));
+    expect(fallback).toContain("<h3>New activity</h3>");
+    expect(fallback).toContain("<h3>Needs attention</h3>");
+    expect(fallback.match(/>HoldOn<\/span>/g)).toHaveLength(2);
+    expect(fallback).toContain("Management <span>1</span>");
   });
 
   it("retains merged and closed cards as badges without synthesizing closure events", () => {

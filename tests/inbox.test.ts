@@ -11,6 +11,7 @@ import type {
 } from "../src/data/contracts";
 import {
   buildReviewInbox,
+  commentComparisonFrom,
   isExcludedCommentAuthor,
 } from "../scripts/inbox";
 
@@ -175,10 +176,22 @@ describe("draft inbox visibility", () => {
   });
 });
 
+describe("HoldOn comment recovery", () => {
+  const now = new Date("2026-09-22T01:00:00Z");
+  it("only widens the comment window for explicitly requested HoldOn recovery", () => {
+    const recent = "2026-09-21T22:00:00Z";
+    expect(commentComparisonFrom(recent, true, true, now)).toBe("2026-09-21T01:00:00.000Z");
+    expect(commentComparisonFrom(recent, true, false, now)).toBe(recent);
+    expect(commentComparisonFrom(recent, false, true, now)).toBe(recent);
+    expect(commentComparisonFrom("2026-09-19T00:00:00Z", true, true, now))
+      .toBe("2026-09-19T00:00:00.000Z");
+  });
+});
+
 describe("buildReviewInbox", () => {
   it("excludes only new-commit activity while keeping other reasons and the new baseline SHA", async () => {
     const current = [pull(1, {
-      headSha: "new-head", reviewDecision: "review-required",
+      headSha: "new-head", reviewDecision: "review-required", holdOn: true,
       checks: { failedCount: 2, qualification: "complete", observedCount: 3 },
     }), pull(2, { headSha: "mixed-head" }), pull(3, { headSha: "unreachable-head" })];
     const previous = {
@@ -220,13 +233,13 @@ describe("buildReviewInbox", () => {
     })).toEqual({ excluded: new Set(), warnings: new Map() });
   });
 
-  it("keeps new PRs and skips attribution for baseline, unchanged, or held PRs", async () => {
+  it("keeps new PRs and skips attribution only for baseline or unchanged PRs", async () => {
     let requests = 0;
     const getComparisonPage = async (): Promise<CommitComparison> => {
       requests += 1;
       throw new Error("Unexpected comparison");
     };
-    const current = [pull(1), pull(2), pull(3, { holdOn: true, headSha: "changed" })];
+    const current = [pull(1), pull(2, { holdOn: true }), pull(3, { holdOn: true })];
     const previous = { generatedAt: "2026-09-15T00:07:00Z", pullRequests: [pull(1), pull(3)] };
     for (const baseline of [null, previous]) {
       const result = await collectCommitExclusions({
@@ -242,7 +255,7 @@ describe("buildReviewInbox", () => {
     expect(inbox.items.map((item) => [item.pullRequestNumber, item.reasons])).toEqual([[2, ["new-pr"]]]);
   });
 
-  it("excludes PRs carrying the HoldOn label", () => {
+  it("includes activity and attention for PRs carrying the HoldOn label", () => {
     const inbox = buildReviewInbox({
       current: [
         pull(1, {
@@ -255,12 +268,16 @@ describe("buildReviewInbox", () => {
           },
         }),
       ],
-      previous: null,
-      comments: new Map(),
+      previous: { generatedAt: "2026-09-15T00:00:00Z", pullRequests: [pull(1, { headSha: "old" })] },
+      comments: new Map([[1, [{
+        id: "conversation:1", kind: "conversation", author: "service-team",
+        createdAt: "2026-09-16T00:00:00Z", url: "https://example.test/comment/1",
+      }]]]),
       generatedAt: "2026-09-16T00:07:00Z",
       defaultPlane: "management",
     });
-    expect(inbox.items).toEqual([]);
+    expect(inbox.items).toHaveLength(1);
+    expect(inbox.items[0].reasons).toEqual(["new-commit", "new-comment", "review-needed", "ci-failure"]);
   });
 
   it("combines activity and persistent attention without duplicating PRs", () => {

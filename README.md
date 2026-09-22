@@ -275,8 +275,15 @@ displayed activities for everyone across devices. Recently read restores
 acknowledged events for 3 days; unread events do not expire. When opened, Recently
 read appears between Unread activities and Needs attention. A PR can appear in
 both blocks. Drafts are hidden from Needs attention but remain eligible for
-unread activity and stay in the full table/report. HoldOn hides activity without
-acknowledging it. Tab counts count unique visible PRs, not duplicated cards.
+unread activity and stay in the full table/report. HoldOn PRs remain eligible for
+activity and non-draft review/CI attention, with a `HoldOn` badge in each block
+(including Recently read). Tab counts count unique visible PRs, not duplicated cards.
+
+For comments skipped by the old HoldOn exclusion, manually dispatch the SDK
+collector with `recover_holdon_comments=true`. This opt-in recovery includes the
+last 24 hours of HoldOn comments, keeps author exclusions, and deduplicates against
+existing events without resetting read markers or the collection baseline.
+Scheduled runs leave recovery disabled; older skipped activity is not reconstructed.
 
 The shared API and Azure snapshots are polled every minute and on browser focus;
 this picks up completed collections and read changes without running the GitHub

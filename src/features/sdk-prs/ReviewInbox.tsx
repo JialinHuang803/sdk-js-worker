@@ -71,7 +71,6 @@ export function ReviewInboxView({ snapshot, activity = null }: {
     const pull = getPull(item, pulls);
     if (
       !pull ||
-      pull.holdOn ||
       (pull.draft && !item.reasons.some((reason) => activityReasons.has(reason)))
     ) return [];
     return [{ item, pull }];
@@ -256,6 +255,7 @@ function InboxSection({
                 </div>
                 <div className="inbox-notification__footer">
                   <div className="badges">
+                    {pull.holdOn && <span className="badge">HoldOn</span>}
                     {pull.packages?.some((pkg) => pkg.breakingChanges === true) && (
                       <span className="badge badge--warning">Breaking change</span>
                     )}

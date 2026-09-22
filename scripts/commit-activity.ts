@@ -61,7 +61,7 @@ export async function collectCommitExclusions({
   const priorByNumber = new Map(previous.pullRequests.map((pull) => [pull.number, pull]));
   for (const pull of current) {
     const prior = priorByNumber.get(pull.number);
-    if (pull.holdOn || !prior || prior.headSha === pull.headSha) continue;
+    if (!prior || prior.headSha === pull.headSha) continue;
     try {
       if (await hasOnlyExcludedCommits(
         patterns, (page) => getComparisonPage(pull, prior.headSha, page),

@@ -5,6 +5,11 @@ on:
     - cron: "0 6 * * *"
     - cron: "0 20 * * *"
   workflow_dispatch:
+    inputs:
+      recover_holdon_comments:
+        description: Recover the last 24 hours of HoldOn comments without resetting read state
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -32,3 +37,4 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.AZURE_SDK_READ_TOKEN || github.token }}
           ACTIVITY_API_URL: ${{ vars.ACTIVITY_API_URL }}
           ACTIVITY_COLLECTOR_AUTH: github-oidc
+          RECOVER_HOLDON_COMMENTS: ${{ github.event_name == 'workflow_dispatch' && inputs.recover_holdon_comments || false }}

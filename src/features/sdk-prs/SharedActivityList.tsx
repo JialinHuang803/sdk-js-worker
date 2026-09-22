@@ -54,6 +54,7 @@ export function SharedActivityList({
                     <h4 title={pull.title}>{pull.title}</h4>
                     {pull.state !== "open" && <span className="badge">{pull.state === "merged" ? "Merged" : "Closed"}</span>}
                     {pull.draft && <span className="badge">Draft</span>}
+                    {pull.holdOn && <span className="badge">HoldOn</span>}
                   </div>
                   <div className="shared-activity__meta">
                     <span>{pull.repository}</span>

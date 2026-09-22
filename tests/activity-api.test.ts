@@ -56,6 +56,30 @@ function memoryStore(initial: ActivityState | null = null): StateBlob {
 }
 
 describe("durable shared activity", () => {
+  it("recovers held comments idempotently without resetting existing reads or their attribution", () => {
+    const state = seed();
+    acknowledge(state, ack(state), now, "Reader");
+    const generation = state.feed.generation;
+    const original = structuredClone(state.feed.events[0]);
+    const next = snapshot("2026-09-18T02:00:00Z");
+    next.pullRequests[0].holdOn = true;
+    next.inbox.items[0].reasons = ["new-comment", "review-needed"];
+    next.inbox.items[0].comments = [{
+      id: "conversation:123", kind: "conversation", author: "service-team",
+      createdAt: "2026-09-17T23:00:00Z", url: `https://github.com/${repository}/pull/1#issuecomment-123`,
+    }];
+    ingest(state, parseIngest({ snapshot: next, inactivePullRequests: [] }), next.generatedAt);
+    expect(state.feed.events[0]).toEqual(original);
+    expect(state.feed.events[1]).toMatchObject({ kind: "new-comment", readAt: null });
+    acknowledge(state, ack(state, 2), next.generatedAt, "Second reader");
+    const recovered = structuredClone(state.feed.events[1]);
+    next.generatedAt = "2026-09-18T03:00:00Z";
+    ingest(state, { snapshot: next, inactivePullRequests: [] }, next.generatedAt);
+    expect(state.feed.events).toEqual([original, recovered]);
+    expect(state.feed.generation).toBe(generation);
+    expect(state.feed.pullRequests[0].holdOn).toBe(true);
+  });
+
   it("persists readers per batch, preserves the first reader on retries and clears only restored attribution", () => {
     const state = seed();
     const first = acknowledge(state, ack(state), now, "Alice")!;
