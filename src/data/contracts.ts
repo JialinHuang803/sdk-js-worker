@@ -56,6 +56,7 @@ export interface PullRequestRecord {
   updatedAt: string;
   releasePlanUrl: string | null;
   reviewDecision: ReviewDecision;
+  recordedApproval?: boolean | null;
   packages: PackageMetadata[];
   checks: {
     failedCount: number | null;

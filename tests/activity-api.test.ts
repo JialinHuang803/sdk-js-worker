@@ -56,6 +56,14 @@ function memoryStore(initial: ActivityState | null = null): StateBlob {
 }
 
 describe("durable shared activity", () => {
+  it("accepts optional recorded approval evidence but rejects invalid values", () => {
+    const data = snapshot();
+    data.pullRequests[0].recordedApproval = true;
+    expect(parseIngest({ snapshot: data, inactivePullRequests: [] }).snapshot.pullRequests[0].recordedApproval).toBe(true);
+    expect(() => parseIngest({ snapshot: {
+      ...data, pullRequests: [{ ...data.pullRequests[0], recordedApproval: "yes" }],
+    }, inactivePullRequests: [] })).toThrow("invalid");
+  });
   it("recovers held comments idempotently without resetting existing reads or their attribution", () => {
     const state = seed();
     acknowledge(state, ack(state), now, "Reader");

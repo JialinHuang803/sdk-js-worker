@@ -9,6 +9,8 @@ import {
 } from "../src/data/contracts";
 import { buildPlaneReports } from "../src/features/sdk-prs/reportSummary";
 import { SdkPrReport } from "../src/features/sdk-prs/SdkPrReport";
+import { PrTable } from "../src/features/sdk-prs/PrTable";
+import { attentionEntries } from "../src/features/sdk-prs/sharedActivity";
 
 const now = "2026-09-17T20:00:00Z";
 const weekStart = "2026-09-10T20:00:00Z";
@@ -70,10 +72,29 @@ describe("per-plane delivery report", () => {
     });
     expect(buildPlaneReports(data)).toEqual([
       { plane: "management", open: 6, awaitingReview: 2, approved: 2, approvedWithConflicts: 1,
-        reviewUnknown: 0, drafts: 2, held: 2, mergedLastWeek: 0 },
+        recordedApprovalOnly: 0, reviewUnknown: 0, drafts: 2, held: 2, mergedLastWeek: 0 },
       { plane: "data", open: 2, awaitingReview: 1, approved: 1, approvedWithConflicts: 1,
-        reviewUnknown: 0, drafts: 0, held: 0, mergedLastWeek: 0 },
+        recordedApprovalOnly: 0, reviewUnknown: 0, drafts: 0, held: 0, mergedLastWeek: 0 },
     ]);
+  });
+
+  it("shows recorded approvals without claiming unknown requirements are satisfied", () => {
+    const data = snapshot({ pullRequests: [
+      pull(39365, { reviewDecision: "unknown", recordedApproval: true, conflicts: true }),
+      pull(39565, { recordedApproval: true }),
+    ] });
+    expect(buildPlaneReports(data)[0]).toMatchObject({
+      approved: 1, recordedApprovalOnly: 1, reviewUnknown: 1,
+    });
+    const report = renderToStaticMarkup(createElement(SdkPrReport, { snapshot: data }));
+    expect(report).toContain("1 additional PR with an approval recorded");
+    const table = renderToStaticMarkup(createElement(PrTable, { rows: data.pullRequests, now: new Date(now) }));
+    expect(table).toContain(">Approval recorded</span>");
+    expect(table).toContain(">Approved</span>");
+    expect(table).toContain(">Conflicts</span>");
+    expect(table).toContain("Wait to merge");
+    expect(table).not.toContain("1 failed");
+    expect(attentionEntries(data)).toEqual([]);
   });
 
   it("qualifies unknown or partial review states instead of treating them as zero work", () => {

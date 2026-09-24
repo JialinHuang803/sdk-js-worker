@@ -58,7 +58,9 @@ Each AutoPR row includes:
 
 Only the failed count is shown—not individual CI job details. Zero failures is
 qualified when checks are pending, cancelled, absent, or incomplete. Unknown
-mergeability is shown as checking rather than as conflict-free.
+mergeability is retried after 1, 2, and 4 seconds, then shown as checking rather
+than as conflict-free if still unresolved. A revision change during retries
+fails collection rather than mixing signals from different revisions.
 
 The **Next step** column applies this order:
 
@@ -73,6 +75,11 @@ The **Next step** column applies this order:
 GitHub's `reviewDecision` is used instead of counting requested reviewers. It
 reflects whether branch protection's qualifying approval requirement is
 actually satisfied without publishing reviewer identities.
+An absent decision remains unknown, not "approval not required." Separately,
+`recordedApproval` tracks an undismissed approval on the current head from each
+reviewer's latest decisive review. The table shows **Approval recorded** when
+that evidence exists but GitHub does not report all requirements as satisfied;
+the delivery report counts these separately. Reviewer identities are not published.
 
 Plane, next-step, search, and sorting filters are stored in the hash URL, so a
 filtered view can be bookmarked. Conflicts remain visible in their own column
@@ -155,8 +162,11 @@ whole dashboard.
 
 Checks are requested for the current PR head SHA with GitHub's `latest` filter.
 Commit statuses are deduplicated by context and producer, retaining the newest
-retry. Check runs returned by GitHub remain distinct, even when several
-workflow jobs share a generic name. Test-merge-ref runs with a different SHA
+retry. GitHub Actions checks are grouped by app, workflow, event, and head SHA
+using workflow-run metadata, retaining the latest execution instead of old
+failed suites. Jobs within that execution remain distinct, even when several
+jobs share a generic name. Unresolved workflow identity never becomes a
+false healthy result. Test-merge-ref runs with a different SHA
 are excluded. The combined commit status endpoint is intentionally not used:
 an empty status list must not become a synthetic pending check.
 

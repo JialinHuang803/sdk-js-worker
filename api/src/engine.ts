@@ -142,6 +142,7 @@ export function parseIngest(value: unknown): ActivityIngestRequest {
   const s = value.snapshot;
   if (!repoPattern.test(s.source.repository) || !date(s.source.fetchedAt) ||
       !s.pullRequests.every((p) => pullValid({ ...p, state: "open" }) &&
+        (p.recordedApproval === undefined || p.recordedApproval === null || typeof p.recordedApproval === "boolean") &&
         text(p.headSha) && date(p.createdAt) && date(p.updatedAt)) ||
       (s.mergedPullRequests !== undefined && (!Array.isArray(s.mergedPullRequests) ||
         !s.mergedPullRequests.every((p) => pullValid({ ...p, draft: false, packages: [], state: "merged" }) &&

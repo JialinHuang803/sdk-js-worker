@@ -32,6 +32,13 @@ export function PrTable({
                 </a>
                 <div className="badges">
                   {pr.draft && <span className="badge">Draft</span>}
+                  {(pr.reviewDecision === "approved" || pr.recordedApproval === true) && (
+                    <span className="badge" title={pr.reviewDecision === "approved"
+                      ? "GitHub reports that required approvals are satisfied."
+                      : "An undismissed approval is recorded on the current revision; this does not imply all required approvals are satisfied."}>
+                      {pr.reviewDecision === "approved" ? "Approved" : "Approval recorded"}
+                    </span>
+                  )}
                   {pr.completeness.changedFiles === "partial" && (
                     <span className="badge badge--warning">Partial files</span>
                   )}

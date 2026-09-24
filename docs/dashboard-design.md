@@ -106,6 +106,14 @@ Unknown or incomplete review decisions are excluded from confirmed totals and
 explicitly qualified. Requested changes and no approval requirement do not
 count as approval. Approval never implies merge readiness.
 
+An absent GitHub aggregate decision is unknown, not evidence that approval is
+unnecessary. The collector also publishes `recordedApproval` (optional for older
+snapshots): whether a reviewer's latest decisive, undismissed review approves
+the current head. Recorded approvals appear as a badge and a separate report
+count when required approvals are not confirmed as satisfied. They do not
+override review requirements, change requests, conflicts, or incomplete checks.
+No reviewer identity or review body is published for this signal.
+
 The collector publishes an optional `mergeHistoryWindow` with `from` and
 `through` timestamps covering its lightweight merged-PR summaries. Weekly
 counts require coverage of the full seven-day window and are deduplicated by

@@ -32,6 +32,8 @@ import { detectBreakingChanges } from "./changelog.ts";
 import { collectCommitExclusions, type CommitComparison } from "./commit-activity.ts";
 import { sharedActivityClient } from "./shared-activity-client.ts";
 import type { SharedActivityPull } from "../src/data/activity-contracts.ts";
+import { hasCurrentHeadApproval, normalizeReviewDecision, resolveMergeability, type SubmittedReview } from "./review-status.ts";
+import { selectCurrentCheckRuns, type WorkflowRunInfo } from "./check-runs.ts";
 
 const repository = process.env.SOURCE_REPOSITORY ?? "Azure/azure-sdk-for-js";
 const outputPath = resolve(
@@ -91,6 +93,7 @@ interface CheckRunsResponse {
 
 interface ReviewDecisionResult {
   decisions: Map<number, ReviewDecision>;
+  heads: Map<number, string>;
   complete: boolean;
 }
 
@@ -133,6 +136,7 @@ async function collectReviewDecisions(
     );
     return {
       decisions: new Map(pulls.map((pull) => [pull.number, "unknown"])),
+      heads: new Map(),
       complete: false,
     };
   }
@@ -140,7 +144,7 @@ async function collectReviewDecisions(
   const fields = pulls
     .map(
       (pull) =>
-        `pr${pull.number}: pullRequest(number: ${pull.number}) { reviewDecision }`,
+        `pr${pull.number}: pullRequest(number: ${pull.number}) { reviewDecision headRefOid }`,
     )
     .join("\n");
   const response = await fetch(graphqlUrl, {
@@ -164,6 +168,7 @@ async function collectReviewDecisions(
     );
     return {
       decisions: new Map(pulls.map((pull) => [pull.number, "unknown"])),
+      heads: new Map(),
       complete: false,
     };
   }
@@ -172,6 +177,7 @@ async function collectReviewDecisions(
       repository?: Record<
         string,
         {
+          headRefOid: string;
           reviewDecision:
             | "APPROVED"
             | "CHANGES_REQUESTED"
@@ -183,26 +189,21 @@ async function collectReviewDecisions(
     errors?: unknown[];
   };
   const decisions = new Map<number, ReviewDecision>();
+  const heads = new Map<number, string>();
   for (const pull of pulls) {
-    const value = payload.data?.repository?.[`pr${pull.number}`]?.reviewDecision;
+    const result = payload.data?.repository?.[`pr${pull.number}`];
+    const value = result?.reviewDecision;
+    if (result?.headRefOid) heads.set(pull.number, result.headRefOid);
     decisions.set(
       pull.number,
-      value === "APPROVED"
-        ? "approved"
-        : value === "CHANGES_REQUESTED"
-          ? "changes-requested"
-          : value === "REVIEW_REQUIRED"
-            ? "review-required"
-            : value === null
-              ? "not-required"
-              : "unknown",
+      normalizeReviewDecision(value),
     );
   }
   return {
     decisions,
+    heads,
     complete:
-      (payload.errors?.length ?? 0) === 0 &&
-      [...decisions.values()].every((value) => value !== "unknown"),
+      (payload.errors?.length ?? 0) === 0,
   };
 }
 
@@ -364,6 +365,8 @@ async function collectChangedFiles(
   };
 }
 
+const workflowRunCache = new Map<number, WorkflowRunInfo>();
+
 async function collectCheckRuns(sha: string): Promise<CheckRun[]> {
   const all: CheckRun[] = [];
   for (let page = 1; ; page += 1) {
@@ -373,7 +376,24 @@ async function collectCheckRuns(sha: string): Promise<CheckRun[]> {
     all.push(...response.data.check_runs);
     if (!hasNext(response.headers) && response.data.check_runs.length < 100) break;
   }
-  return all;
+  if (all.some((run) => run.head_sha === sha && run.app?.slug === "github-actions")) {
+    // One paginated lookup per SHA avoids a request for every historical suite.
+    for (let page = 1; ; page += 1) {
+      const response = await request<{ workflow_runs: WorkflowRunInfo[] }>(
+        `/repos/${repository}/actions/runs?head_sha=${encodeURIComponent(sha)}&per_page=100&page=${page}`,
+      );
+      for (const run of response.data.workflow_runs) workflowRunCache.set(run.id, run);
+      if (!hasNext(response.headers)) break;
+    }
+  }
+  return selectCurrentCheckRuns(repository, sha, all, async (id) => {
+    let run = workflowRunCache.get(id);
+    if (!run) {
+      run = (await request<WorkflowRunInfo>(`/repos/${repository}/actions/runs/${id}`)).data;
+      workflowRunCache.set(id, run);
+    }
+    return run;
+  });
 }
 
 const fileCache = new Map<string, string | null>();
@@ -523,11 +543,23 @@ async function collectPull(
   pullItem: PullListItem,
   reviewDecision: ReviewDecision,
   reviewsComplete: boolean,
+  reviewHeadSha: string | undefined,
 ): Promise<PullRequestRecord> {
-  const pull = (
+  const initial = (
     await request<PullDetails>(`/repos/${repository}/pulls/${pullItem.number}`)
   ).data;
+  const pull = await resolveMergeability(initial, async () =>
+    (await request<PullDetails>(`/repos/${repository}/pulls/${pullItem.number}`)).data);
+  if (reviewHeadSha !== pull.head.sha) reviewDecision = "unknown";
   const warnings: string[] = [];
+  if (pull.mergeable === null) warnings.push("Merge conflicts are still being computed by GitHub.");
+  let recordedApproval: boolean | null = null;
+  try {
+    const reviews = await paginate<SubmittedReview>(`/repos/${repository}/pulls/${pull.number}/reviews`);
+    recordedApproval = hasCurrentHeadApproval(pull.head.sha, reviews);
+  } catch {
+    warnings.push("Recorded approvals could not be collected.");
+  }
   const changed = await collectChangedFiles(pull.number, pull.changed_files);
   if (changed.partial) {
     warnings.push(
@@ -593,6 +625,7 @@ async function collectPull(
     updatedAt: pull.updated_at,
     releasePlanUrl: extractReleasePlanUrl(pull.body),
     reviewDecision,
+    recordedApproval,
     packages,
     checks,
     conflicts: pull.mergeable === null ? null : !pull.mergeable,
@@ -671,6 +704,7 @@ async function main() {
       pull,
       reviewDecisions.decisions.get(pull.number) ?? "unknown",
       reviewDecisions.complete,
+      reviewDecisions.heads.get(pull.number),
     ),
   );
   const comments = await collectRecentComments(

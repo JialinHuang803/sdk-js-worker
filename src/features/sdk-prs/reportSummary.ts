@@ -6,6 +6,7 @@ export interface PlaneReport {
   awaitingReview: number;
   approved: number;
   approvedWithConflicts: number;
+  recordedApprovalOnly: number;
   reviewUnknown: number;
   drafts: number;
   held: number;
@@ -43,6 +44,8 @@ export function buildPlaneReports(snapshot: DashboardSnapshot): PlaneReport[] {
       ).length,
       approved: approved.length,
       approvedWithConflicts: approved.filter((pull) => pull.conflicts === true).length,
+      recordedApprovalOnly: pulls.filter((pull) =>
+        pull.recordedApproval === true && !approved.includes(pull)).length,
       reviewUnknown: pulls.length - knownReviews.length,
       drafts: pulls.filter((pull) => pull.draft).length,
       held: pulls.filter((pull) => pull.holdOn).length,

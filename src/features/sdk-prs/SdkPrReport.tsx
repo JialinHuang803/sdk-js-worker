@@ -18,6 +18,7 @@ export function SdkPrReport({ snapshot }: { snapshot: DashboardSnapshot }) {
       </div>
       <p className="delivery-report__note">
         Review counts follow GitHub's required-approval decision.
+        {" "}Other recorded approvals are shown separately.
         {" "}Approved does not mean ready to merge.
       </p>
     </section>
@@ -66,6 +67,12 @@ function PlaneSummary({ report }: { report: PlaneReport }) {
             </span>
           )}
         </p>
+        {report.recordedApprovalOnly > 0 && (
+          <p>
+            {report.recordedApprovalOnly} additional {prNoun(report.recordedApprovalOnly)} with an
+            {" "}approval recorded on the current revision; required approvals are not confirmed as satisfied.
+          </p>
+        )}
         <p className={report.mergedLastWeek === null ? "plane-report__unavailable" : "plane-report__merged"}>
           {report.mergedLastWeek === null
             ? "The past 7 days of merge history are not available in this snapshot. The next data refresh will collect them."
