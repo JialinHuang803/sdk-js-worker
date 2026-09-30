@@ -27,7 +27,7 @@ it("collects current workflow results, recorded approval and recomputed conflict
     number: 39365, title: "[AutoPR @azure-arm-servicebus]", updated_at: date,
     created_at: date, html_url: `https://github.com/${repository}/pull/39365`,
     body: null, draft: false, changed_files: 1, state: "open", merged_at: null,
-    labels: [{ name: "Mgmt" }], head: { sha: head, repo: { full_name: repository } },
+    labels: [], head: { sha: head, repo: { full_name: repository } },
     base: { sha: base, repo: { full_name: repository } },
   };
   const unexpected: string[] = [];
@@ -89,7 +89,7 @@ it("collects current workflow results, recorded approval and recomputed conflict
     expect(unexpected).toEqual([]);
     expect(detailRequests).toBe(2);
     expect(snapshot.pullRequests[0]).toMatchObject({
-      reviewDecision: "unknown", recordedApproval: true, conflicts: true,
+      plane: "management", reviewDecision: "unknown", recordedApproval: true, conflicts: true,
       checks: { failedCount: 0, qualification: "complete", observedCount: 1 },
     });
     expect(snapshot.inbox.items).toEqual([]);

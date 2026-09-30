@@ -81,8 +81,20 @@ describe("recent SDK merges", () => {
       ]);
     const merged = await collectMergedPullRequests(repository, since, getPage);
     expect(merged).toHaveLength(101);
-    expect(merged.at(-1)?.plane).toBe("data");
+    expect(merged.at(-1)?.plane).toBe("management");
     expect(getPage.mock.calls).toEqual([[1], [2]]);
+  });
+
+  it("uses the title instead of Mgmt labels and retains the AutoPR inclusion rule", async () => {
+    const merged = await collectMergedPullRequests(repository, since, async () => [
+      closed(1, { labels: [] }),
+      closed(2, { title: "[AutoPR generation] update azure-arm-example", labels: [] }),
+      closed(3, { title: "[AutoPR @azure-storage-blob]", labels: [{ name: "Mgmt" }] }),
+      closed(4, { title: "Manual azure-arm-example change", labels: [{ name: "Mgmt" }] }),
+    ]);
+    expect(merged.map((pull) => [pull.number, pull.plane])).toEqual([
+      [1, "management"], [2, "management"], [3, "data"],
+    ]);
   });
 
   it("does not invent historical activity without a previous snapshot", async () => {

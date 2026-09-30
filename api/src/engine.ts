@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { discardStaleReader, validReadAttribution, validReaderName } from "../../src/data/read-attribution";
+import { sdkPlaneFromTitle } from "../../src/data/sdk-plane";
 import { isDashboardSnapshot, type DashboardSnapshot, type PackageMetadata } from "../../src/data/contracts";
 import type {
   ActivityAcknowledgeRequest,
@@ -190,7 +191,7 @@ function projectPackages(packages: PackageMetadata[]): PackageMetadata[] {
 }
 function projectPull(p: SharedActivityPull): SharedActivityPull {
   return { repository: p.repository, number: p.number, title: p.title, url: p.url,
-    plane: p.plane, draft: p.draft, holdOn: p.holdOn, state: p.state,
+    plane: sdkPlaneFromTitle(p.title), draft: p.draft, holdOn: p.holdOn, state: p.state,
     packages: projectPackages(p.packages) };
 }
 const pullKey = (repo: string, number: number) => `${repo}#${number}`;
@@ -218,7 +219,7 @@ export function ingest(state: ActivityState, body: ActivityIngestRequest, now: s
   if (state.snapshot && state.snapshot.source.repository !== s.source.repository) {
     throw new ActivityError(409, "Activity source repository cannot change.");
   }
-  const pulls = new Map(state.feed.pullRequests.map((p) => [pullKey(p.repository, p.number), p]));
+  const pulls = new Map(state.feed.pullRequests.map((p) => [pullKey(p.repository, p.number), projectPull(p)]));
   for (const p of body.inactivePullRequests) pulls.set(pullKey(p.repository, p.number), projectPull(p));
   for (const p of s.pullRequests) {
     pulls.set(pullKey(p.repository, p.number), projectPull({ ...p, state: "open" }));

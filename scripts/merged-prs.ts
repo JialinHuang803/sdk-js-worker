@@ -1,4 +1,5 @@
 import type { MergedPullRequestRecord } from "../src/data/contracts.ts";
+import { sdkPlaneFromTitle } from "../src/data/sdk-plane.ts";
 
 export interface ClosedPull {
   number: number;
@@ -50,9 +51,7 @@ export async function collectMergedPullRequests(
         number: pull.number,
         url: pull.html_url,
         title: pull.title,
-        plane: pull.labels.some((label) => label.name.toLowerCase() === "mgmt")
-          ? "management"
-          : "data",
+        plane: sdkPlaneFromTitle(pull.title),
         holdOn: pull.labels.some((label) => label.name.toLowerCase() === "holdon"),
         headSha: pull.head.sha,
         mergedAt: pull.merged_at,

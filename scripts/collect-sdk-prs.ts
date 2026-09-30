@@ -32,6 +32,7 @@ import { detectBreakingChanges } from "./changelog.ts";
 import { collectCommitExclusions, type CommitComparison } from "./commit-activity.ts";
 import { sharedActivityClient } from "./shared-activity-client.ts";
 import type { SharedActivityPull } from "../src/data/activity-contracts.ts";
+import { sdkPlaneFromTitle } from "../src/data/sdk-plane.ts";
 import { hasCurrentHeadApproval, normalizeReviewDecision, resolveMergeability, type SubmittedReview } from "./review-status.ts";
 import { selectCurrentCheckRuns, type WorkflowRunInfo } from "./check-runs.ts";
 
@@ -617,9 +618,7 @@ async function collectPull(
     holdOn: pull.labels.some(
       (label) => label.name.toLowerCase() === "holdon",
     ),
-    plane: pull.labels.some((label) => label.name.toLowerCase() === "mgmt")
-      ? "management"
-      : "data",
+    plane: sdkPlaneFromTitle(pull.title),
     headSha: pull.head.sha,
     createdAt: pull.created_at,
     updatedAt: pull.updated_at,
@@ -758,8 +757,7 @@ async function main() {
       ...tracked,
       title: pull.title,
       url: pull.html_url,
-      plane: pull.labels.some((label) => label.name.toLowerCase() === "mgmt")
-        ? "management" : "data",
+      plane: sdkPlaneFromTitle(pull.title),
       draft: pull.draft,
       holdOn: pull.labels.some((label) => label.name.toLowerCase() === "holdon"),
       state: pull.merged_at ? "merged" : pull.state === "closed" ? "closed" : "open",

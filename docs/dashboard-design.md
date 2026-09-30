@@ -89,6 +89,14 @@ The page has three primary surfaces:
 
 ## Delivery report
 
+SDK PRs are classified as management plane when their title contains the
+case-sensitive text `azure-arm`, including titles starting `[AutoPR @azure-arm-`.
+The `Mgmt` label is not used for classification. Other included AutoPRs are
+data plane; the exact `[AutoPR` inclusion prefix is unchanged. The same rule
+applies to open PRs, merged history, and retained activity references. A
+successful collection reclassifies retained cards without altering read markers
+or generating new activity solely because their plane changes.
+
 Two side-by-side blocks (stacked on narrow screens) report on management and
 data planes. Sentences describe the work rather than showing standalone
 counters. Each block includes:
@@ -246,7 +254,7 @@ between refreshes, without requiring them to appear in the prior open list.
 
 Merged PRs are stored as lightweight `mergedPullRequests` summaries, separate
 from the open table and its counts. Notifications use the merge timestamp,
-the current plane label, and a GitHub PR link, with no obsolete review/CI
+the title-derived plane, and a GitHub PR link, with no obsolete review/CI
 reasons or guessed package metadata. HoldOn merges remain eligible and retain
 their label.
 Merge events remain unread across refresh cycles until acknowledged and survive

@@ -56,6 +56,29 @@ function memoryStore(initial: ActivityState | null = null): StateBlob {
 }
 
 describe("durable shared activity", () => {
+  it.each([
+    { state: "closed", read: true }, { state: "closed", read: false },
+    { state: "merged", read: true }, { state: "merged", read: false },
+  ] as const)("reclassifies retained $state activity without changing read state ($read)", (prior) => {
+    const state = seed();
+    state.feed.pullRequests[0] = {
+      ...state.feed.pullRequests[0], title: "[AutoPR @azure-arm-example]",
+      plane: "data", state: prior.state,
+    };
+    if (prior.read) acknowledge(state, ack(state), now, "Reader");
+    const events = structuredClone(state.feed.events);
+    const generation = state.feed.generation;
+    const nextSequence = state.nextSequence;
+    const next = snapshot("2026-09-19T00:00:00Z");
+    next.pullRequests = [];
+    next.inbox.items = [];
+    ingest(state, { snapshot: next, inactivePullRequests: [] }, next.generatedAt);
+    expect(state.feed.pullRequests[0]).toMatchObject({ plane: "management", state: prior.state });
+    expect(state.feed.events).toEqual(events);
+    expect(state.feed.generation).toBe(generation);
+    expect(state.nextSequence).toBe(nextSequence);
+  });
+
   it("accepts optional recorded approval evidence but rejects invalid values", () => {
     const data = snapshot();
     data.pullRequests[0].recordedApproval = true;

@@ -46,7 +46,10 @@ merge history is shown as unavailable, never zero.
 Each AutoPR row includes:
 
 - PR number, title, draft status, creation date, and age
-- management plane when the PR has the `Mgmt` label; data plane otherwise
+- management plane when the title contains `azure-arm` (including the
+  `[AutoPR @azure-arm-` prefix); data plane otherwise, independent of the `Mgmt`
+  label. Matching is case-sensitive, and the existing `[AutoPR` inclusion rule
+  still applies.
 - release package name and version from `package.json` at the current PR head
 - namespace-to-version values from the package's `metadata.json`
 - the public release-plan URL referenced in the PR body
