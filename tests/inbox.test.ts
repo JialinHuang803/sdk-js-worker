@@ -11,7 +11,6 @@ import type {
 } from "../src/data/contracts";
 import {
   buildReviewInbox,
-  commentComparisonFrom,
   isExcludedCommentAuthor,
 } from "../scripts/inbox";
 
@@ -173,18 +172,6 @@ describe("draft inbox visibility", () => {
     expect(html).toContain("Management <span>0</span>");
     expect(html).not.toContain("Needs attention");
     expect(html).not.toContain("New activity");
-  });
-});
-
-describe("HoldOn comment recovery", () => {
-  const now = new Date("2026-09-22T01:00:00Z");
-  it("only widens the comment window for explicitly requested HoldOn recovery", () => {
-    const recent = "2026-09-21T22:00:00Z";
-    expect(commentComparisonFrom(recent, true, true, now)).toBe("2026-09-21T01:00:00.000Z");
-    expect(commentComparisonFrom(recent, true, false, now)).toBe(recent);
-    expect(commentComparisonFrom(recent, false, true, now)).toBe(recent);
-    expect(commentComparisonFrom("2026-09-19T00:00:00Z", true, true, now))
-      .toBe("2026-09-19T00:00:00.000Z");
   });
 });
 

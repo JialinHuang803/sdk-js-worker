@@ -7,7 +7,7 @@ import { promisify } from "node:util";
 import { expect, it } from "vitest";
 import type { DashboardSnapshot } from "../src/data/contracts";
 
-it("collects current workflow results, recorded approval and recomputed conflicts end to end", async () => {
+it.each([false, true])("collects current signals and normal comment activity end to end (HoldOn: %s)", async (holdOn) => {
   const repository = "Azure/azure-sdk-for-js";
   const head = "a".repeat(40);
   const base = "b".repeat(40);
@@ -24,10 +24,10 @@ it("collects current workflow results, recorded approval and recomputed conflict
     external_id: null, app: { id: 1, slug: "github-actions" },
   }));
   const pull = {
-    number: 39365, title: "[AutoPR @azure-arm-servicebus]", updated_at: date,
+    number: 39365, title: "[AutoPR @azure-arm-servicebus]", updated_at: "2026-09-24T01:00:00Z",
     created_at: date, html_url: `https://github.com/${repository}/pull/39365`,
     body: null, draft: false, changed_files: 1, state: "open", merged_at: null,
-    labels: [], head: { sha: head, repo: { full_name: repository } },
+    labels: holdOn ? [{ name: "HoldOn" }] : [], head: { sha: head, repo: { full_name: repository } },
     base: { sha: base, repo: { full_name: repository } },
   };
   const unexpected: string[] = [];
@@ -47,6 +47,16 @@ it("collects current workflow results, recorded approval and recomputed conflict
       result = [{ filename: "sdk/servicebus/arm-servicebus/src/index.ts", status: "modified" }];
     } else if (path === "/pulls/39365/reviews") {
       result = [{ id: 1, user: { id: 1 }, state: "APPROVED", commit_id: head, submitted_at: date }];
+    } else if (path === "/issues/39365/comments") {
+      expect(url.searchParams.get("since")).toBe(date);
+      result = [
+        { id: 10, user: { login: "service-team-user" }, created_at: date,
+          html_url: `https://github.com/${repository}/pull/39365#issuecomment-10` },
+        { id: 11, user: { login: "service-team-user" }, created_at: "2026-09-24T01:00:00Z",
+          html_url: `https://github.com/${repository}/pull/39365#issuecomment-11` },
+      ];
+    } else if (path === "/pulls/39365/comments") {
+      result = [];
     } else if (path.endsWith("/check-runs")) {
       result = { total_count: checks.length, check_runs: checks };
     } else if (path.endsWith("/statuses")) {
@@ -81,7 +91,7 @@ it("collects current workflow results, recorded approval and recomputed conflict
         ...process.env, GITHUB_TOKEN: "test-only", GH_TOKEN: "", SOURCE_REPOSITORY: repository,
         GITHUB_API_URL: origin, GITHUB_GRAPHQL_URL: `${origin}/graphql`,
         PREVIOUS_SNAPSHOT_URL: `${origin}/baseline`, DASHBOARD_OUTPUT: output,
-        ACTIVITY_API_URL: "", RECOVER_HOLDON_COMMENTS: "false",
+        ACTIVITY_API_URL: "",
       },
       timeout: 20_000,
     });
@@ -92,7 +102,10 @@ it("collects current workflow results, recorded approval and recomputed conflict
       plane: "management", reviewDecision: "unknown", recordedApproval: true, conflicts: true,
       checks: { failedCount: 0, qualification: "complete", observedCount: 1 },
     });
-    expect(snapshot.inbox.items).toEqual([]);
+    expect(snapshot.pullRequests[0].holdOn).toBe(holdOn);
+    expect(snapshot.inbox.items).toHaveLength(1);
+    expect(snapshot.inbox.items[0].reasons).toEqual(["new-comment"]);
+    expect(snapshot.inbox.items[0].comments.map((comment) => comment.id)).toEqual(["conversation:11"]);
   } finally {
     await new Promise<void>((resolve, reject) => server.close((error) => error ? reject(error) : resolve()));
     await rm(directory, { recursive: true, force: true });

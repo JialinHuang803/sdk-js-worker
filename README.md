@@ -292,11 +292,10 @@ unread activity and stay in the full table/report. HoldOn PRs remain eligible fo
 activity and non-draft review/CI attention, with a `HoldOn` badge in each block
 (including Recently read). Tab counts count unique visible PRs, not duplicated cards.
 
-For comments skipped by the old HoldOn exclusion, manually dispatch the SDK
-collector with `recover_holdon_comments=true`. This opt-in recovery includes the
-last 24 hours of HoldOn comments, keeps author exclusions, and deduplicates against
-existing events without resetting read markers or the collection baseline.
-Scheduled runs leave recovery disabled; older skipped activity is not reconstructed.
+Manual and scheduled collection both include HoldOn comments created since the
+previous successful snapshot, subject to the normal author exclusions. The
+one-time recovery of previously skipped comments is complete; no recovery option
+is needed. Previously recovered events and their read markers remain unchanged.
 
 The shared API and Azure snapshots are polled every minute and on browser focus;
 this picks up completed collections and read changes without running the GitHub

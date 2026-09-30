@@ -157,11 +157,11 @@ feed, grouped by repository/PR across days and ordered oldest-unread first.
 The independent **Needs attention** block derives required-review and failed-CI
 work from the current status snapshot, regardless of whether activity is unread.
 
-Manual SDK collection can opt into `recover_holdon_comments` to include the last
-24 hours of comments on currently held PRs that the former exclusion skipped.
-It preserves author filters and the normal collection baseline, and uses existing
-event IDs to avoid duplicating or unreading acknowledged comments. Recovery is off
-for scheduled runs; it does not reconstruct older skipped activity or commits.
+Manual and scheduled collection use the same comment window for all included
+PRs, including HoldOn: comments created after the previous successful snapshot,
+subject to author exclusions. The one-time recovery for the former HoldOn
+exclusion is complete and its workflow option has been removed. This does not
+remove recovered events or change their read markers.
 
 Draft PRs are excluded from **Needs attention**, even when they require approval
 or have failed CI. They can still appear in **Unread activities** for new PRs, commits,

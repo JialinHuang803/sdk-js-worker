@@ -29,17 +29,6 @@ export interface PreviousSnapshot {
   pullRequests: PullRequestRecord[];
 }
 
-export function commentComparisonFrom(
-  comparisonFrom: string,
-  holdOn: boolean,
-  recoverHoldOnComments: boolean,
-  now: Date,
-): string {
-  if (!holdOn || !recoverHoldOnComments) return comparisonFrom;
-  // Keep recovery well inside the three-day read-marker retention window.
-  return new Date(Math.min(Date.parse(comparisonFrom), now.getTime() - 24 * 60 * 60_000)).toISOString();
-}
-
 export async function loadDashboardConfig(): Promise<DashboardConfig> {
   const path = resolve(
     process.env.DASHBOARD_CONFIG ?? ".github/dashboard-config.json",
