@@ -773,7 +773,6 @@ async function main() {
       comments,
       generatedAt: fetchedAt,
       defaultPlane: config.inbox.defaultPlane,
-      merged: mergedPullRequests,
       excludedCommitPulls: commitActivity.excluded,
     }),
     pullRequests: openPullRequests,

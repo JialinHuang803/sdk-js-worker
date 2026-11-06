@@ -245,7 +245,7 @@ describe("durable shared activity", () => {
     expect(state.snapshot).not.toBeNull();
   });
 
-  it("retains closed/merged cards without inventing closure events", () => {
+  it("retains closed/merged references only for non-merge activity", () => {
     const state = seed();
     const closed = { ...state.feed.pullRequests[0], state: "closed" as const };
     const later = snapshot("2026-09-19T00:00:00Z");
@@ -262,8 +262,41 @@ describe("durable shared activity", () => {
     }];
     merged.inbox.items[0].reasons = ["merged"];
     ingest(state, { snapshot: merged, inactivePullRequests: [] }, merged.generatedAt);
-    expect(state.feed.events.map((event) => event.kind)).toEqual(["new-commit", "merged"]);
+    expect(state.feed.events.map((event) => event.kind)).toEqual(["new-commit"]);
     expect(state.feed.pullRequests[0].state).toBe("merged");
+    expect(state.snapshot?.mergedPullRequests).toEqual(merged.mergedPullRequests);
+    expect(state.nextSequence).toBe(2);
+  });
+
+  it("purges legacy merge events and orphan references without changing other event identity or read state", () => {
+    const state = seed();
+    const acknowledgementId = acknowledge(state, ack(state), now, "Reader");
+    const retained = structuredClone(state.feed.events[0]);
+    state.feed.pullRequests.push({
+      ...state.feed.pullRequests[0], number: 2, state: "merged",
+      url: `https://github.com/${repository}/pull/2`,
+    }, {
+      ...state.feed.pullRequests[0], number: 3, state: "closed",
+      url: `https://github.com/${repository}/pull/3`,
+    });
+    state.feed.events.push({
+      id: `${repository}#2:merged:${now}`, sequence: state.nextSequence++,
+      repository, pullRequestNumber: 2, kind: "merged", occurredAt: now,
+      readAt: null, acknowledgementId: null,
+    });
+    const revision = state.feed.revision;
+    const generation = state.feed.generation;
+    const nextSequence = state.nextSequence;
+    const reconciled = validateStoredState(structuredClone(state));
+    expect(reconciled.feed.events).toEqual([retained]);
+    expect(reconciled.feed.pullRequests.map((pull) => pull.number)).toEqual([1, 3]);
+    expect(reconciled.feed.revision).toBe(revision + 1);
+    expect(reconciled.feed.generation).toBe(generation);
+    expect(reconciled.nextSequence).toBe(nextSequence);
+    expect(reconciled.feed.events[0]).toMatchObject({
+      id: retained.id, sequence: retained.sequence, acknowledgementId,
+      readAt: now, readBy: { name: "Reader", acknowledgementId },
+    });
   });
 
   it("sanitizes public pull and comment records", () => {

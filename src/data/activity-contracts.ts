@@ -6,6 +6,7 @@ import type {
 } from "./contracts";
 import type { ReadAttribution } from "./read-attribution";
 
+// "merged" remains accepted while older stored/browser feeds roll forward.
 export type SharedActivityKind = "new-pr" | "new-commit" | "new-comment" | "merged";
 
 export interface SharedActivityPull {

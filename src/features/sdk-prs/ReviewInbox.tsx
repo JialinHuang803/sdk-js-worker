@@ -68,12 +68,14 @@ export function ReviewInboxView({ snapshot, activity = null }: {
     [snapshot.pullRequests, snapshot.mergedPullRequests],
   );
   const visibleEntries = snapshot.inbox.items.flatMap((item) => {
+    const reasons = item.reasons.filter((reason) => reason !== "merged");
+    if (reasons.length === 0) return [];
     const pull = getPull(item, pulls);
     if (
       !pull ||
-      (pull.draft && !item.reasons.some((reason) => activityReasons.has(reason)))
+      (pull.draft && !reasons.some((reason) => activityReasons.has(reason)))
     ) return [];
-    return [{ item, pull }];
+    return [{ item: { ...item, reasons }, pull }];
   });
   const items = visibleEntries
     .filter(({ pull }) => pull.plane === plane)

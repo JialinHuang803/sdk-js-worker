@@ -136,9 +136,14 @@ export function parseActivityFeed(value: unknown): SharedActivityFeed {
     value.events.some((event) => !pulls.has(pullKey(event.repository, event.pullRequestNumber)))) {
     throw new Error("Invalid activity response: duplicate or missing activity references.");
   }
+  const events = value.events.filter((event) => event.kind !== "merged");
+  const referenced = new Set(events.map((event) => pullKey(event.repository, event.pullRequestNumber)));
   return {
     schemaVersion: 1, generation: value.generation, revision: value.revision,
-    collectedAt: value.collectedAt, pullRequests: value.pullRequests, events: value.events,
+    collectedAt: value.collectedAt,
+    pullRequests: value.pullRequests.filter((pull) =>
+      pull.state !== "merged" || referenced.has(pullKey(pull.repository, pull.number))),
+    events,
   };
 }
 

@@ -461,6 +461,14 @@ the next API read, mutation or collection. Unread events never expire automatica
 this prototype volume; it is not a scalable event database. There is no
 independent permanent audit archive or configured Application Insights ingestion.
 
+SDK merge records remain in each snapshot's rolling seven-day history for
+delivery reporting, but merges do not create unread or recently-read activity.
+During rollout, older merge events are accepted and hidden by readers, then
+removed on the next SDK state access. Cleanup does not renumber retained events
+or reset acknowledgements, reader attribution, generation, baselines, snapshots,
+or the next sequence; it removes only merge events and merged PR activity
+references that no remaining event uses.
+
 ### Original provisioning and deployment
 
 Run from the repository root with an authorized Azure CLI session:

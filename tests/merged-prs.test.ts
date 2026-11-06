@@ -45,12 +45,12 @@ describe("recent SDK merges", () => {
     expect(merged.map((pull) => pull.number)).toEqual([1, 2]);
     const input = {
       current: [], comments: new Map(), generatedAt: now,
-      defaultPlane: "management" as const, merged,
+      defaultPlane: "management" as const,
     };
     expect(buildReviewInbox({ ...input, previous: null }).items).toEqual([]);
     expect(buildReviewInbox({
       ...input, previous: { generatedAt: since, pullRequests: [] },
-    }).items.map((item) => item.pullRequestNumber)).toEqual([2]);
+    }).items).toEqual([]);
   });
 
   it("only selects AutoPR merges after the previous refresh, not closures or old merges", async () => {
@@ -111,7 +111,7 @@ describe("recent SDK merges", () => {
       .rejects.toThrow("API unavailable");
   });
 
-  it("notifies for PRs created and merged between refreshes and keeps them out of the open table", async () => {
+  it("keeps between-refresh merges in reporting history without creating activity cards", async () => {
     const merged = await collectMergedPullRequests(repository, since, async () => [closed(42)]);
     const inbox = buildReviewInbox({
       current: [],
@@ -119,15 +119,8 @@ describe("recent SDK merges", () => {
       comments: new Map(),
       generatedAt: now,
       defaultPlane: "management",
-      merged,
     });
-    expect(inbox.items).toEqual([{
-      repository,
-      pullRequestNumber: 42,
-      reasons: ["merged"],
-      activityAt: merged[0].mergedAt,
-      comments: [],
-    }]);
+    expect(inbox.items).toEqual([]);
     const snapshot: DashboardSnapshot = {
       schemaVersion: DASHBOARD_SCHEMA_VERSION,
       generatedAt: now,
@@ -138,9 +131,9 @@ describe("recent SDK merges", () => {
       mergedPullRequests: merged,
     };
     const html = renderToStaticMarkup(createElement(ReviewInbox, { snapshot }));
-    expect(html).toContain("New activity");
-    expect(html).toContain(">Merged</span>");
-    expect(html).toContain(merged[0].url);
+    expect(html).not.toContain("New activity");
+    expect(html).not.toContain(">Merged</span>");
+    expect(html).not.toContain(merged[0].url);
     expect(html).not.toContain("Needs attention");
     expect(renderToStaticMarkup(createElement(PrTable, {
       rows: snapshot.pullRequests, now: new Date(now),
@@ -149,20 +142,21 @@ describe("recent SDK merges", () => {
     const next = buildReviewInbox({
       current: [], previous: { generatedAt: now, pullRequests: [] },
       comments: new Map(), generatedAt: "2026-09-18T00:00:00Z",
-      defaultPlane: "management", merged,
+      defaultPlane: "management",
     });
     expect(next.items).toEqual([]);
   });
 
-  it("includes HoldOn merges but does not notify merges outside the window", async () => {
+  it("does not notify HoldOn merges or merges outside the comparison window", async () => {
     const merged = await collectMergedPullRequests(repository, since, async () => [
       closed(1, { labels: [{ name: "HoldOn" }] }),
       closed(2, { merged_at: "2026-09-18T00:00:00Z" }),
     ]);
+    expect(merged.map((pull) => pull.number)).toEqual([1, 2]);
     const inbox = buildReviewInbox({
       current: [], previous: { generatedAt: since, pullRequests: [] },
-      comments: new Map(), generatedAt: now, defaultPlane: "management", merged,
+      comments: new Map(), generatedAt: now, defaultPlane: "management",
     });
-    expect(inbox.items.map((item) => [item.pullRequestNumber, item.reasons])).toEqual([[1, ["merged"]]]);
+    expect(inbox.items).toEqual([]);
   });
 });

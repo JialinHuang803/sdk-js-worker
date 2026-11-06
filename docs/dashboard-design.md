@@ -300,8 +300,9 @@ notify. Failed or incomplete comparisons (including unreachable old SHAs
 after force-pushes) retain activity with an explicit collection warning.
 History rewinds with no added commits also retain the head-change notification.
 
-New PRs, comments, required reviews, CI failures, merges, package data and
-report counts are unchanged. The current head SHA is always saved, even for
+New PRs, comments, required reviews, CI failures, package data and report counts
+are unchanged. Merges remain in the rolling seven-day report history but do not
+create activity notifications. The current head SHA is always saved, even for
 suppressed activity, so it becomes the next comparison baseline. No commit
 messages, author emails, or raw comparison responses are published. Changes
 take effect on the next data refresh, not a UI-only deployment.
@@ -339,6 +340,13 @@ error, never a fallback to an old bundled snapshot. Schema migrations require
 compatible readers and explicit collection. Each collector has its own
 non-cancelling concurrency group; Blob ETags protect collection from
 concurrent acknowledgements.
+
+Merged PRs are reporting data, not SDK activity events. Readers tolerate older
+feeds and snapshots that contain merge events while hiding those cards. The
+service removes retained merge events and only their now-unreferenced PR
+activity records on the next SDK state access, preserving all other event IDs,
+sequences, acknowledgements, reader attribution, generation and collection
+baseline. New collection never appends merge events.
 
 ## Package selection
 

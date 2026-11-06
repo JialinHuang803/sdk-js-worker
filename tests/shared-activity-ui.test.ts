@@ -113,6 +113,31 @@ describe("shared activity grouping", () => {
     expect(data.events.every((entry) => entry.readAt === null)).toBe(true);
     expect(groupActivities({ ...data, pullRequests: data.pullRequests.map((pr) => ({ ...pr, holdOn: false })) }, false)).toHaveLength(4);
   });
+
+  it("parses rollout feeds while hiding merge events and orphan merged references", () => {
+    const legacy = feed({
+      pullRequests: [
+        pull(1), pull(2, { state: "merged" }), pull(3, { state: "merged" }),
+        pull(4, { state: "closed" }),
+      ],
+      events: [
+        event(1, 1),
+        event(2, 2, { kind: "new-comment", readAt: time, acknowledgementId: "read",
+          readBy: { name: "Reader", acknowledgementId: "read" } }),
+        event(3, 3, { kind: "merged" }),
+      ],
+    });
+    const parsed = parseActivityFeed(legacy);
+    expect(parsed.events.map((entry) => [entry.id, entry.sequence, entry.kind]))
+      .toEqual([["event-1", 1, "new-commit"], ["event-2", 2, "new-comment"]]);
+    expect(parsed.pullRequests.map((entry) => entry.number)).toEqual([1, 2, 4]);
+    expect(parsed.generation).toBe(legacy.generation);
+    expect(parsed.revision).toBe(legacy.revision);
+    expect(parsed.events[1]).toMatchObject({
+      readAt: time, acknowledgementId: "read",
+      readBy: { name: "Reader", acknowledgementId: "read" },
+    });
+  });
 });
 
 describe("shared activity UI", () => {
@@ -219,6 +244,21 @@ describe("shared activity UI", () => {
     expect(html).toContain(">Closed</span>");
     expect(html).not.toContain("Needs attention");
     expect(html.match(/1 unread event/g)).toHaveLength(2);
+  });
+
+  it("hides merge-only cards from an older snapshot before the next refresh", () => {
+    const current = snapshot([]);
+    current.mergedPullRequests = [{
+      repository, number: 9, title: "Merged SDK", url: "https://example.test/pull/9",
+      plane: "management", holdOn: false, headSha: "head", mergedAt: time,
+    }];
+    current.inbox.items = [{
+      repository, pullRequestNumber: 9, reasons: ["merged"], activityAt: time, comments: [],
+    }];
+    const html = renderToStaticMarkup(createElement(ReviewInboxView, { snapshot: current }));
+    expect(html).not.toContain("Merged SDK");
+    expect(html).not.toContain("New activity");
+    expect(html).toContain("No SDK-team attention is needed");
   });
 
   it("retains recently read restoration without a separate undo button", () => {

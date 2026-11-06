@@ -118,7 +118,7 @@ export function validateStoredState(value: unknown): ActivityState {
       feed.collectedAt !== (value.snapshot?.generatedAt ?? null)) {
     throw new ActivityError(503, "Stored activity state contains inconsistent references.");
   }
-  return {
+  const state: ActivityState = {
     schemaVersion: 1,
     feed: {
       schemaVersion: 1,
@@ -132,6 +132,8 @@ export function validateStoredState(value: unknown): ActivityState {
     nextSequence: value.nextSequence,
     rate: { minute: value.rate.minute, count: value.rate.count },
   };
+  removeMergedActivities(state);
+  return state;
 }
 
 export function parseIngest(value: unknown): ActivityIngestRequest {
@@ -196,6 +198,19 @@ function projectPull(p: SharedActivityPull): SharedActivityPull {
 }
 const pullKey = (repo: string, number: number) => `${repo}#${number}`;
 
+export function removeMergedActivities(state: ActivityState): void {
+  const events = state.feed.events.filter((event) => event.kind !== "merged");
+  const retained = new Set(events.map((event) => pullKey(event.repository, event.pullRequestNumber)));
+  const pulls = state.feed.pullRequests.filter(
+    (pull) => pull.state !== "merged" || retained.has(pullKey(pull.repository, pull.number)),
+  );
+  if (events.length !== state.feed.events.length || pulls.length !== state.feed.pullRequests.length) {
+    state.feed.events = events;
+    state.feed.pullRequests = pulls;
+    state.feed.revision++;
+  }
+}
+
 export function pruneReadActivities(state: ActivityState, now: string): void {
   const events = state.feed.events.filter((event) =>
     event.readAt === null || Date.parse(event.readAt) > Date.parse(now) - READ_RETENTION_MS);
@@ -256,11 +271,6 @@ export function ingest(state: ActivityState, body: ActivityIngestRequest, now: s
           occurredAt: c.createdAt,
           comment: { id: c.id, kind: c.kind, author: c.author, createdAt: c.createdAt, url: c.url } });
       }
-    }
-    if (item.reasons.includes("merged")) {
-      const merged = s.mergedPullRequests?.find((pr) => pullKey(pr.repository, pr.number) === key);
-      if (!merged) throw new ActivityError(400, "Merge source is missing.");
-      append({ ...common, id: `${key}:merged:${merged.mergedAt}`, kind: "merged", occurredAt: merged.mergedAt });
     }
   }
   state.feed.pullRequests = [...pulls.values()];
