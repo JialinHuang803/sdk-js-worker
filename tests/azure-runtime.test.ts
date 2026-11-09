@@ -241,6 +241,35 @@ describe("federated BFF trust boundary", () => {
 });
 
 describe("hosted state and static HTTP integration", () => {
+  it("serves root-hosted modules and CSS with matching MIME/CSP and rejects legacy subpath assets", async () => {
+    const { send, signedIn, sdk, emitter } = await setup();
+    await mkdir(resolve(directory, "public", "assets"));
+    await writeFile(resolve(directory, "public", "assets", "app.js"), "export const dashboard = true;");
+    await writeFile(resolve(directory, "public", "assets", "app.css"), "body { color: black; }");
+    const html = '<script type="module" src="/assets/app.js"></script><link rel="stylesheet" href="/assets/app.css">';
+    await writeFile(resolve(directory, "public", "index.html"), html);
+    const root = await send("/", { headers: signedIn });
+    expect(root.status).toBe(200);
+    expect(await root.text()).toBe(html);
+    expect(root.headers.get("content-security-policy")).toContain("script-src 'self'");
+    for (const [path, contentType] of [
+      ["/assets/app.js", "text/javascript; charset=utf-8"],
+      ["/assets/app.css", "text/css; charset=utf-8"],
+    ]) {
+      const asset = await send(path, { headers: signedIn });
+      expect(asset.status).toBe(200);
+      expect(asset.headers.get("content-type")).toBe(contentType);
+      expect((await send(`/sdk-js-worker${path}`, { headers: signedIn })).status).toBe(404);
+    }
+    expect(sdk.write).not.toHaveBeenCalled();
+    expect(emitter.write).not.toHaveBeenCalled();
+    vi.spyOn(Date, "now").mockReturnValue(Date.now() + 8 * 24 * 60 * 60_000);
+    const expired = await send("/", { headers: signedIn });
+    expect(expired.status).toBe(302);
+    expect(expired.headers.get("location")).toBe("/api/auth/login");
+    expect((await send("/api/auth/session", { headers: signedIn })).status).toBe(401);
+  });
+
   it("acknowledges and restores SDK and emitter state through shared engines with ETags", async () => {
     const { send, sdk, emitter, signedIn, mutations } = await setup();
     for (const feature of ["activity", "emitter-activity"]) {

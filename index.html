@@ -11,7 +11,11 @@
     <title>Azure SDK JS Dashboard</title>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <p role="status">Loading the dashboard. If this message remains, reload the page. If sign-in has expired, open the dashboard home page to sign in again.</p>
+      <p><a href="./">Open dashboard home</a></p>
+    </div>
+    <noscript>JavaScript is required to load the dashboard.</noscript>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

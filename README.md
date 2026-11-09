@@ -274,6 +274,12 @@ and marks changed-file data partial if GitHub's 3,000-file limit or another
 discrepancy is detected.
 
 Azure UI/API images are deployed manually by an authorized Azure operator,
+using `npm run build:azure` for the root-hosted Entra frontend and
+`npm --prefix api run build` for the API. The container build rejects missing
+or incompatible Azure frontend artifacts. The default `npm run build` retains
+the standalone preview/legacy Pages configuration and is not an Azure image input.
+
+Deployment is image-only,
 without collecting, copying or resetting data. Microsoft's tenant currently
 blocks Azure deployment federation from this personal GitHub repository
 (`AADSTS7002381`: an approved enterprise claim is required).

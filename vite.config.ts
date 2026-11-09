@@ -2,7 +2,15 @@ import { defineConfig, loadEnv } from "vite";
 import react from "@vitejs/plugin-react";
 
 export default defineConfig(({ command, mode, isPreview }) => {
-  const env = loadEnv(mode, process.cwd(), ["VITE_", "ACTIVITY_PORT"]);
+  const azureSettings = {
+    VITE_ACTIVITY_AUTH: "entra",
+    VITE_ACTIVITY_API_URL: "/api",
+    VITE_BASE_PATH: "/",
+  };
+  const env: Record<string, string> = {
+    ...loadEnv(mode, process.cwd(), ["VITE_", "ACTIVITY_PORT"]),
+    ...(mode === "azure" ? azureSettings : {}),
+  };
   const localAuth = command === "serve" && !isPreview && env.VITE_ACTIVITY_AUTH === "github";
   const activityPort = env.ACTIVITY_PORT?.trim() || "8787";
   if (localAuth && (!/^\d+$/.test(activityPort) || Number(activityPort) < 1024 || Number(activityPort) > 65535)) {
@@ -14,7 +22,18 @@ export default defineConfig(({ command, mode, isPreview }) => {
   }
   return {
     base: env.VITE_BASE_PATH?.trim() || "/sdk-js-worker/",
-    plugins: [react()],
+    define: mode === "azure" ? Object.fromEntries(Object.entries(azureSettings)
+      .map(([key, value]) => [`import.meta.env.${key}`, JSON.stringify(value)])) : undefined,
+    plugins: [react(), {
+      name: "azure-hosting-contract",
+      generateBundle() {
+        if (env.VITE_ACTIVITY_AUTH === "entra") {
+          this.emitFile({ type: "asset", fileName: "hosting.json",
+            source: JSON.stringify({ auth: env.VITE_ACTIVITY_AUTH, api: env.VITE_ACTIVITY_API_URL,
+              base: env.VITE_BASE_PATH }) });
+        }
+      },
+    }],
     server: {
       fs: { deny: [".env", ".env.*", "*.{crt,pem}", "**/.git/**", "**/.local/**", "**/*.pem"] },
       ...(localAuth ? {

@@ -12,7 +12,8 @@ COPY --from=dependencies --chown=node:node /app/api/node_modules ./api/node_modu
 COPY --chown=node:node api/package.json ./api/package.json
 COPY --chown=node:node api/dist ./api/dist
 COPY --chown=node:node dist ./dist
-RUN test -s dist/index.html && test -s api/dist/api/src/azure/main.js
+COPY --chown=node:node scripts/verify-azure-build.mjs ./scripts/verify-azure-build.mjs
+RUN node scripts/verify-azure-build.mjs && test -s api/dist/api/src/azure/main.js
 USER node
 EXPOSE 8080
 CMD ["node", "api/dist/api/src/azure/main.js"]

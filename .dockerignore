@@ -8,8 +8,11 @@
 !api/dist/
 !api/dist/**/
 !api/dist/**/*.js
+!scripts/
+!scripts/verify-azure-build.mjs
 !dist/
 !dist/index.html
+!dist/hosting.json
 !dist/assets/
 !dist/assets/*.js
 !dist/assets/*.css

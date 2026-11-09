@@ -106,8 +106,13 @@ denied, including for the original owner. Email suffixes are never used to
 authorize membership. Membership and access are evaluated at sign-in and
 background renewal. They are not a live directory lookup on every request.
 
-Build with `VITE_ACTIVITY_AUTH=entra`, `VITE_ACTIVITY_API_URL=/api` and
-`VITE_BASE_PATH=/`, then run `npm run build` and `npm --prefix api run build`.
+Run `npm run build:azure` and `npm --prefix api run build`.
+The Azure build target fixes `VITE_ACTIVITY_AUTH=entra`,
+`VITE_ACTIVITY_API_URL=/api` and `VITE_BASE_PATH=/` in the compiled frontend,
+independently of local preview settings. Do not deploy the default
+`npm run build` output: it targets the legacy Pages subpath, not Azure.
+The image build verifies `dist/hosting.json` and root-hosted entry asset files
+and refuses incompatible frontend artifacts.
 Do not run collectors or stage snapshot JSON during an image deployment.
 Snapshots are served from the canonical private state blobs, not image files,
 and `.dockerignore` excludes `dist/data`.
@@ -291,7 +296,8 @@ requires an approved repository/hosting arrangement.
 Build the Entra frontend and API as described above. Use a curated ACR build
 context containing only `Dockerfile`, `.dockerignore`, the API package/lock and
 `container-lock.mjs`, compiled `api/dist`, and frontend `dist/index.html` plus
-`dist/assets`. Never include `.npmrc`, `.env*`, private keys, local prototypes
+`dist/assets`, `dist/hosting.json` and `scripts/verify-azure-build.mjs`.
+Never include `.npmrc`, `.env*`, private keys, local prototypes
 or snapshot JSON. `az acr build` can build this context without local Docker.
 Deploy the resulting digest with `az containerapp update --image`, preserving
 existing environment, networking and identity. Wait for the latest revision
